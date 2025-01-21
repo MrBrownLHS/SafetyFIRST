@@ -38,8 +38,8 @@ public class RobotContainer {
 
     swerveSubsystem.setDefaultCommand(new SwerveController(
             swerveSubsystem,
-            () -> -DriverController.getRawAxis(translationAxis) * 0.25,
-            () -> -DriverController.getRawAxis(strafeAxis) * 0.25,
+            () -> DriverController.getRawAxis(translationAxis) * 0.25,
+            () -> DriverController.getRawAxis(strafeAxis) * 0.25,
             () -> -DriverController.getRawAxis(rotationAxis) * 0.25,
             () -> robotCentric.getAsBoolean()) // lambda probably not needed but why not
     );
