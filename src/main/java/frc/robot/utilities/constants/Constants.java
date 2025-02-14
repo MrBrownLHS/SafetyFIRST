@@ -12,6 +12,66 @@ import frc.robot.utilities.SwerveModuleGearing;
 public class Constants {
     public static final int gyroID = 0;
 
+    public static final class CollectorArmConstants {
+        // CAN IDs
+        public static final int COLLECTOR_ARM_LIFT_MOTOR_ID = 13;
+        public static final int COLLECTOR_ARM_LIFT_ENCODER_ID = 14;
+        public static final int COLLECTOR_ARM_PIVOT_MOTOR_ID = 15;
+        public static final int COLLECTOR_ARM_PIVOT_ENCODER_ID = 16;
+        public static final int COLLECTOR_ARM_REACH_MOTOR_ID = 17;
+        public static final int COLLECTOR_ARM_REACH_ENCODER_ID = 18;
+        public static final int COLLECTOR_ARM_TOP_INTAKE_MOTOR_ID = 21;
+        public static final int COLLECTOR_ARM_BOTTOM_INTAKE_MOTOR_ID = 22;
+        
+        // PID Constants - NEEDS TUNING
+        public static final double COLLECTOR_ARM_LIFT_kP = 0.01;
+        public static final double COLLECTOR_ARM_LIFT_kI = 0.00;
+        public static final double COLLECTOR_ARM_LIFT_kD = 0.01;
+        public static final double COLLECTOR_ARM_LIFT_kF = 0.00;
+
+        public static final double COLLECTOR_ARM_PIVOT_kP = 0.01;
+        public static final double COLLECTOR_ARM_PIVOT_kI = 0.00;
+        public static final double COLLECTOR_ARM_PIVOT_kD = 0.01;
+        public static final double COLLECTOR_ARM_PIVOT_kF = 0.00;
+
+        public static final double COLLECTOR_ARM_REACH_kP = 0.01;
+        public static final double COLLECTOR_ARM_REACH_kI = 0.00;
+        public static final double COLLECTOR_ARM_REACH_kD = 0.01;
+        public static final double COLLECTOR_ARM_REACH_kF = 0.00;
+
+        // Lift Encoder Postions - NEEDS TUNING
+        public static final double COLLECTOR_ARM_LIFT_ENCODER_START = 0.0;
+        public static final double COLLECTOR_ARM_LIFT_ENCODER_PICKUP = 0.0; //Source/Floor Pickup - NEEDS TUNING
+        public static final double COLLECTOR_ARM_LIFT_ENCODER_L1 = 0.0; //L1 Coral Scoring - NEEDS TUNING
+        public static final double COLLECTOR_ARM_LIFT_ENCODER_L2 = 0.0; //L2 Coral Scoring - NEEDS TUNING
+        public static final double COLLECTOR_ARM_LIFT_ENCODER_L3 = 0.0; //L3 Coral Scoring - NEEDS TUNING
+        public static final double COLLECTOR_ARM_LIFT_ENCODER_MAX = 0.0; //Max Extension - NEEDS TUNING
+        public static final double COLLECTOR_ARM_LIFT_TOLERANCE = 5.0; //Tolerance for PID - NEEDS TUNING
+        public static final double COLLECTOR_ARM_LIFT_SETPOINT = 0.0; //Setpoint for PID - NEEDS TUNING
+
+        // Pivot Encoder Postions - NEEDS TUNING
+        public static final double COLLECTOR_ARM_PIVOT_ENCODER_START = 0.0;
+        public static final double COLLECTOR_ARM_PIVOT_ENCODER_PICKUP = 0.0; //Source/Floor Pickup - NEEDS TUNING
+        public static final double COLLECTOR_ARM_PIVOT_ENCODER_L1 = 0.0; //L1 Coral Scoring - NEEDS TUNING
+        public static final double COLLECTOR_ARM_PIVOT_ENCODER_L2 = 0.0; //L2 Coral Scoring - NEEDS TUNING
+        public static final double COLLECTOR_ARM_PIVOT_ENCODER_L3 = 0.0; //L3 Coral Scoring - NEEDS TUNING
+        public static final double COLLECTOR_ARM_PIVOT_ENCODER_MAX = 0.0; //Max Rotation - NEEDS TUNING
+        public static final double COLLECTOR_ARM_PIVOT_TOLERANCE = 5.0; //Tolerance for PID - NEEDS TUNING
+        public static final double COLLECTOR_ARM_PIVOT_SETPOINT = 0.0; //Setpoint for PID - NEEDS TUNING
+
+        // Reach Encoder Postions - NEEDS TUNING
+        public static final double COLLECTOR_ARM_REACH_ENCODER_START = 0.0;
+        public static final double COLLECTOR_ARM_REACH_ENCODER_PICKUP = 0.0; //Source/Floor Pickup - NEEDS TUNING
+        public static final double COLLECTOR_ARM_REACH_ENCODER_L1 = 0.0; //L1 Coral Scoring - NEEDS TUNING
+        public static final double COLLECTOR_ARM_REACH_ENCODER_L2 = 0.0; //L2 Coral Scoring - NEEDS TUNING
+        public static final double COLLECTOR_ARM_REACH_ENCODER_L3 = 0.0; //L3 Coral Scoring - NEEDS TUNING
+        public static final double COLLECTOR_ARM_REACH_ENCODER_MAX = 0.0; //Max Extension - NEEDS TUNING
+        public static final double COLLECTOR_ARM_REACH_TOLERANCE = 5.0; //Tolerance for PID - NEEDS TUNING
+        public static final double COLLECTOR_ARM_REACH_SETPOINT = 0.0; //Setpoint for PID - NEEDS TUNING
+
+
+    };
+
     public static final class ModuleConstants {
         /* Module Voltage Compensation */
         public static final double voltageCompensation = 12.0;
