@@ -69,6 +69,22 @@ public class Constants {
         public static final double COLLECTOR_ARM_REACH_TOLERANCE = 5.0; //Tolerance for PID - NEEDS TUNING
         public static final double COLLECTOR_ARM_REACH_SETPOINT = 0.0; //Setpoint for PID - NEEDS TUNING
 
+        public static final double COLLECTOR_ARM_ENCODER_CONVERSION_FACTOR = 360.0 / 4096.0; 
+
+        //Intake Motor Speeds - NEEDS TUNING
+        public static final double COLLECTOR_ARM_INTAKE_SPEED = 0.0; //Intake Speed - NEEDS TUNING
+        public static final double COLLECTOR_ARM_OUTTAKE_SPEED = 0.0; //Outtake Speed - NEEDS TUNING, may need to be negative
+
+        public static final int COLLECTOR_ARM_ALGAE_LIMIT_ID = 0; 
+        public static final int COLLECTOR_ARM_CORAL_LIMIT_ID = 1;
+
+        public static final double COLLECTOR_ARM_VOLTAGE_COMPENSATION = 12.0;
+        public static final int COLLECTOR_ARM_CURRENT_LIMIT = 25;
+        public static final int COLLECTOR_ARM_CURRENT_THRESHOLD = 40;
+        public static final double COLLECTOR_ARM_CURRENT_THRESHOLD_TIME = 0.1;
+        public static final int COLLECTOR_ARM_MAX_CURRENT_LIMIT = 60;
+        public static final boolean COLLECTOR_ARM_ENABLE_CURRENT_LIMIT = true;
+
 
     };
 
