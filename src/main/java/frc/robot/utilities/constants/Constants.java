@@ -88,6 +88,11 @@ public class Constants {
 
     };
 
+    public static final class CageClimberConstants {
+        public static final int WINCH_MOTOR_1_ID = 23;
+        public static final int WINCH_MOTOR_2_ID = 24;
+    }
+
     public static final class ModuleConstants {
         /* Module Voltage Compensation */
         public static final double voltageCompensation = 12.0;
