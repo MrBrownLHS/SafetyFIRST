@@ -34,10 +34,6 @@ public class Constants {
         public static final double COLLECTOR_ARM_PIVOT_kD = 0.01;
         public static final double COLLECTOR_ARM_PIVOT_kF = 0.00;
 
-        public static final double COLLECTOR_ARM_REACH_kP = 0.01;
-        public static final double COLLECTOR_ARM_REACH_kI = 0.00;
-        public static final double COLLECTOR_ARM_REACH_kD = 0.01;
-        public static final double COLLECTOR_ARM_REACH_kF = 0.00;
 
         // Lift Encoder Postions - NEEDS TUNING
         public static final double COLLECTOR_ARM_LIFT_ENCODER_START = 0.0;
@@ -59,21 +55,17 @@ public class Constants {
         public static final double COLLECTOR_ARM_PIVOT_TOLERANCE = 5.0; //Tolerance for PID - NEEDS TUNING
         public static final double COLLECTOR_ARM_PIVOT_SETPOINT = 0.0; //Setpoint for PID - NEEDS TUNING
 
-        // Reach Encoder Postions - NEEDS TUNING
-        public static final double COLLECTOR_ARM_REACH_ENCODER_START = 0.0;
-        public static final double COLLECTOR_ARM_REACH_ENCODER_PICKUP = 0.0; //Source/Floor Pickup - NEEDS TUNING
-        public static final double COLLECTOR_ARM_REACH_ENCODER_L1 = 0.0; //L1 Coral Scoring - NEEDS TUNING
-        public static final double COLLECTOR_ARM_REACH_ENCODER_L2 = 0.0; //L2 Coral Scoring - NEEDS TUNING
-        public static final double COLLECTOR_ARM_REACH_ENCODER_L3 = 0.0; //L3 Coral Scoring - NEEDS TUNING
-        public static final double COLLECTOR_ARM_REACH_ENCODER_MAX = 0.0; //Max Extension - NEEDS TUNING
-        public static final double COLLECTOR_ARM_REACH_TOLERANCE = 5.0; //Tolerance for PID - NEEDS TUNING
-        public static final double COLLECTOR_ARM_REACH_SETPOINT = 0.0; //Setpoint for PID - NEEDS TUNING
-
+ 
         public static final double COLLECTOR_ARM_ENCODER_CONVERSION_FACTOR = 360.0 / 4096.0; 
+        public static final double COLLECTOR_ARM_COG_DIAMETER_INCHES = 2.0; // Diameter of the center of gravity pulley in inches - NEEDS TUNING
+        public static final double LIFT_GEAR_RATIO = 1.0; // Gear ratio of the lift mechanism - NEEDS TUNING
+        public static final double COLLECTOR_ARM_DEGREES_TO_INCHES = (Math.PI * COLLECTOR_ARM_COG_DIAMETER_INCHES) / 360.0 / LIFT_GEAR_RATIO; 
+        public static final double COLLECTOR_ARM_DEADBAND = 0.05;
+        public static final double COLLECTOR_ARM_MAX_SPEED = 0.5; // Maximum speed of the arm in m/s
 
         //Intake Motor Speeds - NEEDS TUNING
-        public static final double COLLECTOR_ARM_INTAKE_SPEED = 0.0; //Intake Speed - NEEDS TUNING
-        public static final double COLLECTOR_ARM_OUTTAKE_SPEED = 0.0; //Outtake Speed - NEEDS TUNING, may need to be negative
+        public static final double COLLECTOR_ARM_INTAKE_SPEED = 0.25; //Intake Speed - NEEDS TUNING
+        public static final double COLLECTOR_ARM_OUTTAKE_SPEED = 0.25; //Outtake Speed - NEEDS TUNING, may need to be negative
 
         public static final int COLLECTOR_ARM_ALGAE_LIMIT_ID = 0; 
         public static final int COLLECTOR_ARM_CORAL_LIMIT_ID = 1;

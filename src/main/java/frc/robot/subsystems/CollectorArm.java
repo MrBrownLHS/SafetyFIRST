@@ -19,6 +19,8 @@ import com.ctre.phoenix6.configs.MagnetSensorConfigs;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
+
+import frc.robot.utilities.ArmState;
 import frc.robot.utilities.constants.Constants;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
@@ -27,38 +29,53 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SmartMotionConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 
 public class CollectorArm extends SubsystemBase {
-  private final SparkMax liftMotor, pivotMotor, reachMotor, topIntakeMotor, bottomIntakeMotor;
-  private final CANcoder liftEncoder, pivotEncoder, reachEncoder;
-  private final PIDController liftPIDController, pivotPIDController, reachPIDController;
-  private final CANcoderConfiguration liftEncoderConfig, pivotEncoderConfig, reachEncoderConfig;
-  private final SparkMaxConfig liftMotorConfig, pivotMotorConfig, reachMotorConfig, topIntakeMotorConfig, bottomIntakeMotorConfig;
-  private final MagnetSensorConfigs liftMagnetSensorConfig, pivotMagnetSensorConfig, reachMagnetSensorConfig;
+  private final SparkMax liftMotor, pivotMotor, topIntakeMotor, bottomIntakeMotor;
+  private final CANcoder liftEncoder, pivotEncoder;
+  private final PIDController liftPIDController, pivotPIDController;
+  private final CANcoderConfiguration liftEncoderConfig, pivotEncoderConfig;
+  private final SparkMaxConfig liftMotorConfig, pivotMotorConfig, topIntakeMotorConfig, bottomIntakeMotorConfig;
+  private final MagnetSensorConfigs liftMagnetSensorConfig, pivotMagnetSensorConfig;
   private final DigitalInput coralLimit, algaeLimit;
-  private final SmartMotionConfig configureSmartMotion;
-  private final ArmFeedforward liftFeedforward, pivotFeedforward, reachFeedforward;+
-  private final Timer timer = new Timer();
+  private final ArmFeedforward liftFeedforward, pivotFeedforward;
+  private final double liftOutput, pivotOutput;
+  private final TrapezoidProfile.State liftGoal, pivotGoal;
+  private final TrapezoidProfile.State liftCurrent, pivotCurrent;
+  private final TrapezoidProfile.Constraints liftConstraints, pivotConstraints;
+
+  public enum CollectorArmState {
+    START, PICKUP, L1, L2, L3, MAX
+  }
+
+
+
+
  
   public CollectorArm() { 
     // Declare motors
-    timer.start();
     liftMotor = new SparkMax(Constants.CollectorArmConstants.COLLECTOR_ARM_LIFT_MOTOR_ID, MotorType.kBrushless);
     liftMotorConfig = new SparkMaxConfig();
     liftEncoder = new CANcoder(Constants.CollectorArmConstants.COLLECTOR_ARM_LIFT_ENCODER_ID);
     pivotMotor = new SparkMax(Constants.CollectorArmConstants.COLLECTOR_ARM_PIVOT_MOTOR_ID, MotorType.kBrushless);
     pivotMotorConfig = new SparkMaxConfig();
     pivotEncoder = new CANcoder(Constants.CollectorArmConstants.COLLECTOR_ARM_PIVOT_ENCODER_ID);
-    reachMotor = new SparkMax(Constants.CollectorArmConstants.COLLECTOR_ARM_REACH_MOTOR_ID, MotorType.kBrushless);
-    reachMotorConfig = new SparkMaxConfig();
-    reachEncoder = new CANcoder(Constants.CollectorArmConstants.COLLECTOR_ARM_REACH_ENCODER_ID);
     topIntakeMotor = new SparkMax(Constants.CollectorArmConstants.COLLECTOR_ARM_TOP_INTAKE_MOTOR_ID, MotorType.kBrushless);
     topIntakeMotorConfig = new SparkMaxConfig();
     bottomIntakeMotor = new SparkMax(Constants.CollectorArmConstants.COLLECTOR_ARM_BOTTOM_INTAKE_MOTOR_ID, MotorType.kBrushless);
     bottomIntakeMotorConfig = new SparkMaxConfig();
     coralLimit = new DigitalInput(Constants.CollectorArmConstants.COLLECTOR_ARM_CORAL_LIMIT_ID);
     algaeLimit = new DigitalInput(Constants.CollectorArmConstants.COLLECTOR_ARM_ALGAE_LIMIT_ID);
-    configureSmartMotion = new SmartMotionConfig();
+    
+    
+    liftConstraints = new TrapezoidProfile.Constraints(
+      Constants.CollectorArmConstants.COLLECTOR_ARM_LIFT_MAX_VELOCITY, 
+      Constants.CollectorArmConstants.COLLECTOR_ARM_LIFT_MAX_ACCELERATION);
+    pivotConstraints = new TrapezoidProfile.Constraints(
+      Constants.CollectorArmConstants.COLLECTOR_ARM_PIVOT_MAX_VELOCITY, 
+      Constants.CollectorArmConstants.COLLECTOR_ARM_PIVOT_MAX_ACCELERATION);
     
     liftFeedforward = new ArmFeedforward(
       Constants.CollectorArmConstants.COLLECTOR_ARM_LIFT_kS, 
@@ -70,12 +87,6 @@ public class CollectorArm extends SubsystemBase {
       Constants.CollectorArmConstants.COLLECTOR_ARM_PIVOT_kG, 
       Constants.CollectorArmConstants.COLLECTOR_ARM_PIVOT_kV, 
       Constants.CollectorArmConstants.COLLECTOR_ARM_PIVOT_kA);
-
-    reachFeedforward = new ArmFeedforward(
-      Constants.CollectorArmConstants.COLLECTOR_ARM_REACH_kS, 
-      Constants.CollectorArmConstants.COLLECTOR_ARM_REACH_kG, 
-      Constants.CollectorArmConstants.COLLECTOR_ARM_REACH_kV, 
-      Constants.CollectorArmConstants.COLLECTOR_ARM_REACH_kA);
     
     liftPIDController = new PIDController(
       Constants.CollectorArmConstants.COLLECTOR_ARM_LIFT_kP, 
@@ -91,13 +102,7 @@ public class CollectorArm extends SubsystemBase {
       Constants.CollectorArmConstants.COLLECTOR_ARM_PIVOT_kF);
     pivotPIDController.setTolerance(Constants.CollectorArmConstants.COLLECTOR_ARM_PIVOT_TOLERANCE);
 
-    reachPIDController = new PIDController(
-      Constants.CollectorArmConstants.COLLECTOR_ARM_REACH_kP, 
-      Constants.CollectorArmConstants.COLLECTOR_ARM_REACH_kI,
-      Constants.CollectorArmConstants.COLLECTOR_ARM_REACH_kD,
-      Constants.CollectorArmConstants.COLLECTOR_ARM_REACH_kF);
-    reachPIDController.setTolerance(Constants.CollectorArmConstants.COLLECTOR_ARM_REACH_TOLERANCE);
-    
+        
         // Set encoder conversion factor to return values in degrees
     liftEncoderConfig = new CANcoderConfiguration();
     liftMagnetSensorConfig = new MagnetSensorConfigs();
@@ -113,29 +118,20 @@ public class CollectorArm extends SubsystemBase {
     pivotEncoderConfig.MagnetSensor = pivotMagnetSensorConfig;
     pivotEncoder.getConfigurator().apply(pivotEncoderConfig);
 
-    reachEncoderConfig = new CANcoderConfiguration();
-    reachMagnetSensorConfig = new MagnetSensorConfigs();
-    reachMagnetSensorConfig.MagnetOffset = Constants.CollectorArmConstants.COLLECTOR_ARM_ENCODER_CONVERSION_FACTOR;
-    reachMagnetSensorConfig.SensorDirection = SensorDirectionValue.Clockwise_Positive;
-    reachEncoderConfig.MagnetSensor = reachMagnetSensorConfig;
-    reachEncoder.getConfigurator().apply(reachEncoderConfig);
-
-
-
-        // Configure PID (Tune these values!)
+            // Configure PID (Tune these values!)
     configurePID(liftPIDController);
     configurePID(pivotPIDController);
-    configurePID(reachPIDController);
-
+    
     configureMotor(liftMotor, liftMotorConfig);
     configureMotor(pivotMotor, pivotMotorConfig);
-    configureMotor(reachMotor, reachMotorConfig);
     configureMotor(topIntakeMotor, topIntakeMotorConfig);
     configureMotor(bottomIntakeMotor, bottomIntakeMotorConfig);
+    
+    }
 
-    configureSmartMotion(liftMotor, liftMotorConfig);
-    configureSmartMotion(pivotMotor, pivotMotorConfig);
-    configureSmartMotion(reachMotor, reachMotorConfig);
+    public void updateDashboard() {
+      SmartDashboard.putNumber("Lift Height", liftEncoder.getPosition().getValueAsDouble());
+      SmartDashboard.putNumber("Pivot Angle", pivotEncoder.getPosition().getValueAsDouble());
     }
 
     private void configureMotor(SparkMax motor, SparkMaxConfig config) {
@@ -144,82 +140,22 @@ public class CollectorArm extends SubsystemBase {
       config.secondaryCurrentLimit(Constants.CollectorArmConstants.COLLECTOR_ARM_MAX_CURRENT_LIMIT);
       config.voltageCompensation(Constants.CollectorArmConstants.COLLECTOR_ARM_VOLTAGE_COMPENSATION);
       motor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
-      //var config = new SparkMaxConfig();
-        //config.idleMode(IdleMode.kBrake);
-        //config.smartCurrentLimit(Constants.CollectorArmConstants.COLLECTOR_ARM_CURRENT_LIMIT);
-        //config.secondaryCurrentLimit(Constants.CollectorArmConstants.COLLECTOR_ARM_MAX_CURRENT_LIMIT);
-        //config.voltageCompensation(Constants.CollectorArmConstants.COLLECTOR_ARM_VOLTAGE_COMPENSATION);
-        //liftMotor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
-    }
 
+    }
 
     private void configurePID(PIDController pidController) {
-      liftPIDController.setP(0.02);
-      liftPIDController.setI(0.0);
-      liftPIDController.setD(0.01);
-      liftPIDController.setFF(0.00015);
-      liftPIDController.setSmartMotionMaxVelocity(3000, 0);
-      liftPIDController.setSmartMotionMaxAccel(2000, 0);
-      liftPIDController.setSmartMotionAllowedClosedLoopError(0.1, 0);
+      liftPIDController.setP(Constants.CollectorArmConstants.COLLECTOR_ARM_LIFT_kP);
+      liftPIDController.setI(Constants.CollectorArmConstants.COLLECTOR_ARM_LIFT_kI);
+      liftPIDController.setD(Constants.CollectorArmConstants.COLLECTOR_ARM_LIFT_kD);
+      pivotPIDController.setP(Constants.CollectorArmConstants.COLLECTOR_ARM_PIVOT_kP);
+      pivotPIDController.setI(Constants.CollectorArmConstants.COLLECTOR_ARM_PIVOT_kI);
+      pivotPIDController.setD(Constants.CollectorArmConstants.COLLECTOR_ARM_PIVOT_kD);
+         
+      
     }
 
 
-    private void configureSmartMotion(SparkMax motor, SparkMaxConfig config) {
-      config.setMaxVelocity(3000);  // Max speed (adjust per need)
-      config.smartMotionMinOutputVelocity(0.0);
-      config.smartMotionMaxAccel(2000);     // Acceleration limit
-      config.smartMotionAllowedClosedLoopError(0.1);
-      motor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
-    }
-
-    private void setLiftPosition (double targetAngle) {
-      double currentAngle = liftEncoder.getAbsolutePosition().getValueAsDouble();
-      double error = getShortestPath(currentAngle, targetAngle);
-      double pidOutput = liftPIDController.calculate(currentAngle, targetAngle);
-      double ffOutput = liftFeedforward.calculate(Math.toRadians(targetAngle),0);
-      liftMotor.set(pidOutput + ffOutput);
-    }
-
-    private void setPivotPosition (double targetAngle) {
-      double currentAngle = liftEncoder.getAbsolutePosition().getValueAsDouble();
-      double error = getShortestPath(currentAngle, targetAngle);
-      double output = liftPIDController.calculate(currentAngle, targetAngle);
-      liftMotor.set(output * Math.signum(error));
-    }
-
-    private void setReachPosition (double targetAngle) {
-      double currentAngle = liftEncoder.getAbsolutePosition().getValueAsDouble();
-      double error = getShortestPath(currentAngle, targetAngle);
-      double output = liftPIDController.calculate(currentAngle, targetAngle);
-      liftMotor.set(output * Math.signum(error));
-    }
-
-    
-  
-  
-
-    public void setPosition(double targetLiftAngle, double targetPivotAngle, double targetReachAngle) {
-      double currentLiftAngle = liftEncoder.getAbsolutePosition().getValueAsDouble();
-      double currentPivotAngle = pivotEncoder.getAbsolutePosition().getValueAsDouble();
-      double currentReachAngle = reachEncoder.getAbsolutePosition().getValueAsDouble();
-  
-      double liftError = getShortestPath(currentLiftAngle, targetLiftAngle);
-      double pivotError = getShortestPath(currentPivotAngle, targetPivotAngle);
-      double reachError = getShortestPath(currentReachAngle, targetReachAngle);
-  
-      double liftOutput = liftPIDController.calculate(currentLiftAngle, targetLiftAngle);
-      double pivotOutput = pivotPIDController.calculate(currentPivotAngle, targetPivotAngle);
-      double reachOutput = reachPIDController.calculate(currentReachAngle, targetReachAngle);
-  
-      liftMotor.set(liftOutput * Math.signum(liftError)); 
-      pivotMotor.set(pivotOutput * Math.signum(pivotError)); 
-      reachMotor.set(reachOutput * Math.signum(reachError)); 
-  }
-  
-  /**
-   * Calculates the shortest angular distance between current and target positions.
-   */
-  private double getShortestPath(double currentAngle, double targetAngle) {
+    private double getShortestPath(double currentAngle, double targetAngle) {
       double error = targetAngle - currentAngle;
       if (error > 180) {
           error -= 360;
@@ -227,58 +163,69 @@ public class CollectorArm extends SubsystemBase {
           error += 360;
       }
       return error;
-
-        //double liftOutput = liftPIDController.calculate(liftAngle);
-        //liftMotor.set(liftOutput);
-
-        //double pivotOutput = pivotPIDController.calculate(pivotAngle);
-        //pivotMotor.set(pivotOutput);
-
-        //double reachOutput = reachPIDController.calculate(reachAngle);
-        //reachMotor.set(reachOutput);
     }
 
-    // Commands to move to preset positions
-    public void moveToStart() {
-        setPosition(
-          Constants.CollectorArmConstants.COLLECTOR_ARM_LIFT_ENCODER_START, 
-          Constants.CollectorArmConstants.COLLECTOR_ARM_PIVOT_ENCODER_START, 
-          Constants.CollectorArmConstants.COLLECTOR_ARM_REACH_ENCODER_START);
+   
+    private void setLiftPosition (double targetInches) {
+      double currentInches = liftEncoder.getAbsolutePosition().getValueAsDouble() * Constants.CollectorArmConstants.COLLECTOR_ARM_DEGREES_TO_INCHES;
+      double pidOutput = liftPIDController.calculate(currentInches, targetInches);
+      double ffOutput = liftFeedforward.calculate(Math.toRadians(targetInches / Constants.CollectorArmConstants.COLLECTOR_ARM_DEGREES_TO_INCHES), 0);
+      liftMotor.set(pidOutput + ffOutput);
     }
 
-    public void moveToPickup() {
-        setPosition(
-          Constants.CollectorArmConstants.COLLECTOR_ARM_LIFT_ENCODER_PICKUP, 
-          Constants.CollectorArmConstants.COLLECTOR_ARM_PIVOT_ENCODER_PICKUP, 
-          Constants.CollectorArmConstants.COLLECTOR_ARM_REACH_ENCODER_PICKUP);
+    private void setPivotPosition (double targetAngle) {
+      double currentAngle = pivotEncoder.getAbsolutePosition().getValueAsDouble();
+      double error = getShortestPath(currentAngle, targetAngle);
+      double pidOutput = pivotPIDController.calculate(currentAngle, targetAngle);
+      double ffOutput = pivotFeedforward.calculate(Math.toRadians(targetAngle), 0);
+      pivotMotor.set(pidOutput * Math.signum(error));
     }
 
-    public void moveToL1() {
-        setPosition(
-          Constants.CollectorArmConstants.COLLECTOR_ARM_LIFT_ENCODER_L1, 
-          Constants.CollectorArmConstants.COLLECTOR_ARM_PIVOT_ENCODER_L1, 
-          Constants.CollectorArmConstants.COLLECTOR_ARM_REACH_ENCODER_L1);
+    private ArmState currentState = ArmState.START; // Default state
+
+    public void moveToState(ArmState state) {
+        currentState = state;
     }
 
-    public void moveToL2() {
-        setPosition(
-          Constants.CollectorArmConstants.COLLECTOR_ARM_LIFT_ENCODER_L2, 
-          Constants.CollectorArmConstants.COLLECTOR_ARM_PIVOT_ENCODER_L2, 
-          Constants.CollectorArmConstants.COLLECTOR_ARM_REACH_ENCODER_L2);
-    }
-
-    public void moveToL3() {
-        setPosition(
-          Constants.CollectorArmConstants.COLLECTOR_ARM_LIFT_ENCODER_L3, 
-          Constants.CollectorArmConstants.COLLECTOR_ARM_PIVOT_ENCODER_L3, 
-          Constants.CollectorArmConstants.COLLECTOR_ARM_REACH_ENCODER_L3);
-    }
-
-    public void moveToMax() {
-        setPosition(
-          Constants.CollectorArmConstants.COLLECTOR_ARM_LIFT_ENCODER_MAX, 
-          Constants.CollectorArmConstants.COLLECTOR_ARM_PIVOT_ENCODER_MAX, 
-          Constants.CollectorArmConstants.COLLECTOR_ARM_REACH_ENCODER_MAX);
+    public void updateLift() {
+      switch (currentState) {
+          case START:
+              setLiftPosition(
+                  Constants.CollectorArmConstants.COLLECTOR_ARM_LIFT_ENCODER_START);
+              setPivotPosition( 
+                  Constants.CollectorArmConstants.COLLECTOR_ARM_PIVOT_ENCODER_START);
+              break;
+          case PICKUP:
+              setLiftPosition(
+                  Constants.CollectorArmConstants.COLLECTOR_ARM_LIFT_ENCODER_PICKUP);
+              setPivotPosition( 
+                  Constants.CollectorArmConstants.COLLECTOR_ARM_PIVOT_ENCODER_PICKUP);
+              break;
+          case L1:
+              setLiftPosition(
+                  Constants.CollectorArmConstants.COLLECTOR_ARM_LIFT_ENCODER_L1);
+              setPivotPosition( 
+                  Constants.CollectorArmConstants.COLLECTOR_ARM_PIVOT_ENCODER_L1);
+              break;
+          case L2:
+              setLiftPosition(
+                  Constants.CollectorArmConstants.COLLECTOR_ARM_LIFT_ENCODER_L2);
+              setPivotPosition( 
+                  Constants.CollectorArmConstants.COLLECTOR_ARM_PIVOT_ENCODER_L2);
+              break;
+          case L3:
+              setLiftPosition(
+                  Constants.CollectorArmConstants.COLLECTOR_ARM_LIFT_ENCODER_L3);
+              setPivotPosition( 
+                  Constants.CollectorArmConstants.COLLECTOR_ARM_PIVOT_ENCODER_L3);
+              break;
+          case MAX:
+              setLiftPosition(
+                  Constants.CollectorArmConstants.COLLECTOR_ARM_LIFT_ENCODER_MAX);
+              setPivotPosition( 
+                  Constants.CollectorArmConstants.COLLECTOR_ARM_PIVOT_ENCODER_MAX);
+              break;
+      }
     }
 
     public void CollectAlgae(){
