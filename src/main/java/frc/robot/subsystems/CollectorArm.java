@@ -177,7 +177,6 @@ public class CollectorArm extends SubsystemBase {
       double currentAngle = pivotEncoder.getAbsolutePosition().getValueAsDouble();
       double error = getShortestPath(currentAngle, targetAngle);
       double pidOutput = pivotPIDController.calculate(currentAngle, targetAngle);
-      double ffOutput = pivotFeedforward.calculate(Math.toRadians(targetAngle), 0);
       pivotMotor.set(pidOutput * Math.signum(error));
     }
 
