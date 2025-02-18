@@ -9,6 +9,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.ctre.phoenix6.hardware.CANcoder;
+import edu.wpi.first.wpilibj2.command.Command;
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.MagnetSensorConfigs;
@@ -149,19 +150,20 @@ public class CollectorArm extends SubsystemBase {
     
     }
 
-    public void updateDashboard() {
-      SmartDashboard.putNumber("Lift Height", liftEncoder.getPosition().getValueAsDouble());
-      SmartDashboard.putNumber("Pivot Angle", pivotEncoder.getPosition().getValueAsDouble());
-      SmartDashboard.putNumber("Lift Setpoint", liftPIDController.getSetpoint());
-      SmartDashboard.putNumber("Pivot Setpoint", pivotPIDController.getSetpoint());
-      SmartDashboard.putNumber("Lift PID Error", liftPIDController.getPositionError());
-      SmartDashboard.putNumber("Pivot PID Error", pivotPIDController.getPositionError());
-      SmartDashboard.putNumber("Lift Motor Output", liftMotor.get());
-      SmartDashboard.putNumber("Pivot Motor Output", pivotMotor.get());
-      SmartDashboard.putBoolean("Algae Limit Switch", algaeLimit.get());
-      SmartDashboard.putBoolean("Coral Limit Switch", coralLimit.get());
-      SmartDashboard.putString("Current Arm State", currentState.name());
+  public void updateDashboard() {
+    SmartDashboard.putNumber("Lift Height", liftEncoder.getPosition().getValueAsDouble());
+    SmartDashboard.putNumber("Pivot Angle", pivotEncoder.getPosition().getValueAsDouble());
+    SmartDashboard.putNumber("Lift Setpoint", liftPIDController.getSetpoint());
+    SmartDashboard.putNumber("Pivot Setpoint", pivotPIDController.getSetpoint());
+    SmartDashboard.putNumber("Lift PID Error", liftPIDController.getPositionError());
+    SmartDashboard.putNumber("Pivot PID Error", pivotPIDController.getPositionError());
+    SmartDashboard.putNumber("Lift Motor Output", liftMotor.get());
+    SmartDashboard.putNumber("Pivot Motor Output", pivotMotor.get());
+    SmartDashboard.putBoolean("Algae Limit Switch", algaeLimit.get());
+    SmartDashboard.putBoolean("Coral Limit Switch", coralLimit.get());
+    SmartDashboard.putString("Current Arm State", currentState.name());
   }
+
   public void logArmState() {
     DataLogManager.log("Current State: " + currentState.name());
     DataLogManager.log("Lift Height: " + liftEncoder.getPosition().getValueAsDouble());
@@ -170,47 +172,23 @@ public class CollectorArm extends SubsystemBase {
     DataLogManager.log("Pivot Output: " + pivotMotor.get());
 }
 
-    private void configureMotor(SparkMax motor, SparkMaxConfig config) {
-      config.idleMode(IdleMode.kBrake);
-      config.smartCurrentLimit(Constants.CollectorArmConstants.CURRENT_LIMIT);
-      config.secondaryCurrentLimit(Constants.CollectorArmConstants.MAX_CURRENT_LIMIT);
-      config.voltageCompensation(Constants.CollectorArmConstants.VOLTAGE_COMPENSATION);
-      motor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+  private void configureMotor(SparkMax motor, SparkMaxConfig config) {
+    config.idleMode(IdleMode.kBrake);
+    config.smartCurrentLimit(Constants.CollectorArmConstants.CURRENT_LIMIT);
+    config.secondaryCurrentLimit(Constants.CollectorArmConstants.MAX_CURRENT_LIMIT);
+    config.voltageCompensation(Constants.CollectorArmConstants.VOLTAGE_COMPENSATION);
+    motor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
 
     }
 
-    private void configurePID(PIDController pidController, double kP, double kI, double kD) {
-      pidController.setP(kP);
-      pidController.setI(kI);
-      pidController.setD(kD);
+  private void configurePID(PIDController pidController, double kP, double kI, double kD) {
+    pidController.setP(kP);
+    pidController.setI(kI);
+    pidController.setD(kD);
   }
- 
-    //private void setLiftPosition (double targetInches) {
-      //double currentInches = liftEncoder.getAbsolutePosition().getValueAsDouble() * 
-      //Constants.CollectorArmConstants.DEGREES_TO_INCHES;
-      //double pidOutput = liftPIDController.calculate(currentInches, targetInches);
-      //double ffOutput = liftFeedforward.calculate(targetInches, 0);
-      //liftMotor.set(pidOutput + ffOutput);
-    //}
+  private CollectorArmState currentState = CollectorArmState.START; // Default state
 
-    //private void setPivotPosition (double targetAngle) {
-      //double currentAngle = pivotEncoder.getAbsolutePosition().getValueAsDouble();
-      //double clampedTarget = Math.max(Constants.CollectorArmConstants.PIVOT_MIN_ANGLE,
-      //Math.min(targetAngle, Constants.CollectorArmConstants.PIVOT_MAX_ANGLE));
-      //double pidOutput = pivotPIDController.calculate(currentAngle, targetAngle);
-      //pivotMotor.set(pidOutput + pivotFeedforward.calculate(clampedTarget, 0));
-    //}
-
-    private CollectorArmState currentState = CollectorArmState.START; // Default state
-
-    //public void moveToState(CollectorArmState state) {
-      //if (liftPIDController.atSetpoint() && pivotPIDController.atSetpoint()) {
-          //currentState = state;
-     // }
- // }
-  
-
-    public void setLiftPosition(double targetInches) {
+  public void setLiftPosition(double targetInches) {
       TrapezoidProfile.Constraints constraints =
       new TrapezoidProfile.Constraints(
           Constants.CollectorArmConstants.LIFT_MAX_VELOCITY,
@@ -231,7 +209,7 @@ public class CollectorArm extends SubsystemBase {
       liftMotor.set(pidOutput + ffOutput);
 }
 
-    public void setPivotPosition(double targetAngle) {
+  public void setPivotPosition(double targetAngle) {
       TrapezoidProfile.Constraints constraints = 
         new TrapezoidProfile.Constraints(
         Constants.CollectorArmConstants.PIVOT_MAX_VELOCITY,
@@ -257,8 +235,17 @@ public class CollectorArm extends SubsystemBase {
       setLiftPosition(state.liftHeightInches);
       setPivotPosition(state.pivotAngleDegrees);
 }
-  
-    
+    public boolean isAtTarget(CollectorArmState state) {
+      return liftPIDController.atSetpoint() && pivotPIDController.atSetpoint();
+    }
+
+    public void stopArm() {
+      liftMotor.stopMotor();
+      pivotMotor.stopMotor();
+      topIntakeMotor.stopMotor();
+      bottomIntakeMotor.stopMotor();
+      DataLogManager.log("Emergency Stop Triggered!");
+  }
 
     private boolean algaeCollected = false;
     private boolean coralCollected = false;
