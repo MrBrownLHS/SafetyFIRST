@@ -34,11 +34,11 @@ public class CollectorArm extends SubsystemBase {
   private final SparkMaxConfig liftMotorConfig, pivotMotorConfig, topIntakeMotorConfig, bottomIntakeMotorConfig;
   private final MagnetSensorConfigs liftMagnetSensorConfig, pivotMagnetSensorConfig;
   private final DigitalInput coralLimit, algaeLimit;
-  private final ArmFeedforward liftFeedforward, pivotFeedforward;
+  private ArmFeedforward liftFeedforward, pivotFeedforward;
   private TrapezoidProfile.Constraints liftConstraints, pivotConstraints;
   private TrapezoidProfile.State liftState, pivotState;
   private TrapezoidProfile liftProfile, pivotProfile;
-  private final TrapezoidProfile.State liftGoal, pivotGoal;
+  private TrapezoidProfile.State liftGoal, pivotGoal;
   
 
   public enum CollectorArmState { //adjust angles as needed
@@ -168,6 +168,38 @@ public class CollectorArm extends SubsystemBase {
     SmartDashboard.putBoolean("Algae Limit Switch", algaeLimit.get());
     SmartDashboard.putBoolean("Coral Limit Switch", coralLimit.get());
     SmartDashboard.putString("Current Arm State", currentState.name());
+
+    SmartDashboard.putNumber("Lift kP", liftPIDController.getP());
+    liftPIDController.setP(SmartDashboard.getNumber("Lift kP", 0.05));
+    SmartDashboard.putNumber("Lift kI", liftPIDController.getI());
+    liftPIDController.setI(SmartDashboard.getNumber("Lift kI", 0.0));
+    SmartDashboard.putNumber("Lift kD", liftPIDController.getD());
+    liftPIDController.setD(SmartDashboard.getNumber("Lift kD", 0.0));
+    SmartDashboard.putNumber("Pivot kP", pivotPIDController.getP());
+    pivotPIDController.setP(SmartDashboard.getNumber("Pivot kP", 0.05));
+    SmartDashboard.putNumber("Pivot kI", pivotPIDController.getI());
+    pivotPIDController.setI(SmartDashboard.getNumber("Pivot kI", 0.0));
+    SmartDashboard.putNumber("Pivot kD", pivotPIDController.getD());
+    pivotPIDController.setD(SmartDashboard.getNumber("Pivot kD", 0.0));
+
+    SmartDashboard.putNumber("Lift kG", liftFeedforward.getKg());
+    liftFeedforward = new ArmFeedforward(0.1, SmartDashboard.getNumber("Lift kG", 1.0), 0.2, 0.05);
+    SmartDashboard.putNumber("Pivot kG", pivotFeedforward.getKg());
+    pivotFeedforward = new ArmFeedforward(0.1, SmartDashboard.getNumber("Pivot kG", 1.0), 0.2, 0.05);
+    SmartDashboard.putNumber("Lift kS", liftFeedforward.getKs());
+    liftFeedforward = new ArmFeedforward(SmartDashboard.getNumber("Lift kS", 0.1), 1.0, 0.2, 0.05);
+    SmartDashboard.putNumber("Pivot kS", pivotFeedforward.getKs());
+    pivotFeedforward = new ArmFeedforward(SmartDashboard.getNumber("Pivot kS", 0.1), 1.0, 0.2, 0.05);
+    SmartDashboard.putNumber("Lift kV", liftFeedforward.getKv());
+    liftFeedforward = new ArmFeedforward(0.1, 1.0, SmartDashboard.getNumber("Lift kV", 0.2), 0.05);
+    SmartDashboard.putNumber("Pivot kV", pivotFeedforward.getKv());
+    pivotFeedforward = new ArmFeedforward(0.1, 1.0, SmartDashboard.getNumber("Pivot kV", 0.2), 0.05);
+    SmartDashboard.putNumber("Lift kA", liftFeedforward.getKa());
+    liftFeedforward = new ArmFeedforward(0.1, 1.0, 0.2, SmartDashboard.getNumber("Lift kA", 0.05));
+    SmartDashboard.putNumber("Pivot kA", pivotFeedforward.getKa());
+    pivotFeedforward = new ArmFeedforward(0.1, 1.0, 0.2, SmartDashboard.getNumber("Pivot kA", 0.05));
+    
+
   }
 
   public void logArmState() {
