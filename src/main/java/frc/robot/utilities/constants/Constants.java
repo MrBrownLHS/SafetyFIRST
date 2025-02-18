@@ -25,13 +25,11 @@ public class Constants {
         public static final double LIFT_kP = 0.01;
         public static final double LIFT_kI = 0.00;
         public static final double LIFT_kD = 0.01;
-        public static final double LIFT_kF = 0.00;
-
+        
         public static final double PIVOT_kP = 0.01;
         public static final double PIVOT_kI = 0.00;
         public static final double PIVOT_kD = 0.01;
-        public static final double PIVOT_kF = 0.00;
-
+       
         // Feedforward/Trapazoid
 
         public static final double LIFT_kS = 0.0;
@@ -44,42 +42,26 @@ public class Constants {
         public static final double PIVOT_kV = 0.0;
         public static final double PIVOT_kA = 0.0;
 
-        public static final double LIFT_MAX_VELOCITY = 0.0; // Max velocity of the lift - NEEDS TUNING
-        public static final double LIFT_MAX_ACCELERATION = 0.0; // Max acceleration of the lift - NEEDS TUNING
-        public static final double PIVOT_MAX_VELOCITY = 0.0; // Max velocity of the pivot - NEEDS TUNING
-        public static final double PIVOT_MAX_ACCELERATION = 0.0; // Max acceleration of the pivot - NEEDS TUNING
+        public static final double LIFT_MAX_VELOCITY = 3.0; // Max velocity of the lift - NEEDS TUNING
+        public static final double LIFT_MAX_ACCELERATION = 1.0; // Max acceleration of the lift - NEEDS TUNING
+        public static final double PIVOT_MAX_VELOCITY = 5.0; // Max velocity of the pivot - NEEDS TUNING
+        public static final double PIVOT_MAX_ACCELERATION = 1.0; // Max acceleration of the pivot - NEEDS TUNING
         public static final double PIVOT_MIN_ANGLE = 30; // Min angle of the pivot - NEEDS TUNING
         public static final double PIVOT_MAX_ANGLE = 180; // Max angle of the pivot - NEEDS TUNING
 
 
 
         // Lift Encoder Postions - NEEDS TUNING
-        public static final double LIFT_ENCODER_START = 0.0;
-        public static final double LIFT_ENCODER_PICKUP = 0.0; //Source/Floor Pickup - NEEDS TUNING
-        public static final double LIFT_ENCODER_L1 = 0.0; //L1 Coral Scoring - NEEDS TUNING
-        public static final double LIFT_ENCODER_L2 = 0.0; //L2 Coral Scoring - NEEDS TUNING
-        public static final double LIFT_ENCODER_L3 = 0.0; //L3 Coral Scoring - NEEDS TUNING
-        public static final double LIFT_ENCODER_MAX = 0.0; //Max Extension - NEEDS TUNING
         public static final double LIFT_TOLERANCE = 5.0; //Tolerance for PID - NEEDS TUNING
-        public static final double LIFT_SETPOINT = 0.0; //Setpoint for PID - NEEDS TUNING
-
-        // Pivot Encoder Postions - NEEDS TUNING
-        public static final double PIVOT_ENCODER_START = 0.0;
-        public static final double PIVOT_ENCODER_PICKUP = 0.0; //Source/Floor Pickup - NEEDS TUNING
-        public static final double PIVOT_ENCODER_L1 = 0.0; //L1 Coral Scoring - NEEDS TUNING
-        public static final double PIVOT_ENCODER_L2 = 0.0; //L2 Coral Scoring - NEEDS TUNING
-        public static final double PIVOT_ENCODER_L3 = 0.0; //L3 Coral Scoring - NEEDS TUNING
-        public static final double PIVOT_ENCODER_MAX = 0.0; //Max Rotation - NEEDS TUNING
         public static final double PIVOT_TOLERANCE = 5.0; //Tolerance for PID - NEEDS TUNING
-        public static final double PIVOT_SETPOINT = 0.0; //Setpoint for PID - NEEDS TUNING
-
+        
  
         public static final double ENCODER_TO_DEGREES = 360.0 / 4096.0; 
         public static final double COG_DIAMETER_INCHES = 2.0; // Diameter of the center of gravity pulley in inches - NEEDS TUNING
         public static final double LIFT_GEAR_RATIO = 1.0; // Gear ratio of the lift mechanism - NEEDS TUNING
         public static final double ENCODER_TO_INCHES = (Math.PI * COG_DIAMETER_INCHES) / 360.0 / LIFT_GEAR_RATIO; 
         public static final double DEADBAND = 0.05;
-        public static final double MAX_SPEED = 0.5; // Maximum speed of the arm in m/s
+        
 
         //Intake Motor Speeds - NEEDS TUNING
         public static final double INTAKE_SPEED = 0.25; //Intake Speed - NEEDS TUNING
