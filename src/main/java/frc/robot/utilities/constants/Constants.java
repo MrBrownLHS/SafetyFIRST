@@ -74,10 +74,10 @@ public class Constants {
         public static final double PIVOT_SETPOINT = 0.0; //Setpoint for PID - NEEDS TUNING
 
  
-        public static final double ENCODER_CONVERSION_FACTOR = 360.0 / 4096.0; 
+        public static final double ENCODER_TO_DEGREES = 360.0 / 4096.0; 
         public static final double COG_DIAMETER_INCHES = 2.0; // Diameter of the center of gravity pulley in inches - NEEDS TUNING
         public static final double LIFT_GEAR_RATIO = 1.0; // Gear ratio of the lift mechanism - NEEDS TUNING
-        public static final double DEGREES_TO_INCHES = (Math.PI * COG_DIAMETER_INCHES) / 360.0 / LIFT_GEAR_RATIO; 
+        public static final double ENCODER_TO_INCHES = (Math.PI * COG_DIAMETER_INCHES) / 360.0 / LIFT_GEAR_RATIO; 
         public static final double DEADBAND = 0.05;
         public static final double MAX_SPEED = 0.5; // Maximum speed of the arm in m/s
 

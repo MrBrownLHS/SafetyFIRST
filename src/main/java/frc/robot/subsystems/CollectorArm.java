@@ -9,7 +9,6 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.ctre.phoenix6.hardware.CANcoder;
-import edu.wpi.first.wpilibj2.command.Command;
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.MagnetSensorConfigs;
@@ -36,11 +35,10 @@ public class CollectorArm extends SubsystemBase {
   private final MagnetSensorConfigs liftMagnetSensorConfig, pivotMagnetSensorConfig;
   private final DigitalInput coralLimit, algaeLimit;
   private final ArmFeedforward liftFeedforward, pivotFeedforward;
-   private TrapezoidProfile.Constraints liftConstraints, pivotConstraints;
+  private TrapezoidProfile.Constraints liftConstraints, pivotConstraints;
   private TrapezoidProfile.State liftState, pivotState;
   private TrapezoidProfile liftProfile, pivotProfile;
-  //private final TrapezoidProfile.State liftGoal, pivotGoal;
-  //private final TrapezoidProfile.State liftCurrent, pivotCurrent;
+  private final TrapezoidProfile.State liftGoal, pivotGoal;
   
 
   public enum CollectorArmState { //adjust angles as needed
@@ -94,6 +92,14 @@ public class CollectorArm extends SubsystemBase {
     liftState = new TrapezoidProfile.State(0, 0);
     pivotState = new TrapezoidProfile.State(0, 0);
 
+    liftGoal = new TrapezoidProfile.State(0, 0);
+    pivotGoal = new TrapezoidProfile.State(0, 0);
+
+    TrapezoidProfile.State liftGoal = new TrapezoidProfile.State(0, 0);
+      liftState = liftProfile.calculate(0.02, liftState, liftGoal);
+    TrapezoidProfile.State pivotGoal = new TrapezoidProfile.State(0, 0);
+      pivotState = pivotProfile.calculate(0.02, pivotState, pivotGoal);
+
     liftProfile = new TrapezoidProfile(liftConstraints);
     pivotProfile = new TrapezoidProfile(pivotConstraints);
             
@@ -124,14 +130,14 @@ public class CollectorArm extends SubsystemBase {
         // Set encoder conversion factor to return values in degrees
     liftEncoderConfig = new CANcoderConfiguration();
     liftMagnetSensorConfig = new MagnetSensorConfigs();
-    liftMagnetSensorConfig.MagnetOffset = Constants.CollectorArmConstants.ENCODER_CONVERSION_FACTOR;
+    liftMagnetSensorConfig.MagnetOffset = Constants.CollectorArmConstants.ENCODER_TO_INCHES;
     liftMagnetSensorConfig.SensorDirection = SensorDirectionValue.Clockwise_Positive;
     liftEncoderConfig.MagnetSensor = liftMagnetSensorConfig;
     liftEncoder.getConfigurator().apply(liftEncoderConfig);
 
     pivotEncoderConfig = new CANcoderConfiguration();
     pivotMagnetSensorConfig = new MagnetSensorConfigs();
-    pivotMagnetSensorConfig.MagnetOffset = Constants.CollectorArmConstants.ENCODER_CONVERSION_FACTOR;
+    pivotMagnetSensorConfig.MagnetOffset = Constants.CollectorArmConstants.ENCODER_TO_DEGREES;
     pivotMagnetSensorConfig.SensorDirection = SensorDirectionValue.Clockwise_Positive;
     pivotEncoderConfig.MagnetSensor = pivotMagnetSensorConfig;
     pivotEncoder.getConfigurator().apply(pivotEncoderConfig);
@@ -186,6 +192,15 @@ public class CollectorArm extends SubsystemBase {
     pidController.setI(kI);
     pidController.setD(kD);
   }
+
+  public double getLiftHeightInches() {
+    return liftEncoder.getAbsolutePosition().getValueAsDouble() * Constants.CollectorArmConstants.ENCODER_TO_INCHES;
+}
+
+  public double getPivotAngleDegrees() {
+    return pivotEncoder.getAbsolutePosition().getValueAsDouble() * Constants.CollectorArmConstants.ENCODER_TO_DEGREES;
+}
+
   private CollectorArmState currentState = CollectorArmState.START; // Default state
 
   public void setLiftPosition(double targetInches) {
@@ -198,13 +213,9 @@ public class CollectorArm extends SubsystemBase {
       new TrapezoidProfile.State(this.liftState.position, this.liftState.velocity);
       TrapezoidProfile liftProfile = new TrapezoidProfile(constraints);
 
-      liftState = liftProfile.calculate(0.02, liftState, liftState);
-
-      double pidOutput = liftPIDController.calculate(
-        liftEncoder.getAbsolutePosition().getValueAsDouble() * Constants.CollectorArmConstants.DEGREES_TO_INCHES,
-        liftState.position
-    );
-
+      liftState = liftProfile.calculate(0.02, liftState, liftGoal);
+      double pidOutput = liftPIDController.calculate(getLiftHeightInches(), liftState.position);
+    
       double ffOutput = liftFeedforward.calculate(liftState.velocity, 0);
       liftMotor.set(pidOutput + ffOutput);
 }
@@ -219,13 +230,10 @@ public class CollectorArm extends SubsystemBase {
         new TrapezoidProfile.State(targetAngle, 0);
       TrapezoidProfile pivotProfile = new TrapezoidProfile(constraints);
         
-      pivotState = pivotProfile.calculate(0.02, pivotState, pivotState);
+      pivotState = pivotProfile.calculate(0.02, pivotState, pivotGoal);
 
-      double pidOutput = pivotPIDController.calculate(
-        pivotEncoder.getAbsolutePosition().getValueAsDouble(),
-        pivotState.position
-    );
-
+      double pidOutput = pivotPIDController.calculate(getPivotAngleDegrees(), pivotState.position);
+  
       double ffOutput = pivotFeedforward.calculate(pivotState.velocity, 0);
       pivotMotor.set(pidOutput + ffOutput);
 }
@@ -258,6 +266,7 @@ public class CollectorArm extends SubsystemBase {
     } else if (!algaeCollected) {
         bottomIntakeMotor.stopMotor();
         topIntakeMotor.stopMotor();
+        algaeCollected = true;
     }
     }
 
