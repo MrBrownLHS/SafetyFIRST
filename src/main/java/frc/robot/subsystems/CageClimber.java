@@ -39,9 +39,9 @@ public class CageClimber extends SubsystemBase {
   private void configureWinchMotor() {
     var config = new SparkMaxConfig();
     config.idleMode(IdleMode.kBrake);
-    config.smartCurrentLimit(Constants.CollectorArmConstants.COLLECTOR_ARM_CURRENT_LIMIT);
-    config.secondaryCurrentLimit(Constants.CollectorArmConstants.COLLECTOR_ARM_MAX_CURRENT_LIMIT);
-    config.voltageCompensation(Constants.CollectorArmConstants.COLLECTOR_ARM_VOLTAGE_COMPENSATION);
+    config.smartCurrentLimit(Constants.CollectorArmConstants.CURRENT_LIMIT);
+    config.secondaryCurrentLimit(Constants.CollectorArmConstants.MAX_CURRENT_LIMIT);
+    config.voltageCompensation(Constants.CollectorArmConstants.VOLTAGE_COMPENSATION);
     Winch1Motor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
     Winch2Motor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
   

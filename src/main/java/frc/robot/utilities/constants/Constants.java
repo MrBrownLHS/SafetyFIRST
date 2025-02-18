@@ -14,68 +14,89 @@ public class Constants {
 
     public static final class CollectorArmConstants {
         // CAN IDs
-        public static final int COLLECTOR_ARM_LIFT_MOTOR_ID = 13;
-        public static final int COLLECTOR_ARM_LIFT_ENCODER_ID = 14;
-        public static final int COLLECTOR_ARM_PIVOT_MOTOR_ID = 15;
-        public static final int COLLECTOR_ARM_PIVOT_ENCODER_ID = 16;
-        public static final int COLLECTOR_ARM_REACH_MOTOR_ID = 17;
-        public static final int COLLECTOR_ARM_REACH_ENCODER_ID = 18;
-        public static final int COLLECTOR_ARM_TOP_INTAKE_MOTOR_ID = 21;
-        public static final int COLLECTOR_ARM_BOTTOM_INTAKE_MOTOR_ID = 22;
+        public static final int LIFT_MOTOR_ID = 13;
+        public static final int LIFT_ENCODER_ID = 14;
+        public static final int PIVOT_MOTOR_ID = 15;
+        public static final int PIVOT_ENCODER_ID = 16;
+        public static final int TOP_INTAKE_MOTOR_ID = 21;
+        public static final int BOTTOM_INTAKE_MOTOR_ID = 22;
         
         // PID Constants - NEEDS TUNING
-        public static final double COLLECTOR_ARM_LIFT_kP = 0.01;
-        public static final double COLLECTOR_ARM_LIFT_kI = 0.00;
-        public static final double COLLECTOR_ARM_LIFT_kD = 0.01;
-        public static final double COLLECTOR_ARM_LIFT_kF = 0.00;
+        public static final double LIFT_kP = 0.01;
+        public static final double LIFT_kI = 0.00;
+        public static final double LIFT_kD = 0.01;
+        public static final double LIFT_kF = 0.00;
 
-        public static final double COLLECTOR_ARM_PIVOT_kP = 0.01;
-        public static final double COLLECTOR_ARM_PIVOT_kI = 0.00;
-        public static final double COLLECTOR_ARM_PIVOT_kD = 0.01;
-        public static final double COLLECTOR_ARM_PIVOT_kF = 0.00;
+        public static final double PIVOT_kP = 0.01;
+        public static final double PIVOT_kI = 0.00;
+        public static final double PIVOT_kD = 0.01;
+        public static final double PIVOT_kF = 0.00;
+
+        // Feedforward/Trapazoid
+
+        public static final double LIFT_kS = 0.0;
+        public static final double LIFT_kG = 0.0;
+        public static final double LIFT_kV = 0.0;
+        public static final double LIFT_kA = 0.0;
+
+        public static final double PIVOT_kS = 0.0;
+        public static final double PIVOT_kG = 0.0;
+        public static final double PIVOT_kV = 0.0;
+        public static final double PIVOT_kA = 0.0;
+
+        public static final double LIFT_MAX_VELOCITY = 0.0; // Max velocity of the lift - NEEDS TUNING
+        public static final double LIFT_MAX_ACCELERATION = 0.0; // Max acceleration of the lift - NEEDS TUNING
+        public static final double PIVOT_MAX_VELOCITY = 0.0; // Max velocity of the pivot - NEEDS TUNING
+        public static final double PIVOT_MAX_ACCELERATION = 0.0; // Max acceleration of the pivot - NEEDS TUNING
+        public static final double PIVOT_MIN_ANGLE = 30; // Min angle of the pivot - NEEDS TUNING
+        public static final double PIVOT_MAX_ANGLE = 180; // Max angle of the pivot - NEEDS TUNING
+
 
 
         // Lift Encoder Postions - NEEDS TUNING
-        public static final double COLLECTOR_ARM_LIFT_ENCODER_START = 0.0;
-        public static final double COLLECTOR_ARM_LIFT_ENCODER_PICKUP = 0.0; //Source/Floor Pickup - NEEDS TUNING
-        public static final double COLLECTOR_ARM_LIFT_ENCODER_L1 = 0.0; //L1 Coral Scoring - NEEDS TUNING
-        public static final double COLLECTOR_ARM_LIFT_ENCODER_L2 = 0.0; //L2 Coral Scoring - NEEDS TUNING
-        public static final double COLLECTOR_ARM_LIFT_ENCODER_L3 = 0.0; //L3 Coral Scoring - NEEDS TUNING
-        public static final double COLLECTOR_ARM_LIFT_ENCODER_MAX = 0.0; //Max Extension - NEEDS TUNING
-        public static final double COLLECTOR_ARM_LIFT_TOLERANCE = 5.0; //Tolerance for PID - NEEDS TUNING
-        public static final double COLLECTOR_ARM_LIFT_SETPOINT = 0.0; //Setpoint for PID - NEEDS TUNING
+        public static final double LIFT_ENCODER_START = 0.0;
+        public static final double LIFT_ENCODER_PICKUP = 0.0; //Source/Floor Pickup - NEEDS TUNING
+        public static final double LIFT_ENCODER_L1 = 0.0; //L1 Coral Scoring - NEEDS TUNING
+        public static final double LIFT_ENCODER_L2 = 0.0; //L2 Coral Scoring - NEEDS TUNING
+        public static final double LIFT_ENCODER_L3 = 0.0; //L3 Coral Scoring - NEEDS TUNING
+        public static final double LIFT_ENCODER_MAX = 0.0; //Max Extension - NEEDS TUNING
+        public static final double LIFT_TOLERANCE = 5.0; //Tolerance for PID - NEEDS TUNING
+        public static final double LIFT_SETPOINT = 0.0; //Setpoint for PID - NEEDS TUNING
 
         // Pivot Encoder Postions - NEEDS TUNING
-        public static final double COLLECTOR_ARM_PIVOT_ENCODER_START = 0.0;
-        public static final double COLLECTOR_ARM_PIVOT_ENCODER_PICKUP = 0.0; //Source/Floor Pickup - NEEDS TUNING
-        public static final double COLLECTOR_ARM_PIVOT_ENCODER_L1 = 0.0; //L1 Coral Scoring - NEEDS TUNING
-        public static final double COLLECTOR_ARM_PIVOT_ENCODER_L2 = 0.0; //L2 Coral Scoring - NEEDS TUNING
-        public static final double COLLECTOR_ARM_PIVOT_ENCODER_L3 = 0.0; //L3 Coral Scoring - NEEDS TUNING
-        public static final double COLLECTOR_ARM_PIVOT_ENCODER_MAX = 0.0; //Max Rotation - NEEDS TUNING
-        public static final double COLLECTOR_ARM_PIVOT_TOLERANCE = 5.0; //Tolerance for PID - NEEDS TUNING
-        public static final double COLLECTOR_ARM_PIVOT_SETPOINT = 0.0; //Setpoint for PID - NEEDS TUNING
+        public static final double PIVOT_ENCODER_START = 0.0;
+        public static final double PIVOT_ENCODER_PICKUP = 0.0; //Source/Floor Pickup - NEEDS TUNING
+        public static final double PIVOT_ENCODER_L1 = 0.0; //L1 Coral Scoring - NEEDS TUNING
+        public static final double PIVOT_ENCODER_L2 = 0.0; //L2 Coral Scoring - NEEDS TUNING
+        public static final double PIVOT_ENCODER_L3 = 0.0; //L3 Coral Scoring - NEEDS TUNING
+        public static final double PIVOT_ENCODER_MAX = 0.0; //Max Rotation - NEEDS TUNING
+        public static final double PIVOT_TOLERANCE = 5.0; //Tolerance for PID - NEEDS TUNING
+        public static final double PIVOT_SETPOINT = 0.0; //Setpoint for PID - NEEDS TUNING
 
  
-        public static final double COLLECTOR_ARM_ENCODER_CONVERSION_FACTOR = 360.0 / 4096.0; 
-        public static final double COLLECTOR_ARM_COG_DIAMETER_INCHES = 2.0; // Diameter of the center of gravity pulley in inches - NEEDS TUNING
+        public static final double ENCODER_CONVERSION_FACTOR = 360.0 / 4096.0; 
+        public static final double COG_DIAMETER_INCHES = 2.0; // Diameter of the center of gravity pulley in inches - NEEDS TUNING
         public static final double LIFT_GEAR_RATIO = 1.0; // Gear ratio of the lift mechanism - NEEDS TUNING
-        public static final double COLLECTOR_ARM_DEGREES_TO_INCHES = (Math.PI * COLLECTOR_ARM_COG_DIAMETER_INCHES) / 360.0 / LIFT_GEAR_RATIO; 
-        public static final double COLLECTOR_ARM_DEADBAND = 0.05;
-        public static final double COLLECTOR_ARM_MAX_SPEED = 0.5; // Maximum speed of the arm in m/s
+        public static final double DEGREES_TO_INCHES = (Math.PI * COG_DIAMETER_INCHES) / 360.0 / LIFT_GEAR_RATIO; 
+        public static final double DEADBAND = 0.05;
+        public static final double MAX_SPEED = 0.5; // Maximum speed of the arm in m/s
 
         //Intake Motor Speeds - NEEDS TUNING
-        public static final double COLLECTOR_ARM_INTAKE_SPEED = 0.25; //Intake Speed - NEEDS TUNING
-        public static final double COLLECTOR_ARM_OUTTAKE_SPEED = 0.25; //Outtake Speed - NEEDS TUNING, may need to be negative
+        public static final double INTAKE_SPEED = 0.25; //Intake Speed - NEEDS TUNING
+        public static final double OUTTAKE_SPEED = 0.25; //Outtake Speed - NEEDS TUNING, may need to be negative
 
-        public static final int COLLECTOR_ARM_ALGAE_LIMIT_ID = 0; 
-        public static final int COLLECTOR_ARM_CORAL_LIMIT_ID = 1;
+        public static final int YEET_SPEED = 1;
 
-        public static final double COLLECTOR_ARM_VOLTAGE_COMPENSATION = 12.0;
-        public static final int COLLECTOR_ARM_CURRENT_LIMIT = 25;
-        public static final int COLLECTOR_ARM_CURRENT_THRESHOLD = 40;
-        public static final double COLLECTOR_ARM_CURRENT_THRESHOLD_TIME = 0.1;
-        public static final int COLLECTOR_ARM_MAX_CURRENT_LIMIT = 60;
-        public static final boolean COLLECTOR_ARM_ENABLE_CURRENT_LIMIT = true;
+
+        public static final int ALGAE_LIMIT_ID = 0; 
+        public static final int CORAL_LIMIT_ID = 1;
+
+        public static final double VOLTAGE_COMPENSATION = 12.0;
+        public static final int CURRENT_LIMIT = 25;
+        public static final int CURRENT_THRESHOLD = 40;
+        public static final double CURRENT_THRESHOLD_TIME = 0.1;
+        public static final int MAX_CURRENT_LIMIT = 60;
+        public static final boolean ENABLE_CURRENT_LIMIT = true;
 
 
     };
@@ -83,6 +104,8 @@ public class Constants {
     public static final class CageClimberConstants {
         public static final int WINCH_MOTOR_1_ID = 23;
         public static final int WINCH_MOTOR_2_ID = 24;
+
+        
     }
 
     public static final class ModuleConstants {
