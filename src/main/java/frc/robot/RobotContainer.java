@@ -21,7 +21,7 @@ public class RobotContainer {
   private final JoystickButton resetHeading;
   private final JoystickButton robotCentric;
 
-  private final XboxController coPilotController;
+  private final XboxController CoPilotController;
   private final CollectorArm collectorArm;
 
   private final int translationAxis;
@@ -34,7 +34,7 @@ public class RobotContainer {
   public RobotContainer() {
     swerveSubsystem = new SwerveSubsystem();
     DriverController = new Joystick(0);
-    coPilotController = new XboxController(1);
+    CoPilotController = new XboxController(1);
     collectorArm = new CollectorArm();
 
     resetHeading = new JoystickButton(DriverController, Constants.ControllerRawButtons.XboxController.Button.kY.value);
@@ -58,26 +58,28 @@ public class RobotContainer {
   private void configureBindings() {
     resetHeading.whileTrue(new InstantCommand(() -> swerveSubsystem.resetHeading()));
 
-    new JoystickButton(coPilotController, XboxController.Button.kA.value)
+    new JoystickButton(CoPilotController, XboxController.Button.kA.value)
     .onTrue(new InstantCommand(() -> collectorArm.moveToState(CollectorArmState.START), collectorArm));
 
-    new JoystickButton(coPilotController, XboxController.Button.kB.value)
+    new JoystickButton(CoPilotController, XboxController.Button.kB.value)
     .onTrue(new InstantCommand(() -> collectorArm.moveToState(CollectorArmState.FLOOR), collectorArm));
 
-    new JoystickButton(coPilotController, XboxController.Button.kX.value)
+    new JoystickButton(CoPilotController, XboxController.Button.kX.value)
     .onTrue(new InstantCommand(() -> collectorArm.moveToState(CollectorArmState.COLLECT), collectorArm));
 
-    new JoystickButton(coPilotController, XboxController.Button.kY.value)
+    new JoystickButton(CoPilotController, XboxController.Button.kY.value)
     .onTrue(new InstantCommand(() -> collectorArm.moveToState(CollectorArmState.L3), collectorArm));
 
-    new JoystickButton(coPilotController, XboxController.Button.kLeftBumper.value)
+    new JoystickButton(CoPilotController, XboxController.Button.kLeftBumper.value)
     .onTrue(new InstantCommand(() -> collectorArm.moveToState(CollectorArmState.L2), collectorArm));
 
-    new JoystickButton(coPilotController, XboxController.Button.kRightBumper.value)
+    new JoystickButton(CoPilotController, XboxController.Button.kRightBumper.value)
     .onTrue(new InstantCommand(() -> collectorArm.moveToState(CollectorArmState.MAX), collectorArm));
 
-    new JoystickButton(coPilotController, XboxController.Button.kStart.value)
+    new JoystickButton(CoPilotController, XboxController.Button.kStart.value)
     .onTrue(new InstantCommand(collectorArm::stopArm, collectorArm));
+
+    
   }
 
   public Command getAutonomousCommand() {

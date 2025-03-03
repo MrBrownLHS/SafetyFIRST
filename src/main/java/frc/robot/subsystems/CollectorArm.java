@@ -27,7 +27,7 @@ import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation; 
 
 public class CollectorArm extends SubsystemBase {
-  private final SparkMax liftMotor, pivotMotor, topIntakeMotor, bottomIntakeMotor;
+  private final SparkMax liftMotor1, liftMotor2, pivotMotor1, pivotMotor2, topIntakeMotor, bottomIntakeMotor, articulateMotor;
   private final CANcoder liftEncoder, pivotEncoder;
   private final PIDController liftPIDController, pivotPIDController;
   private final CANcoderConfiguration liftEncoderConfig, pivotEncoderConfig;
@@ -69,16 +69,19 @@ public class CollectorArm extends SubsystemBase {
     
     DataLogManager.log("CollectorArm Subsystem Initialized");
     
-    liftMotor = new SparkMax(Constants.CollectorArmConstants.LIFT_MOTOR_ID, MotorType.kBrushless);
+    liftMotor1 = new SparkMax(Constants.CollectorArmConstants.LIFT_MOTOR_1_ID, MotorType.kBrushless);
+    liftMotor2 = new SparkMax(Constants.CollectorArmConstants.LIFT_MOTOR_2_ID, MotorType.kBrushless);
     liftMotorConfig = new SparkMaxConfig();
     liftEncoder = new CANcoder(Constants.CollectorArmConstants.LIFT_ENCODER_ID);
-    pivotMotor = new SparkMax(Constants.CollectorArmConstants.PIVOT_MOTOR_ID, MotorType.kBrushless);
+    pivotMotor1 = new SparkMax(Constants.CollectorArmConstants.PIVOT_MOTOR_1_ID, MotorType.kBrushless);
+    pivotMotor2 = new SparkMax(Constants.CollectorArmConstants.PIVOT_MOTOR_2_ID, MotorType.kBrushless);
     pivotMotorConfig = new SparkMaxConfig();
     pivotEncoder = new CANcoder(Constants.CollectorArmConstants.PIVOT_ENCODER_ID);
     topIntakeMotor = new SparkMax(Constants.CollectorArmConstants.TOP_INTAKE_MOTOR_ID, MotorType.kBrushless);
     topIntakeMotorConfig = new SparkMaxConfig();
     bottomIntakeMotor = new SparkMax(Constants.CollectorArmConstants.BOTTOM_INTAKE_MOTOR_ID, MotorType.kBrushless);
     bottomIntakeMotorConfig = new SparkMaxConfig();
+    articulateMotor = new SparkMax(Constants.CollectorArmConstants.ARTICULATE_MOTOR_ID, MotorType.kBrushless);
     coralLimit = new DigitalInput(Constants.CollectorArmConstants.CORAL_LIMIT_ID);
     algaeLimit = new DigitalInput(Constants.CollectorArmConstants.ALGAE_LIMIT_ID);
 
@@ -149,8 +152,11 @@ public class CollectorArm extends SubsystemBase {
     configurePID(pivotPIDController, Constants.CollectorArmConstants.PIVOT_kP,
       Constants.CollectorArmConstants.PIVOT_kI, Constants.CollectorArmConstants.PIVOT_kD);
     
-    configureMotor(liftMotor, liftMotorConfig);
-    configureMotor(pivotMotor, pivotMotorConfig);
+    configureMotor(liftMotor1, liftMotorConfig);
+    configureMotor(liftMotor2, liftMotorConfig);
+    configureMotor(articulateMotor, liftMotorConfig);
+    configureMotor(pivotMotor1, pivotMotorConfig);
+    configureMotor(pivotMotor2, pivotMotorConfig);
     configureMotor(topIntakeMotor, topIntakeMotorConfig);
     configureMotor(bottomIntakeMotor, bottomIntakeMotorConfig);
     
@@ -163,11 +169,15 @@ public class CollectorArm extends SubsystemBase {
     SmartDashboard.putNumber("Pivot Setpoint", pivotPIDController.getSetpoint());
     SmartDashboard.putNumber("Lift PID Error", liftPIDController.getPositionError());
     SmartDashboard.putNumber("Pivot PID Error", pivotPIDController.getPositionError());
-    SmartDashboard.putNumber("Lift Motor Output", liftMotor.get());
-    SmartDashboard.putNumber("Pivot Motor Output", pivotMotor.get());
+    SmartDashboard.putNumber("Lift Motor 1 Output", liftMotor1.get());
+    SmartDashboard.putNumber("Lift Motor 2 Output", liftMotor2.get());
+    SmartDashboard.putNumber("Pivot Motor 1 Output", pivotMotor1.get());
+    SmartDashboard.putNumber("Pivot Motor 2 Output", pivotMotor2.get());
+    SmartDashboard.putNumber("Articulate Motor Output", articulateMotor.get());
     SmartDashboard.putBoolean("Algae Limit Switch", algaeLimit.get());
     SmartDashboard.putBoolean("Coral Limit Switch", coralLimit.get());
     SmartDashboard.putString("Current Arm State", currentState.name());
+    
 
     SmartDashboard.putNumber("Lift kP", liftPIDController.getP());
     liftPIDController.setP(SmartDashboard.getNumber("Lift kP", 0.05));
@@ -206,8 +216,10 @@ public class CollectorArm extends SubsystemBase {
     DataLogManager.log("Current State: " + currentState.name());
     DataLogManager.log("Lift Height: " + liftEncoder.getPosition().getValueAsDouble());
     DataLogManager.log("Pivot Angle: " + pivotEncoder.getPosition().getValueAsDouble());
-    DataLogManager.log("Lift Output: " + liftMotor.get());
-    DataLogManager.log("Pivot Output: " + pivotMotor.get());
+    DataLogManager.log("Lift Output 1: " + liftMotor1.get());
+    DataLogManager.log("Lift Output 2: " + liftMotor2.get());
+    DataLogManager.log("Pivot Output 1: " + pivotMotor1.get());
+    DataLogManager.log("Pivot Output 2: " + pivotMotor2.get());
 }
 
   private void configureMotor(SparkMax motor, SparkMaxConfig config) {
@@ -249,7 +261,8 @@ public class CollectorArm extends SubsystemBase {
       double pidOutput = liftPIDController.calculate(getLiftHeightInches(), liftState.position);
     
       double ffOutput = liftFeedforward.calculate(liftState.velocity, 0);
-      liftMotor.set(pidOutput + ffOutput);
+      liftMotor1.set(pidOutput + ffOutput);
+      liftMotor2.set(-pidOutput + ffOutput);
 }
 
   public void setPivotPosition(double targetAngle) {
@@ -267,7 +280,8 @@ public class CollectorArm extends SubsystemBase {
       double pidOutput = pivotPIDController.calculate(getPivotAngleDegrees(), pivotState.position);
   
       double ffOutput = pivotFeedforward.calculate(pivotState.velocity, 0);
-      pivotMotor.set(pidOutput + ffOutput);
+      pivotMotor1.set(pidOutput + ffOutput);
+      pivotMotor2.set(-pidOutput + ffOutput);
 }
 
 
@@ -280,15 +294,23 @@ public class CollectorArm extends SubsystemBase {
     }
 
     public void stopArm() {
-      liftMotor.stopMotor();
-      pivotMotor.stopMotor();
+      liftMotor1.stopMotor();
+      liftMotor2.stopMotor();
+      pivotMotor1.stopMotor();
+      pivotMotor2.stopMotor();
       topIntakeMotor.stopMotor();
       bottomIntakeMotor.stopMotor();
+      articulateMotor.stopMotor();
       DataLogManager.log("Emergency Stop Triggered!");
   }
 
     private boolean algaeCollected = false;
     private boolean coralCollected = false;
+
+    public void ArticulateCollector(){
+      articulateMotor.set(Constants.CollectorArmConstants.ARTICULATE_SPEED);
+      
+    }
 
     public void CollectAlgae(){
       if (!algaeLimit.get()) { 
