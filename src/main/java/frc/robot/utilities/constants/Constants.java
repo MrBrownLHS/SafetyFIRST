@@ -71,6 +71,7 @@ public class Constants {
         public static final double OUTTAKE_SPEED = 0.25; //Outtake Speed - NEEDS TUNING, may need to be negative
         public static final double ARTICULATE_SPEED = 0.25; //Articulate Speed - NEEDS TUNING
         public static final double ARTICULATE_DEADBAND = 0.05; //Articulate Deadband - NEEDS TUNING
+        public static final double ARTICULATE_RATE_LIMIT = 0.5; //Articulate Rate Limit - NEEDS TUNING
 
         public static final int YEET_SPEED = 1;
 

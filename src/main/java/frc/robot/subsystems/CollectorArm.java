@@ -9,6 +9,10 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.ctre.phoenix6.hardware.CANcoder;
+import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.math.filter.SlewRateLimiter;
+
+import java.util.function.DoubleSupplier;
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.MagnetSensorConfigs;
@@ -33,12 +37,13 @@ public class CollectorArm extends SubsystemBase {
   private final CANcoderConfiguration liftEncoderConfig, pivotEncoderConfig;
   private final SparkMaxConfig liftMotorConfig, pivotMotorConfig, topIntakeMotorConfig, bottomIntakeMotorConfig;
   private final MagnetSensorConfigs liftMagnetSensorConfig, pivotMagnetSensorConfig;
-  private final DigitalInput coralLimit, algaeLimit;
+  //private final DigitalInput coralLimit, algaeLimit;
   private ArmFeedforward liftFeedforward, pivotFeedforward;
   private TrapezoidProfile.Constraints liftConstraints, pivotConstraints;
   private TrapezoidProfile.State liftState, pivotState;
   private TrapezoidProfile liftProfile, pivotProfile;
   private TrapezoidProfile.State liftGoal, pivotGoal;
+  private SlewRateLimiter rateLimiter;
   
 
   public enum CollectorArmState { //adjust angles as needed
@@ -82,8 +87,9 @@ public class CollectorArm extends SubsystemBase {
     bottomIntakeMotor = new SparkMax(Constants.CollectorArmConstants.BOTTOM_INTAKE_MOTOR_ID, MotorType.kBrushless);
     bottomIntakeMotorConfig = new SparkMaxConfig();
     articulateMotor = new SparkMax(Constants.CollectorArmConstants.ARTICULATE_MOTOR_ID, MotorType.kBrushless);
-    coralLimit = new DigitalInput(Constants.CollectorArmConstants.CORAL_LIMIT_ID);
-    algaeLimit = new DigitalInput(Constants.CollectorArmConstants.ALGAE_LIMIT_ID);
+    //coralLimit = new DigitalInput(Constants.CollectorArmConstants.CORAL_LIMIT_ID);
+    //algaeLimit = new DigitalInput(Constants.CollectorArmConstants.ALGAE_LIMIT_ID);
+    rateLimiter = new SlewRateLimiter(Constants.CollectorArmConstants.ARTICULATE_RATE_LIMIT);
 
     liftConstraints = new TrapezoidProfile.Constraints(
       Constants.CollectorArmConstants.LIFT_MAX_VELOCITY, 
@@ -174,8 +180,8 @@ public class CollectorArm extends SubsystemBase {
     SmartDashboard.putNumber("Pivot Motor 1 Output", pivotMotor1.get());
     SmartDashboard.putNumber("Pivot Motor 2 Output", pivotMotor2.get());
     SmartDashboard.putNumber("Articulate Motor Output", articulateMotor.get());
-    SmartDashboard.putBoolean("Algae Limit Switch", algaeLimit.get());
-    SmartDashboard.putBoolean("Coral Limit Switch", coralLimit.get());
+    //SmartDashboard.putBoolean("Algae Limit Switch", algaeLimit.get());
+    //SmartDashboard.putBoolean("Coral Limit Switch", coralLimit.get());
     SmartDashboard.putString("Current Arm State", currentState.name());
     
 
@@ -304,44 +310,31 @@ public class CollectorArm extends SubsystemBase {
       DataLogManager.log("Emergency Stop Triggered!");
   }
 
-    private boolean algaeCollected = false;
-    private boolean coralCollected = false;
-
-    public void ArticulateCollector(){
-      articulateMotor.set(Constants.CollectorArmConstants.ARTICULATE_SPEED);
-      
+   
+    public RunCommand ArticulateCollector(DoubleSupplier joystickInput) {
+      return new RunCommand(() -> {
+        double rawInput = joystickInput.getAsDouble();
+        double adjustedInput = (Math.abs(rawInput) > Constants.CollectorArmConstants.DEADBAND) ? rawInput : 0.0;
+        double limitedInput = rateLimiter.calculate(adjustedInput);
+        articulateMotor.set(limitedInput);
+      }, this);
+    }
+  
+    public RunCommand CollectReleasePiece(DoubleSupplier joystickInput) {
+      return new RunCommand(() -> {
+        double rawInput = joystickInput.getAsDouble();
+        double adjustedInput = (Math.abs(rawInput) > Constants.CollectorArmConstants.DEADBAND) ? rawInput : 0.0;
+        double limitedInput = rateLimiter.calculate(adjustedInput);
+        bottomIntakeMotor.set(limitedInput);
+        topIntakeMotor.set(limitedInput);
+      }, this);
     }
 
-    public void CollectAlgae(){
-      if (!algaeLimit.get()) { 
-        algaeCollected = false;
-        bottomIntakeMotor.set(Constants.CollectorArmConstants.INTAKE_SPEED);
-        topIntakeMotor.set(Constants.CollectorArmConstants.INTAKE_SPEED);
-    } else if (!algaeCollected) {
-        bottomIntakeMotor.stopMotor();
-        topIntakeMotor.stopMotor();
-        algaeCollected = true;
-    }
-    }
-
-    public void CollectCoral(){
-      if (!coralLimit.get()) {
-          coralCollected = false;
-          bottomIntakeMotor.set(Constants.CollectorArmConstants.INTAKE_SPEED);
-      } else if (!coralCollected) {
-          bottomIntakeMotor.stopMotor();
-          coralCollected = true;
-      }
-  }
-
-    public void ReleasePiece(){
-      topIntakeMotor.set(Constants.CollectorArmConstants.OUTTAKE_SPEED);
-      bottomIntakeMotor.set(Constants.CollectorArmConstants.OUTTAKE_SPEED);
-    }
-
-    public void YeetPiece(){
-      topIntakeMotor.set(Constants.CollectorArmConstants.YEET_SPEED);
-      bottomIntakeMotor.set(Constants.CollectorArmConstants.YEET_SPEED);
+    public RunCommand YeetPiece() {
+      return new RunCommand(() -> {
+        topIntakeMotor.set(Constants.CollectorArmConstants.YEET_SPEED);
+        bottomIntakeMotor.set(Constants.CollectorArmConstants.YEET_SPEED);
+      }, this);
     }
 
   @Override
