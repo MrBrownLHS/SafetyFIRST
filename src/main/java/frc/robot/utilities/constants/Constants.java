@@ -76,15 +76,19 @@ public class Constants {
         public static final int YEET_SPEED = 1;
 
 
-        public static final int ALGAE_LIMIT_ID = 0; 
-        public static final int CORAL_LIMIT_ID = 1;
-
+      
         public static final double VOLTAGE_COMPENSATION = 12.0;
-        public static final int CURRENT_LIMIT = 25;
-        public static final int CURRENT_THRESHOLD = 40;
-        public static final double CURRENT_THRESHOLD_TIME = 0.1;
-        public static final int MAX_CURRENT_LIMIT = 60;
-        public static final boolean ENABLE_CURRENT_LIMIT = true;
+        public static final int CURRENT_LIMIT_NEO = 25;
+        public static final int CURRENT_THRESHOLD_NEO = 40;
+        public static final double CURRENT_THRESHOLD_TIME_NEO = 0.1;
+        public static final int MAX_CURRENT_LIMIT_NEO = 60;
+        public static final boolean ENABLE_CURRENT_LIMIT_NEO = true;
+
+        public static final int CURRENT_LIMIT_550 = 20;
+        public static final int CURRENT_THRESHOLD_550 = 40;
+        public static final double CURRENT_THRESHOLD_TIME_550 = 10;
+        public static final int MAX_CURRENT_LIMIT_550 = 60;
+        public static final boolean ENABLE_CURRENT_LIMIT_550 = true;
 
 
     };

@@ -11,6 +11,8 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -18,6 +20,8 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 
 import frc.robot.utilities.constants.Constants;
 
@@ -137,6 +141,33 @@ public class SwerveSubsystem extends SubsystemBase {
             swerveModule.stop();
         }
     }
+
+
+//Autonomous Commands - duplicate and rename as needed to create new commands based on field position. Add selections to SmartDashboard.
+    public Command swerveAuto (double xMeters, double yMeters, double speed) {
+        return new SequentialCommandGroup(
+            new RunCommand(() -> drive(
+            new Translation2d(speed * Math.signum(xMeters), speed * Math.signum(yMeters)),
+            0, true, false),
+            this
+        ).until(() -> hasReachedDistance(xMeters, yMeters)),
+        
+        stopSwerveCommand() // Stops the robot after reaching distance
+    );
+        
+    }
+
+    private boolean hasReachedDistance(double xTarget, double yTarget) {
+        double currentX = getPose().getX();
+        double currentY = getPose().getY();
+        return Math.abs(currentX - xTarget) < 0.05 && Math.abs(currentY - yTarget) < 0.05;
+    }
+
+    public Command stopSwerveCommand() {
+    return new InstantCommand(() -> drive(new Translation2d(0, 0), 0, true, false), this);
+}
+
+
 
     @Override
     public void periodic() {

@@ -17,6 +17,7 @@ import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.utilities.constants.Constants;
 import frc.robot.subsystems.CollectorArm;
 import frc.robot.subsystems.CollectorArm.CollectorArmState;
+import frc.robot.subsystems.CageClimber;
 
 
 public class RobotContainer {
@@ -25,6 +26,7 @@ public class RobotContainer {
 
   private final XboxController CoPilotController;
   private final CollectorArm collectorArm;
+  private final CageClimber cageClimber;
   
   private final int translationAxis;
   private final int strafeAxis;
@@ -39,6 +41,7 @@ public class RobotContainer {
     DriverController = new Joystick(0);
     CoPilotController = new XboxController(1);
     collectorArm = new CollectorArm();
+    cageClimber = new CageClimber();
         
 
     resetHeading = new JoystickButton(DriverController, Constants.ControllerRawButtons.XboxController.Button.kY.value);
@@ -56,12 +59,21 @@ public class RobotContainer {
             () -> robotCentric.getAsBoolean()) // lambda probably not needed but why not
     );
 
-    collectorArm.setDefaultCommand(new RunCommand(
-      collectorArm,
-      () -> ArticulateCollector(() -> CoPilotController.getRawAxis(Constants.ControllerRawButtons.XboxController.Axis.kRightY.value)),
-      () -> CollectReleasePiece(() -> CoPilotController.getRawAxis(Constants.ControllerRawButtons.XboxController.Axis.kLeftX.value)),
-      () -> collectorArm.YeetPiece(() -> CoPilotController.whileTrue(Constants.ControllerRawButtons.XboxController.Axis.KRightTrigger.value))
-    ));
+    collectorArm.setDefaultCommand(collectorArm.ArticulateCollector(
+      () -> CoPilotController.getRawAxis(XboxController.Axis.kRightY.value))
+    );
+
+    collectorArm.setDefaultCommand(collectorArm.CollectAlgae(
+      () -> CoPilotController.getRawAxis(XboxController.Axis.kLeftX.value))
+    );
+
+    collectorArm.setDefaultCommand(collectorArm.CollectCoral(
+      () -> CoPilotController.getRawAxis(XboxController.Axis.kLeftY.value))
+    ); 
+
+    collectorArm.setDefaultCommand(collectorArm.YeetAlgae(
+      () -> CoPilotController.getRawAxis(XboxController.Axis.kRightTrigger.value))
+    );
       
 
     configureBindings();
@@ -88,11 +100,15 @@ public class RobotContainer {
     new JoystickButton(CoPilotController, XboxController.Button.kRightBumper.value)
     .onTrue(new InstantCommand(() -> collectorArm.moveToState(CollectorArmState.MAX), collectorArm));
 
+    new JoystickButton(CoPilotController, Constants.ControllerRawButtons.DPAD_EAST)
+    .whileTrue(new InstantCommand(() -> cageClimber.ReadyCageGrabber(), cageClimber));
+
+    new JoystickButton(CoPilotController, Constants.ControllerRawButtons.DPAD_WEST)
+    .whileTrue(new InstantCommand(() -> cageClimber.CageClimb(), cageClimber));
+
     new JoystickButton(CoPilotController, XboxController.Button.kStart.value)
     .onTrue(new InstantCommand(collectorArm::stopArm, collectorArm));
 
-    new JoystickButton(CoPilotController, XboxController.Axis.kRightStick.value)
-    .whileHeld(new RunCommand(() -> collectorArm.articulateCollector(CoPilotController.getRawAxis(XboxController.Axis.kRightY.value)), collectorArm));
 
 
 

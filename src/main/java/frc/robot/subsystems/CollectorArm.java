@@ -35,7 +35,7 @@ public class CollectorArm extends SubsystemBase {
   private final CANcoder liftEncoder, pivotEncoder;
   private final PIDController liftPIDController, pivotPIDController;
   private final CANcoderConfiguration liftEncoderConfig, pivotEncoderConfig;
-  private final SparkMaxConfig liftMotorConfig, pivotMotorConfig, topIntakeMotorConfig, bottomIntakeMotorConfig;
+  private final SparkMaxConfig liftMotorConfig, pivotMotorConfig, articulateMotorConfig, topIntakeMotorConfig, bottomIntakeMotorConfig;
   private final MagnetSensorConfigs liftMagnetSensorConfig, pivotMagnetSensorConfig;
   //private final DigitalInput coralLimit, algaeLimit;
   private ArmFeedforward liftFeedforward, pivotFeedforward;
@@ -87,6 +87,7 @@ public class CollectorArm extends SubsystemBase {
     bottomIntakeMotor = new SparkMax(Constants.CollectorArmConstants.BOTTOM_INTAKE_MOTOR_ID, MotorType.kBrushless);
     bottomIntakeMotorConfig = new SparkMaxConfig();
     articulateMotor = new SparkMax(Constants.CollectorArmConstants.ARTICULATE_MOTOR_ID, MotorType.kBrushless);
+    articulateMotorConfig = new SparkMaxConfig();
     //coralLimit = new DigitalInput(Constants.CollectorArmConstants.CORAL_LIMIT_ID);
     //algaeLimit = new DigitalInput(Constants.CollectorArmConstants.ALGAE_LIMIT_ID);
     rateLimiter = new SlewRateLimiter(Constants.CollectorArmConstants.ARTICULATE_RATE_LIMIT);
@@ -158,13 +159,13 @@ public class CollectorArm extends SubsystemBase {
     configurePID(pivotPIDController, Constants.CollectorArmConstants.PIVOT_kP,
       Constants.CollectorArmConstants.PIVOT_kI, Constants.CollectorArmConstants.PIVOT_kD);
     
-    configureMotor(liftMotor1, liftMotorConfig);
-    configureMotor(liftMotor2, liftMotorConfig);
-    configureMotor(articulateMotor, liftMotorConfig);
-    configureMotor(pivotMotor1, pivotMotorConfig);
-    configureMotor(pivotMotor2, pivotMotorConfig);
-    configureMotor(topIntakeMotor, topIntakeMotorConfig);
-    configureMotor(bottomIntakeMotor, bottomIntakeMotorConfig);
+    configureNEOMotor(liftMotor1, liftMotorConfig);
+    configureNEOMotor(liftMotor2, liftMotorConfig);
+    configureNEOMotor(articulateMotor, articulateMotorConfig);
+    configureNEOMotor(pivotMotor1, pivotMotorConfig);
+    configureNEOMotor(pivotMotor2, pivotMotorConfig);
+    configure550Motor(topIntakeMotor, topIntakeMotorConfig);
+    configure550Motor(bottomIntakeMotor, bottomIntakeMotorConfig);
     
     }
 
@@ -228,13 +229,21 @@ public class CollectorArm extends SubsystemBase {
     DataLogManager.log("Pivot Output 2: " + pivotMotor2.get());
 }
 
-  private void configureMotor(SparkMax motor, SparkMaxConfig config) {
+  private void configureNEOMotor(SparkMax motor, SparkMaxConfig config) {
     config.idleMode(IdleMode.kBrake);
-    config.smartCurrentLimit(Constants.CollectorArmConstants.CURRENT_LIMIT);
-    config.secondaryCurrentLimit(Constants.CollectorArmConstants.MAX_CURRENT_LIMIT);
+    config.smartCurrentLimit(Constants.CollectorArmConstants.CURRENT_LIMIT_NEO);
+    config.secondaryCurrentLimit(Constants.CollectorArmConstants.MAX_CURRENT_LIMIT_NEO);
     config.voltageCompensation(Constants.CollectorArmConstants.VOLTAGE_COMPENSATION);
     motor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
 
+    }
+  private void configure550Motor(SparkMax motor, SparkMaxConfig config) {
+    config.idleMode(IdleMode.kBrake);
+    config.smartCurrentLimit(Constants.CollectorArmConstants.CURRENT_LIMIT_550);
+    config.secondaryCurrentLimit(Constants.CollectorArmConstants.MAX_CURRENT_LIMIT_550);
+    config.voltageCompensation(Constants.CollectorArmConstants.VOLTAGE_COMPENSATION);
+    motor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+  
     }
 
   private void configurePID(PIDController pidController, double kP, double kI, double kD) {
@@ -320,20 +329,35 @@ public class CollectorArm extends SubsystemBase {
       }, this);
     }
   
-    public RunCommand CollectReleasePiece(DoubleSupplier joystickInput) {
+    public RunCommand CollectAlgae(DoubleSupplier joystickInput) {
       return new RunCommand(() -> {
         double rawInput = joystickInput.getAsDouble();
         double adjustedInput = (Math.abs(rawInput) > Constants.CollectorArmConstants.DEADBAND) ? rawInput : 0.0;
         double limitedInput = rateLimiter.calculate(adjustedInput);
-        bottomIntakeMotor.set(limitedInput);
+        bottomIntakeMotor.set(-limitedInput); //May need to switch which motor is inverted so they run opposite directions
         topIntakeMotor.set(limitedInput);
       }, this);
     }
 
-    public RunCommand YeetPiece() {
+    public RunCommand CollectCoral(DoubleSupplier joystickInput) {
+      return new RunCommand(() -> {
+        double rawInput = joystickInput.getAsDouble();
+        double adjustedInput = (Math.abs(rawInput) > Constants.CollectorArmConstants.DEADBAND) ? rawInput : 0.0;
+        double limitedInput = rateLimiter.calculate(adjustedInput);
+        bottomIntakeMotor.set(limitedInput); 
+      }, this);
+    }
+
+    public RunCommand YeetAlgae(DoubleSupplier joystickInput) {
       return new RunCommand(() -> {
         topIntakeMotor.set(Constants.CollectorArmConstants.YEET_SPEED);
         bottomIntakeMotor.set(Constants.CollectorArmConstants.YEET_SPEED);
+      }, this);
+    }
+
+    public RunCommand AutoCoral() {
+      return new RunCommand(() -> {
+        bottomIntakeMotor.set(-0.5);
       }, this);
     }
 
