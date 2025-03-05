@@ -6,6 +6,8 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -36,12 +38,22 @@ public class RobotContainer {
   private final Joystick DriverController;
   private final SwerveSubsystem swerveSubsystem;
 
+  private final SendableChooser<Command> autoChooser;
+
   public RobotContainer() {
     swerveSubsystem = new SwerveSubsystem();
     DriverController = new Joystick(0);
     CoPilotController = new XboxController(1);
     collectorArm = new CollectorArm();
     cageClimber = new CageClimber();
+
+     autoChooser = new SendableChooser<>();
+        autoChooser.setDefaultOption("Center Start", new AutoCenterStart(swerveSubsystem, collectorArm));
+        autoChooser.addOption("Left Start", new AutoLeftStart(swerveSubsystem, collectorArm));
+        autoChooser.addOption("Right Start", new AutoRightStart(swerveSubsystem, collectorArm));
+
+        SmartDashboard.putData("Auto Mode", autoChooser);
+        configureBindings();
         
 
     resetHeading = new JoystickButton(DriverController, Constants.ControllerRawButtons.XboxController.Button.kY.value);
@@ -118,6 +130,6 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-    return Commands.print("No autonomous command configured");
+    return autoChooser.getSelected();
   }
 }

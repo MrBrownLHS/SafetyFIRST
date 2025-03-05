@@ -157,15 +157,28 @@ public class SwerveSubsystem extends SubsystemBase {
         
     }
 
+    public Command swerveAuto(double xMeters, double yMeters, double speed, double rotationSpeed) {
+        return new SequentialCommandGroup(
+            new RunCommand(() -> drive(
+                new Translation2d(speed * Math.signum(xMeters), speed * Math.signum(yMeters)),
+                rotationSpeed, // Allows rotation while moving
+                true, false),
+                this
+            ).until(() -> hasReachedDistance(xMeters, yMeters)),
+            
+            stopSwerveCommand() // Stops the robot after reaching distance
+        );
+    }
+    
     private boolean hasReachedDistance(double xTarget, double yTarget) {
         double currentX = getPose().getX();
         double currentY = getPose().getY();
         return Math.abs(currentX - xTarget) < 0.05 && Math.abs(currentY - yTarget) < 0.05;
     }
-
+    
     public Command stopSwerveCommand() {
-    return new InstantCommand(() -> drive(new Translation2d(0, 0), 0, true, false), this);
-}
+        return new InstantCommand(() -> drive(new Translation2d(0, 0), 0, true, false), this);
+    }
 
 
 

@@ -16,11 +16,12 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 // information, see:
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
 public class AutoLeftStart extends SequentialCommandGroup {
+
   /** Creates a new AutoRoutine. */
   public AutoLeftStart(SwerveSubsystem swerve, CollectorArm collectorArm) {
      addCommands(
-      swerve.swerveAuto(-2.0, 0.0, 0.5),  // Move back 2 meters - Tune as needed
-      swerve.swerveAuto(0.0, 1.5, 0.5), // Move right 1.5 meters - Tune as needed
+      swerve.swerveAuto(2.0, 0.0, 0.5, 0.0),  // Move forward 2m
+      swerve.swerveAuto(0.0, 1.5, 0.5, 0.2),   // Move right 1.5m and rotate slowly
       new InstantCommand(() -> collectorArm.moveToState(CollectorArmState.L3), collectorArm),// Move the collector arm to the L3 position
       new RunCommand(() -> collectorArm.AutoCoral(), collectorArm), //Release the coral
       new InstantCommand(() -> collectorArm.stopArm(), collectorArm));  
