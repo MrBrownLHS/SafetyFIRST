@@ -20,6 +20,9 @@ import frc.robot.utilities.constants.Constants;
 import frc.robot.subsystems.CollectorArm;
 import frc.robot.subsystems.CollectorArm.CollectorArmState;
 import frc.robot.subsystems.CageClimber;
+import frc.robot.commands.AutoCenterStart;
+import frc.robot.commands.AutoLeftStart;
+import frc.robot.commands.AutoRightStart;
 
 
 public class RobotContainer {

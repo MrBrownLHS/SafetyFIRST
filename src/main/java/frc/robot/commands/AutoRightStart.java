@@ -4,16 +4,25 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
+import frc.robot.subsystems.CollectorArm;
+import frc.robot.subsystems.CollectorArm.CollectorArmState;
+import frc.robot.subsystems.SwerveSubsystem;
 
-// NOTE:  Consider using this command inline, rather than writing a subclass.  For more
-// information, see:
-// https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
 public class AutoRightStart extends SequentialCommandGroup {
-  /** Creates a new AutoRightStart. */
-  public AutoRightStart() {
-    // Add your commands in the addCommands() call, e.g.
-    // addCommands(new FooCommand(), new BarCommand());
-    addCommands();
+  
+  public AutoRightStart(SwerveSubsystem swerve, CollectorArm collectorArm) {
+    addCommands(
+      swerve.swerveAuto(2.0, 0.0, 0.5, 0.0),  // Move forward 2m
+      swerve.swerveAuto(0.0, 1.5, 0.5, 0.2),   // Move right 1.5m and rotate slowly
+      new WaitCommand(1),
+      new InstantCommand(() -> collectorArm.moveToState(CollectorArmState.L3), collectorArm),// Move the collector arm to the L3 position
+      new RunCommand(() -> collectorArm.AutoCoral(), collectorArm)
+        .withTimeout(2.0)
+        .andThen(new InstantCommand(() -> collectorArm.stopArm(), collectorArm)),
+      swerve.stopSwerveCommand());
   }
 }

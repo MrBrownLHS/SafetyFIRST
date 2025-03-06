@@ -20,6 +20,7 @@ import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 
+import frc.robot.subsystems.CollectorArm.CollectorArmState;
 import frc.robot.utilities.constants.Constants;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
@@ -40,9 +41,8 @@ public class CollectorArm extends SubsystemBase {
   //private final DigitalInput coralLimit, algaeLimit;
   private ArmFeedforward liftFeedforward, pivotFeedforward;
   private TrapezoidProfile.Constraints liftConstraints, pivotConstraints;
-  private TrapezoidProfile.State liftState, pivotState;
   private TrapezoidProfile liftProfile, pivotProfile;
-  private TrapezoidProfile.State liftGoal, pivotGoal;
+  private TrapezoidProfile.State liftGoal, pivotGoal, liftState, pivotState;
   private SlewRateLimiter rateLimiter;
   
 
@@ -55,19 +55,17 @@ public class CollectorArm extends SubsystemBase {
     L3(40, 15),
     MAX(50, 30);
 
-    public final double liftHeightInches;
-    public final double pivotAngleDegrees;
-
+    public final double liftHeightInches, pivotAngleDegrees;
     CollectorArmState(double liftHeight, double pivotAngle) {
         this.liftHeightInches = liftHeight;
         this.pivotAngleDegrees = pivotAngle;
-    }
-}
+      }
+    
+  }
+
+  private CollectorArmState currentState = CollectorArmState.START; // Default state
 
 
-
-
- 
   public CollectorArm() { 
     DataLogManager.start();
     DriverStation.startDataLog(DataLogManager.getLog());
@@ -76,28 +74,30 @@ public class CollectorArm extends SubsystemBase {
     
     liftMotor1 = new SparkMax(Constants.CollectorArmConstants.LIFT_MOTOR_1_ID, MotorType.kBrushless);
     liftMotor2 = new SparkMax(Constants.CollectorArmConstants.LIFT_MOTOR_2_ID, MotorType.kBrushless);
-    liftMotorConfig = new SparkMaxConfig();
-    liftEncoder = new CANcoder(Constants.CollectorArmConstants.LIFT_ENCODER_ID);
     pivotMotor1 = new SparkMax(Constants.CollectorArmConstants.PIVOT_MOTOR_1_ID, MotorType.kBrushless);
     pivotMotor2 = new SparkMax(Constants.CollectorArmConstants.PIVOT_MOTOR_2_ID, MotorType.kBrushless);
-    pivotMotorConfig = new SparkMaxConfig();
+    
+    liftEncoder = new CANcoder(Constants.CollectorArmConstants.LIFT_ENCODER_ID);
     pivotEncoder = new CANcoder(Constants.CollectorArmConstants.PIVOT_ENCODER_ID);
+
+    liftMotor2.set(liftMotor1.get());
+    pivotMotor2.set(pivotMotor1.get());
+
     topIntakeMotor = new SparkMax(Constants.CollectorArmConstants.TOP_INTAKE_MOTOR_ID, MotorType.kBrushless);
-    topIntakeMotorConfig = new SparkMaxConfig();
     bottomIntakeMotor = new SparkMax(Constants.CollectorArmConstants.BOTTOM_INTAKE_MOTOR_ID, MotorType.kBrushless);
-    bottomIntakeMotorConfig = new SparkMaxConfig();
     articulateMotor = new SparkMax(Constants.CollectorArmConstants.ARTICULATE_MOTOR_ID, MotorType.kBrushless);
-    articulateMotorConfig = new SparkMaxConfig();
-    //coralLimit = new DigitalInput(Constants.CollectorArmConstants.CORAL_LIMIT_ID);
-    //algaeLimit = new DigitalInput(Constants.CollectorArmConstants.ALGAE_LIMIT_ID);
+    
     rateLimiter = new SlewRateLimiter(Constants.CollectorArmConstants.ARTICULATE_RATE_LIMIT);
 
     liftConstraints = new TrapezoidProfile.Constraints(
       Constants.CollectorArmConstants.LIFT_MAX_VELOCITY, 
-      Constants.CollectorArmConstants.LIFT_MAX_ACCELERATION);
+      Constants.CollectorArmConstants.LIFT_MAX_ACCELERATION
+    );
+
     pivotConstraints = new TrapezoidProfile.Constraints(
       Constants.CollectorArmConstants.PIVOT_MAX_VELOCITY, 
-      Constants.CollectorArmConstants.PIVOT_MAX_ACCELERATION);
+      Constants.CollectorArmConstants.PIVOT_MAX_ACCELERATION
+    );
 
     liftState = new TrapezoidProfile.State(0, 0);
     pivotState = new TrapezoidProfile.State(0, 0);
@@ -105,39 +105,27 @@ public class CollectorArm extends SubsystemBase {
     liftGoal = new TrapezoidProfile.State(0, 0);
     pivotGoal = new TrapezoidProfile.State(0, 0);
 
-    TrapezoidProfile.State liftGoal = new TrapezoidProfile.State(0, 0);
-      liftState = liftProfile.calculate(0.02, liftState, liftGoal);
-    TrapezoidProfile.State pivotGoal = new TrapezoidProfile.State(0, 0);
-      pivotState = pivotProfile.calculate(0.02, pivotState, pivotGoal);
+    liftFeedforward = new ArmFeedforward(Constants.CollectorArmConstants.LIFT_kS, 
+                                        Constants.CollectorArmConstants.LIFT_kG, 
+                                        Constants.CollectorArmConstants.LIFT_kV, 
+                                        Constants.CollectorArmConstants.LIFT_kA);
 
-    liftProfile = new TrapezoidProfile(liftConstraints);
-    pivotProfile = new TrapezoidProfile(pivotConstraints);
-            
-    liftFeedforward = new ArmFeedforward(
-      Constants.CollectorArmConstants.LIFT_kS, 
-      Constants.CollectorArmConstants.LIFT_kG, 
-      Constants.CollectorArmConstants.LIFT_kV, 
-      Constants.CollectorArmConstants.LIFT_kA);
-    pivotFeedforward = new ArmFeedforward(
-      Constants.CollectorArmConstants.PIVOT_kS, 
-      Constants.CollectorArmConstants.PIVOT_kG, 
-      Constants.CollectorArmConstants.PIVOT_kV, 
-      Constants.CollectorArmConstants.PIVOT_kA);
-    
-    liftPIDController = new PIDController(
-      Constants.CollectorArmConstants.LIFT_kP, 
-      Constants.CollectorArmConstants.LIFT_kI, 
-      Constants.CollectorArmConstants.LIFT_kD);
+    pivotFeedforward = new ArmFeedforward(Constants.CollectorArmConstants.PIVOT_kS, 
+                                        Constants.CollectorArmConstants.PIVOT_kG, 
+                                        Constants.CollectorArmConstants.PIVOT_kV, 
+                                        Constants.CollectorArmConstants.PIVOT_kA);
+
+    liftPIDController = new PIDController(Constants.CollectorArmConstants.LIFT_kP, 
+                                        Constants.CollectorArmConstants.LIFT_kI, 
+                                        Constants.CollectorArmConstants.LIFT_kD);
     liftPIDController.setTolerance(Constants.CollectorArmConstants.LIFT_TOLERANCE);
 
-    pivotPIDController = new PIDController(
-      Constants.CollectorArmConstants.PIVOT_kP, 
-      Constants.CollectorArmConstants.PIVOT_kI,
-      Constants.CollectorArmConstants.PIVOT_kD);
+    pivotPIDController = new PIDController(Constants.CollectorArmConstants.PIVOT_kP, 
+                                          Constants.CollectorArmConstants.PIVOT_kI,
+                                          Constants.CollectorArmConstants.PIVOT_kD);
     pivotPIDController.setTolerance(Constants.CollectorArmConstants.PIVOT_TOLERANCE);
 
-        
-        // Set encoder conversion factor to return values in degrees
+
     liftEncoderConfig = new CANcoderConfiguration();
     liftMagnetSensorConfig = new MagnetSensorConfigs();
     liftMagnetSensorConfig.MagnetOffset = Constants.CollectorArmConstants.ENCODER_TO_INCHES;
@@ -151,6 +139,18 @@ public class CollectorArm extends SubsystemBase {
     pivotMagnetSensorConfig.SensorDirection = SensorDirectionValue.Clockwise_Positive;
     pivotEncoderConfig.MagnetSensor = pivotMagnetSensorConfig;
     pivotEncoder.getConfigurator().apply(pivotEncoderConfig);
+
+    TrapezoidProfile.State liftGoal = new TrapezoidProfile.State(0, 0);
+      liftState = liftProfile.calculate(0.02, liftState, liftGoal);
+    TrapezoidProfile.State pivotGoal = new TrapezoidProfile.State(0, 0);
+      pivotState = pivotProfile.calculate(0.02, pivotState, pivotGoal);
+
+    liftProfile = new TrapezoidProfile(liftConstraints);
+    pivotProfile = new TrapezoidProfile(pivotConstraints);
+            
+           
+        // Set encoder conversion factor to return values in degrees
+   
 
             // Configure PID (Tune these values!)
     configurePID(liftPIDController, Constants.CollectorArmConstants.LIFT_kP,
@@ -167,6 +167,29 @@ public class CollectorArm extends SubsystemBase {
     configure550Motor(topIntakeMotor, topIntakeMotorConfig);
     configure550Motor(bottomIntakeMotor, bottomIntakeMotorConfig);
     
+    }
+
+    private void configureNEOMotor(SparkMax motor, SparkMaxConfig config) {
+      config.idleMode(IdleMode.kBrake);
+      config.smartCurrentLimit(Constants.CollectorArmConstants.CURRENT_LIMIT_NEO);
+      config.secondaryCurrentLimit(Constants.CollectorArmConstants.MAX_CURRENT_LIMIT_NEO);
+      config.voltageCompensation(Constants.CollectorArmConstants.VOLTAGE_COMPENSATION);
+      motor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+  
+      }
+    private void configure550Motor(SparkMax motor, SparkMaxConfig config) {
+      config.idleMode(IdleMode.kBrake);
+      config.smartCurrentLimit(Constants.CollectorArmConstants.CURRENT_LIMIT_550);
+      config.secondaryCurrentLimit(Constants.CollectorArmConstants.MAX_CURRENT_LIMIT_550);
+      config.voltageCompensation(Constants.CollectorArmConstants.VOLTAGE_COMPENSATION);
+      motor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+    
+      }
+  
+    private void configurePID(PIDController pidController, double kP, double kI, double kD) {
+      pidController.setP(kP);
+      pidController.setI(kI);
+      pidController.setD(kD);
     }
 
   public void updateDashboard() {
@@ -229,28 +252,7 @@ public class CollectorArm extends SubsystemBase {
     DataLogManager.log("Pivot Output 2: " + pivotMotor2.get());
 }
 
-  private void configureNEOMotor(SparkMax motor, SparkMaxConfig config) {
-    config.idleMode(IdleMode.kBrake);
-    config.smartCurrentLimit(Constants.CollectorArmConstants.CURRENT_LIMIT_NEO);
-    config.secondaryCurrentLimit(Constants.CollectorArmConstants.MAX_CURRENT_LIMIT_NEO);
-    config.voltageCompensation(Constants.CollectorArmConstants.VOLTAGE_COMPENSATION);
-    motor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
-
-    }
-  private void configure550Motor(SparkMax motor, SparkMaxConfig config) {
-    config.idleMode(IdleMode.kBrake);
-    config.smartCurrentLimit(Constants.CollectorArmConstants.CURRENT_LIMIT_550);
-    config.secondaryCurrentLimit(Constants.CollectorArmConstants.MAX_CURRENT_LIMIT_550);
-    config.voltageCompensation(Constants.CollectorArmConstants.VOLTAGE_COMPENSATION);
-    motor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
-  
-    }
-
-  private void configurePID(PIDController pidController, double kP, double kI, double kD) {
-    pidController.setP(kP);
-    pidController.setI(kI);
-    pidController.setD(kD);
-  }
+ 
 
   public double getLiftHeightInches() {
     return liftEncoder.getAbsolutePosition().getValueAsDouble() * Constants.CollectorArmConstants.ENCODER_TO_INCHES;
