@@ -63,9 +63,6 @@ public class CollectorArm extends SubsystemBase {
     
   }
 
-  private CollectorArmState currentState = CollectorArmState.START; // Default state
-
-
   public CollectorArm() { 
     DataLogManager.start();
     DriverStation.startDataLog(DataLogManager.getLog());
@@ -204,8 +201,6 @@ public class CollectorArm extends SubsystemBase {
     SmartDashboard.putNumber("Pivot Motor 1 Output", pivotMotor1.get());
     SmartDashboard.putNumber("Pivot Motor 2 Output", pivotMotor2.get());
     SmartDashboard.putNumber("Articulate Motor Output", articulateMotor.get());
-    //SmartDashboard.putBoolean("Algae Limit Switch", algaeLimit.get());
-    //SmartDashboard.putBoolean("Coral Limit Switch", coralLimit.get());
     SmartDashboard.putString("Current Arm State", currentState.name());
     
 
