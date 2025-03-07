@@ -35,12 +35,6 @@ import edu.wpi.first.wpilibj.DriverStation;
 public class CollectorArm extends SubsystemBase {
   private final ArmConfiguration armConfig;
   private boolean tuningMode = false;
-  private ArmFeedforward liftFeedforward, pivotFeedforward;
-  private TrapezoidProfile.Constraints liftConstraints, pivotConstraints;
-  private TrapezoidProfile liftProfile, pivotProfile;
-  private TrapezoidProfile.State liftGoal, pivotGoal, liftState, pivotState;
-  private SlewRateLimiter rateLimiter;
-  private final PIDController liftPIDController, pivotPIDController;
 
   public enum CollectorArmState { //adjust angles as needed
     START(0, 0),
@@ -60,17 +54,19 @@ public class CollectorArm extends SubsystemBase {
   }
 
   public CollectorArm() { 
+    armConfig = new ArmConfiguration();
     DataLogManager.start();
     DriverStation.startDataLog(DataLogManager.getLog());
     DataLogManager.log("CollectorArm Subsystem Initialized");
-    armConfig = new ArmConfiguration();
     SmartDashboard.putBoolean("Tuning Mode", false);
-       
-    rateLimiter = new SlewRateLimiter(Constants.CollectorArmConstants.ARTICULATE_RATE_LIMIT);
+  }
 
-  
+  public void moveToState(CollectorArmState state) {
+    setLiftPosition(state.liftHeightInches);
+    setPivotPosition(state.pivotAngleDegrees);
 }
-
+       
+   
   private CollectorArmState currentState = CollectorArmState.START; // Default state
 
   public void setLiftPosition(double targetInches) {
@@ -87,8 +83,8 @@ public class CollectorArm extends SubsystemBase {
       double pidOutput = liftPIDController.calculate(getLiftHeightInches(), liftState.position);
     
       double ffOutput = liftFeedforward.calculate(liftState.velocity, 0);
-      armConfig.getliftMotor1.set(pidOutput + ffOutput);
-      armConfig.getliftMotor2.set(-pidOutput + ffOutput);
+      armConfig.liftMotor1.set(pidOutput + ffOutput);
+      armConfig.liftMotor2.set(-pidOutput + ffOutput);
 }
 
   public void setPivotPosition(double targetAngle) {
@@ -111,10 +107,7 @@ public class CollectorArm extends SubsystemBase {
 }
 
 
-    public void moveToState(CollectorArmState state) {
-      setLiftPosition(state.liftHeightInches);
-      setPivotPosition(state.pivotAngleDegrees);
-}
+ 
     public boolean isAtTarget(CollectorArmState state) {
       return liftPIDController.atSetpoint() && pivotPIDController.atSetpoint();
     }
