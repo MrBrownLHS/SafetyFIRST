@@ -88,6 +88,8 @@ public class Constants {
         public static final double CURRENT_THRESHOLD_TIME_550 = 10;
         public static final int MAX_CURRENT_LIMIT_550 = 60;
         public static final boolean ENABLE_CURRENT_LIMIT_550 = true;
+        public static final boolean ACTIVE_NEUTRAL_MODE = true; 
+        public static final boolean DISABLE_NEUTRAL_MODE = false;
 
 
     };

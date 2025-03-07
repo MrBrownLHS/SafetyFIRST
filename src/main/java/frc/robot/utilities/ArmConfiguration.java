@@ -84,9 +84,10 @@ public class ArmConfiguration {
         configurePIDControllers(pivotPIDController, Constants.CollectorArmConstants.PIVOT_kP, Constants.CollectorArmConstants.PIVOT_kI, Constants.CollectorArmConstants.PIVOT_kD);
         
     }
-   
+   //Need to invert lift and pivot motors: https://www.reddit.com/r/FRC/comments/1id6sz2/how_to_invert_a_spark_max/
     private void configureMotors() {
-        SparkMax[] neoMotors = {liftMotor1, liftMotor2, pivotMotor1, pivotMotor2, articulateMotor};
+        SparkMax[] neoMotors = {liftMotor1, pivotMotor1, articulateMotor};
+        SparkMax[] reversedMotors = {liftMotor2, pivotMotor2};
         SparkMax[] neo550Motors = {topIntakeMotor, bottomIntakeMotor};
 
         for (SparkMax motor : neoMotors) {
@@ -96,13 +97,18 @@ public class ArmConfiguration {
         for (SparkMax motor : neo550Motors) {
             configure550Motor(motor, motorConfig, Constants.CollectorArmConstants.CURRENT_LIMIT_550);
         }
+
+        for (SparkMax motor : reversedMotors) {
+            configureReverseMotor(motor, motorConfig, Constants.CollectorArmConstants.CURRENT_LIMIT_NEO);
+        }
         
         liftMotor2.set(liftMotor1.get());
         pivotMotor2.set(pivotMotor1.get());
+
     }
 
     private void configureNEOMotor(SparkMax neoMotors, SparkMaxConfig config, int currentLimit) {
-        config.idleMode(IdleMode.kBrake);
+        config.idleMode(Constants.CollectorArmConstants.DISABLE_NEUTRAL_MODE ? IdleMode.kCoast : IdleMode.kBrake);
         config.smartCurrentLimit(currentLimit);
         config.secondaryCurrentLimit(Constants.CollectorArmConstants.MAX_CURRENT_LIMIT_NEO);
         config.voltageCompensation(Constants.CollectorArmConstants.VOLTAGE_COMPENSATION);
@@ -110,11 +116,20 @@ public class ArmConfiguration {
     }
 
     private void configure550Motor(SparkMax neo550motor, SparkMaxConfig config, int currentLimit) {
-        config.idleMode(IdleMode.kBrake);
+        config.idleMode(Constants.CollectorArmConstants.DISABLE_NEUTRAL_MODE ? IdleMode.kCoast : IdleMode.kBrake);
         config.smartCurrentLimit(currentLimit);
         config.secondaryCurrentLimit(Constants.CollectorArmConstants.MAX_CURRENT_LIMIT_550);
         config.voltageCompensation(Constants.CollectorArmConstants.VOLTAGE_COMPENSATION);
         neo550motor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+    }
+
+    private void configureReverseMotor(SparkMax neoMotors, SparkMaxConfig config, int currentLimit) {
+        config.idleMode(Constants.CollectorArmConstants.DISABLE_NEUTRAL_MODE ? IdleMode.kCoast : IdleMode.kBrake);
+        config.smartCurrentLimit(currentLimit);
+        config.secondaryCurrentLimit(Constants.CollectorArmConstants.MAX_CURRENT_LIMIT_NEO);
+        config.voltageCompensation(Constants.CollectorArmConstants.VOLTAGE_COMPENSATION);
+        config.inverted(true);
+        neoMotors.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
     }
     
     private void configureEncoders() {

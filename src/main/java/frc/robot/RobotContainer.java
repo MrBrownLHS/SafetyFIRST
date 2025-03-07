@@ -9,7 +9,6 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -43,8 +42,6 @@ public class RobotContainer {
 
   private final SendableChooser<Command> autoChooser;
 
-  //Suggested Fixes - https://chatgpt.com/share/67c8b3c0-1dd4-800e-a02a-5414957768bd 
-
   public RobotContainer() {
     swerveSubsystem = new SwerveSubsystem();
     DriverController = new Joystick(0);
@@ -76,20 +73,19 @@ public class RobotContainer {
             () -> robotCentric.getAsBoolean()) // lambda probably not needed but why not
     );
 
-    collectorArm.setDefaultCommand(collectorArm.ArticulateCollector(
-      () -> CoPilotController.getRawAxis(XboxController.Axis.kRightY.value))
-    );
-
-    collectorArm.setDefaultCommand(collectorArm.CollectAlgae(
-      () -> CoPilotController.getRawAxis(XboxController.Axis.kLeftX.value))
-    );
-
-    collectorArm.setDefaultCommand(collectorArm.CollectCoral(
-      () -> CoPilotController.getRawAxis(XboxController.Axis.kLeftY.value))
-    ); 
-
-    collectorArm.setDefaultCommand(collectorArm.YeetAlgae(
-      () -> CoPilotController.getRawAxis(XboxController.Axis.kRightTrigger.value))
+    collectorArm.setDefaultCommand(
+      new RunCommand(() -> {
+        double articulationInput = CoPilotController.getRawAxis(XboxController.Axis.kRightY.value);
+        double algaeInput = CoPilotController.getRawAxis(XboxController.Axis.kLeftX.value);
+        double coralInput = CoPilotController.getRawAxis(XboxController.Axis.kLeftY.value);
+        double yeetInput = CoPilotController.getRawAxis(XboxController.Axis.kRightTrigger.value);
+    
+        collectorArm.ArticulateCollector(() -> articulationInput);
+        collectorArm.CollectAlgae(() -> algaeInput);
+        collectorArm.CollectCoral(() -> coralInput);
+        collectorArm.YeetAlgae(() -> yeetInput);
+    
+      }, collectorArm)
     );
   configureBindings(); 
   }
@@ -120,6 +116,9 @@ public class RobotContainer {
 
     new JoystickButton(CoPilotController, Constants.ControllerRawButtons.DPAD_WEST)
     .whileTrue(new InstantCommand(() -> cageClimber.CageClimb(), cageClimber));
+
+    new JoystickButton(CoPilotController, Constants.ControllerRawButtons.DPAD_SOUTH)
+    .onTrue(new InstantCommand(() -> cageClimber.CageClimbStop(), cageClimber));
 
     new JoystickButton(CoPilotController, XboxController.Button.kStart.value)
     .onTrue(new InstantCommand(collectorArm::stopArm, collectorArm));
