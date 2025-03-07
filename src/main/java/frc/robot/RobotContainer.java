@@ -43,6 +43,8 @@ public class RobotContainer {
 
   private final SendableChooser<Command> autoChooser;
 
+  //Suggested Fixes - https://chatgpt.com/share/67c8b3c0-1dd4-800e-a02a-5414957768bd 
+
   public RobotContainer() {
     swerveSubsystem = new SwerveSubsystem();
     DriverController = new Joystick(0);
@@ -56,7 +58,7 @@ public class RobotContainer {
         autoChooser.addOption("Right Start", new AutoRightStart(swerveSubsystem, collectorArm));
 
         SmartDashboard.putData("Auto Mode", autoChooser);
-        configureBindings();
+        
         
 
     resetHeading = new JoystickButton(DriverController, Constants.ControllerRawButtons.XboxController.Button.kY.value);
@@ -89,9 +91,7 @@ public class RobotContainer {
     collectorArm.setDefaultCommand(collectorArm.YeetAlgae(
       () -> CoPilotController.getRawAxis(XboxController.Axis.kRightTrigger.value))
     );
-      
-
-    configureBindings();
+  configureBindings(); 
   }
 
   private void configureBindings() {

@@ -33,8 +33,7 @@ public class Constants {
         public static final double PIVOT_kI = 0.00;
         public static final double PIVOT_kD = 0.01;
        
-        // Feedforward/Trapazoid
-
+        // Feedforward/Trapazoidal Constants - NEEDS TUNING
         public static final double LIFT_kS = 0.0;
         public static final double LIFT_kG = 0.0;
         public static final double LIFT_kV = 0.0;
@@ -51,14 +50,15 @@ public class Constants {
         public static final double PIVOT_MAX_ACCELERATION = 1.0; // Max acceleration of the pivot - NEEDS TUNING
         public static final double PIVOT_MIN_ANGLE = 30; // Min angle of the pivot - NEEDS TUNING
         public static final double PIVOT_MAX_ANGLE = 180; // Max angle of the pivot - NEEDS TUNING
+        public static final double LIFT_MIN_HEIGHT = 0; // Min height of the lift - NEEDS TUNING
+        public static final double LIFT_MAX_HEIGHT = 50; // Max height of the lift - NEEDS TUNING
 
 
 
         // Lift Encoder Postions - NEEDS TUNING
-        public static final double LIFT_TOLERANCE = 5.0; //Tolerance for PID - NEEDS TUNING
-        public static final double PIVOT_TOLERANCE = 5.0; //Tolerance for PID - NEEDS TUNING
-        
- 
+        public static final double LIFT_TOLERANCE = 2.0; //Tolerance for PID - NEEDS TUNING
+        public static final double PIVOT_TOLERANCE = 2.0; //Tolerance for PID - NEEDS TUNING
+         
         public static final double ENCODER_TO_DEGREES = 360.0 / 4096.0; 
         public static final double COG_DIAMETER_INCHES = 2.0; // Diameter of the center of gravity pulley in inches - NEEDS TUNING
         public static final double LIFT_GEAR_RATIO = 1.0; // Gear ratio of the lift mechanism - NEEDS TUNING
@@ -74,9 +74,8 @@ public class Constants {
         public static final double ARTICULATE_RATE_LIMIT = 0.5; //Articulate Rate Limit - NEEDS TUNING
 
         public static final int YEET_SPEED = 1;
-
-
-      
+        
+        //Motor Configuration
         public static final double VOLTAGE_COMPENSATION = 12.0;
         public static final int CURRENT_LIMIT_NEO = 25;
         public static final int CURRENT_THRESHOLD_NEO = 40;

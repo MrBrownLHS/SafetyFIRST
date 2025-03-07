@@ -144,19 +144,7 @@ public class SwerveSubsystem extends SubsystemBase {
 
 
 //Autonomous Commands - duplicate and rename as needed to create new commands based on field position. Add selections to SmartDashboard.
-    public Command swerveAuto (double xMeters, double yMeters, double speed) {
-        return new SequentialCommandGroup(
-            new RunCommand(() -> drive(
-            new Translation2d(speed * Math.signum(xMeters), speed * Math.signum(yMeters)),
-            0, true, false),
-            this
-        ).until(() -> hasReachedDistance(xMeters, yMeters)),
-        
-        stopSwerveCommand() // Stops the robot after reaching distance
-    );
-        
-    }
-
+   
     public Command swerveAuto(double xMeters, double yMeters, double speed, double rotationSpeed) {
         return new SequentialCommandGroup(
             new RunCommand(() -> drive(
