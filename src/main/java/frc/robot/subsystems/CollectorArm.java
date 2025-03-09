@@ -24,7 +24,7 @@ public class CollectorArm extends SubsystemBase {
 
   public enum CollectorArmState { //adjust angles as needed
     START(0, 0),
-    FLOOR(5, -45),
+    PROCESSOR(5, -45),
     COLLECT(10, -30),
     L1(20, -15),
     L2(30, 0),
