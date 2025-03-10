@@ -24,12 +24,11 @@ public class CollectorArm extends SubsystemBase {
 
   public enum CollectorArmState { //adjust angles as needed
     START(0, 0),
-    PROCESSOR(5, -45),
     COLLECT(10, -30),
     L1(20, -15),
     L2(30, 0),
-    L3(40, 15),
-    MAX(50, 30);
+    L3(40, 15);
+    
 
   public final double liftHeightInches, pivotAngleDegrees;
     CollectorArmState(double liftHeight, double pivotAngle) {
@@ -83,10 +82,9 @@ public class CollectorArm extends SubsystemBase {
 
     if (!isAtTarget(state))
 
-    armConfig.liftMotor1.set(smoothedLiftOutput);
-    armConfig.liftMotor2.set(smoothedLiftOutput);
-    armConfig.pivotMotor1.set(smoothedPivotOutput);
-    armConfig.pivotMotor2.set(smoothedPivotOutput);
+    armConfig.m_Lift.set(smoothedLiftOutput);
+    armConfig.m_Pivot.set(smoothedPivotOutput);
+    
   } 
    
   public double getLiftHeightInches() {
@@ -105,8 +103,8 @@ public class CollectorArm extends SubsystemBase {
       double pidOutput = armConfig.liftPIDController.calculate(getLiftHeightInches(), liftState.position);
       double ffOutput = armConfig.liftFeedforward.calculate(liftState.velocity, 0);
 
-      armConfig.liftMotor1.set(pidOutput + ffOutput);
-      armConfig.liftMotor2.set(pidOutput + ffOutput);
+      armConfig.m_Lift.set(pidOutput + ffOutput);
+      //armConfig.liftMotor2.set(pidOutput + ffOutput);
     }
   }
 
@@ -118,17 +116,16 @@ public class CollectorArm extends SubsystemBase {
       double pidOutput = armConfig.pivotPIDController.calculate(getLiftHeightInches(), pivotState.position);
       double ffOutput = armConfig.pivotFeedforward.calculate(pivotState.velocity, 0);
 
-      armConfig.pivotMotor1.set(pidOutput + ffOutput);
-      armConfig.pivotMotor2.set(pidOutput + ffOutput);
+      armConfig.m_Pivot.set(pidOutput + ffOutput);
+      //armConfig.pivotMotor2.set(pidOutput + ffOutput);
     }
   }
 
   public void stopArm() {
     SparkMax[] motors = {
-      armConfig.liftMotor1, armConfig.liftMotor2,
-      armConfig.pivotMotor1, armConfig.pivotMotor2,
-      armConfig.topIntakeMotor, armConfig.bottomIntakeMotor,
-      armConfig.articulateMotor
+      armConfig.m_Lift, armConfig.m_Pivot,
+      armConfig.m_CoralIntake, armConfig.m_CoralArticulate,
+      
     };
 
     for (SparkMax motor : motors) {
@@ -143,48 +140,31 @@ public class CollectorArm extends SubsystemBase {
     }
 
    
-    public RunCommand ArticulateCollector(DoubleSupplier joystickInput) {
+    public RunCommand ArticulateCoralCollector(DoubleSupplier joystickInput) {
       return new RunCommand(() -> {
         double rawInput = joystickInput.getAsDouble();
         double adjustedInput = (Math.abs(rawInput) > Constants.CollectorArmConstants.DEADBAND) ? rawInput : 0.0;
         double limitedInput = armConfig.rateLimiter.calculate(adjustedInput);
-        armConfig.articulateMotor.set(limitedInput);
+        armConfig.m_CoralArticulate.set(limitedInput);
       }, this);
     }
   
-    public RunCommand CollectAlgae(DoubleSupplier joystickInput) {
-      return new RunCommand(() -> {
-        double rawInput = joystickInput.getAsDouble();
-        double adjustedInput = (Math.abs(rawInput) > Constants.CollectorArmConstants.DEADBAND) ? rawInput : 0.0;
-        double limitedInput = armConfig.rateLimiter.calculate(adjustedInput);
-        armConfig.bottomIntakeMotor.set(-limitedInput); //May need to switch which motor is inverted so they run opposite directions
-        armConfig.topIntakeMotor.set(limitedInput);
-      }, this);
-    }
+    
 
     public RunCommand CollectCoral(DoubleSupplier joystickInput) {
       return new RunCommand(() -> {
         double rawInput = joystickInput.getAsDouble();
-        double adjustedInput = (Math.abs(rawInput) > Constants.CollectorArmConstants.DEADBAND) ? rawInput : 0.0;
-        double limitedInput = armConfig.rateLimiter.calculate(adjustedInput);
-        armConfig.bottomIntakeMotor.set(limitedInput); 
+        armConfig.m_CoralIntake.set(rawInput);
       }, this);
     }
 
-    public RunCommand YeetAlgae(DoubleSupplier joystickInput) {
+    public RunCommand AutoCollectCoral() {
       return new RunCommand(() -> {
-        armConfig.topIntakeMotor.set(Constants.CollectorArmConstants.YEET_SPEED);
-        armConfig.bottomIntakeMotor.set(Constants.CollectorArmConstants.YEET_SPEED);
+        armConfig.m_CoralIntake.set(Constants.CollectorArmConstants.AUTO_CORAL_RELEASE_SPEED);
       }, this);
     }
 
-    public RunCommand AutoCoral() {
-      return new RunCommand(() -> {
-        armConfig.bottomIntakeMotor.set(-0.5);
-      }, this);
-    }
-
-  
+ 
 
   private void updateDashboard() {
     SmartDashboard.putNumber("Lift Height", getLiftHeightInches());

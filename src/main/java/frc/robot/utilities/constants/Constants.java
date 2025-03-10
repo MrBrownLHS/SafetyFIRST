@@ -14,15 +14,12 @@ public class Constants {
 
     public static final class CollectorArmConstants {
         // CAN IDs
-        public static final int LIFT_MOTOR_1_ID = 13;
+        public static final int LIFT_MOTOR_ID = 13;
         public static final int LIFT_ENCODER_ID = 14;
-        public static final int LIFT_MOTOR_2_ID = 15;
-        public static final int PIVOT_MOTOR_1_ID = 16;
-        public static final int PIVOT_ENCODER_ID = 17;
-        public static final int PIVOT_MOTOR_2_ID = 18;
-        public static final int TOP_INTAKE_MOTOR_ID = 19;
-        public static final int BOTTOM_INTAKE_MOTOR_ID = 20;
-        public static final int ARTICULATE_MOTOR_ID = 21;
+        public static final int PIVOT_MOTOR_ID = 15;
+        public static final int PIVOT_ENCODER_ID = 16;
+        public static final int CORAL_INTAKE_MOTOR_ID = 17;
+        public static final int CORAL_ARTICULATE_MOTOR_ID = 18;
         
         // PID Constants - NEEDS TUNING
         public static final double LIFT_kP = 0.01;
@@ -73,7 +70,9 @@ public class Constants {
         public static final double ARTICULATE_DEADBAND = 0.05; //Articulate Deadband - NEEDS TUNING
         public static final double ARTICULATE_RATE_LIMIT = 0.5; //Articulate Rate Limit - NEEDS TUNING
 
-        public static final int YEET_SPEED = 1;
+        public static final double AUTO_CORAL_RELEASE_SPEED = 0.25; //Coral Collect Speed - NEEDS TUNING
+
+        
         
         //Motor Configuration
         public static final double VOLTAGE_COMPENSATION = 12.0;
@@ -95,10 +94,17 @@ public class Constants {
     };
 
     public static final class CageClimberConstants {
-        public static final int WINCH_MOTOR_1_ID = 22;
-        public static final int WINCH_MOTOR_2_ID = 23;
+        public static final int WINCH_MOTOR_ID = 19;
+                
+    }
 
-        
+    public static final class AlgaeCollectorConstants {
+        public static final int ALGAE_ARTICULATE_MOTOR_ID = 20;
+        public static final int ALGAE_INTAKE_MOTOR_1_ID = 21;
+        public static final int ALGAE_INTAKE_MOTOR_2_ID = 22;
+
+        public static final double ALGAE_RATE_LIMIT = 0.5;
+        public static final double INTAKE_SPEED = 0.25;
     }
 
     public static final class ModuleConstants {

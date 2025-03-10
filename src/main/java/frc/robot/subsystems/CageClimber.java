@@ -5,26 +5,28 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.RunCommand;
+import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import frc.robot.utilities.constants.Constants;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-import com.revrobotics.spark.config.SparkMaxConfig;
+
+
 
 public class CageClimber extends SubsystemBase {
-  private final SparkMax winch1Motor, winch2Motor;
+  private final SparkMax m_Winch;
   private SparkMaxConfig winchMotorConfig;
  
   /** Creates a new CageClimber. */
   public CageClimber() {
-    winch1Motor = new SparkMax(Constants.CageClimberConstants.WINCH_MOTOR_1_ID, MotorType.kBrushless);
-    winch2Motor = new SparkMax(Constants.CageClimberConstants.WINCH_MOTOR_2_ID, MotorType.kBrushless);
+    m_Winch = new SparkMax(Constants.CageClimberConstants.WINCH_MOTOR_ID, MotorType.kBrushless);
+    
     winchMotorConfig = new SparkMaxConfig();
         
-    configureWinchMotor(winch1Motor, winchMotorConfig);
-    configureWinchMotor(winch2Motor, winchMotorConfig);
+    configureWinchMotor(m_Winch, winchMotorConfig);
   }
 
   private void configureWinchMotor(SparkMax motor, SparkMaxConfig config){
@@ -36,21 +38,24 @@ public class CageClimber extends SubsystemBase {
       
   }
 
-  public void ReadyCageGrabber() {
-    winch1Motor.set(0.25);
-    winch2Motor.set(-0.25);
+  public RunCommand ReadyCageGrabber() {
+    return new RunCommand(() -> {
+      m_Winch.set(0.5);
+    }, this);
+    }
 
-  }
 
-  public void CageClimb() {
-    winch1Motor.set(0.5);
-    winch2Motor.set(-0.5);
-  }
+  public RunCommand CageClimb() {
+    return new RunCommand(() -> {
+      m_Winch.set(-0.5);
+    }, this);
+    }
 
-  public void CageClimbStop() {
-    winch1Motor.set(0);
-    winch2Motor.set(0);
-  }
+  public RunCommand CageClimbStop() {
+    return new RunCommand(() -> {
+      m_Winch.stopMotor();
+    }, this);
+    }
 
   @Override
   public void periodic() {

@@ -29,7 +29,7 @@ public class ArmConfiguration {
     public CANcoder liftEncoder, pivotEncoder;
     public CANcoderConfiguration liftEncoderConfig, pivotEncoderConfig;
     public MagnetSensorConfigs liftMagnetSensorConfig, pivotMagnetSensorConfig;
-    public final SparkMax liftMotor1, liftMotor2, pivotMotor1, pivotMotor2, topIntakeMotor, bottomIntakeMotor, articulateMotor;
+    public final SparkMax m_Lift, m_Pivot, m_CoralIntake, m_CoralArticulate;
     public final SparkMaxConfig motorConfig;
     private boolean tuningMode = false;
     public ArmFeedforward liftFeedforward, pivotFeedforward;
@@ -40,10 +40,10 @@ public class ArmConfiguration {
     public PIDController liftPIDController, pivotPIDController;
     
 
-    public SparkMax [] getLiftMotors() { return new SparkMax[]{liftMotor1, liftMotor2}; }
-    public SparkMax [] getPivotMotors() { return new SparkMax[]{pivotMotor1, pivotMotor2}; }
-    public SparkMax [] getIntakeMotors() { return new SparkMax[]{topIntakeMotor, bottomIntakeMotor}; }
-    public SparkMax getArticulateMotor() { return articulateMotor; }
+    public SparkMax [] getLiftMotor() { return new SparkMax[]{m_Lift}; }
+    public SparkMax [] getPivotMotor() { return new SparkMax[]{m_Pivot}; }
+    public SparkMax [] getIntakeMotor() { return new SparkMax[]{m_CoralIntake}; }
+    public SparkMax getArticulateMotor() { return m_CoralArticulate; }
     public CANcoder getLiftEncoder() { return liftEncoder; }
     public CANcoder getPivotEncoder() { return pivotEncoder; }
     public TrapezoidProfile.State getLiftGoal() { return liftGoal; }
@@ -62,13 +62,10 @@ public class ArmConfiguration {
     
     
     public ArmConfiguration() {
-        liftMotor1 = new SparkMax(Constants.CollectorArmConstants.LIFT_MOTOR_1_ID, MotorType.kBrushless);
-        liftMotor2 = new SparkMax(Constants.CollectorArmConstants.LIFT_MOTOR_2_ID, MotorType.kBrushless);
-        pivotMotor1 = new SparkMax(Constants.CollectorArmConstants.PIVOT_MOTOR_1_ID, MotorType.kBrushless);
-        pivotMotor2 = new SparkMax(Constants.CollectorArmConstants.PIVOT_MOTOR_2_ID, MotorType.kBrushless);
-        topIntakeMotor = new SparkMax(Constants.CollectorArmConstants.TOP_INTAKE_MOTOR_ID, MotorType.kBrushless);
-        bottomIntakeMotor = new SparkMax(Constants.CollectorArmConstants.BOTTOM_INTAKE_MOTOR_ID, MotorType.kBrushless);
-        articulateMotor = new SparkMax(Constants.CollectorArmConstants.ARTICULATE_MOTOR_ID, MotorType.kBrushless);
+        m_Lift = new SparkMax(Constants.CollectorArmConstants.LIFT_MOTOR_ID, MotorType.kBrushless);
+        m_Pivot= new SparkMax(Constants.CollectorArmConstants.PIVOT_MOTOR_ID, MotorType.kBrushless);
+        m_CoralArticulate = new SparkMax(Constants.CollectorArmConstants.CORAL_INTAKE_MOTOR_ID, MotorType.kBrushless);
+        m_CoralIntake = new SparkMax(Constants.CollectorArmConstants.CORAL_ARTICULATE_MOTOR_ID, MotorType.kBrushless);
 
         liftEncoder = new CANcoder(Constants.CollectorArmConstants.LIFT_ENCODER_ID);
         pivotEncoder = new CANcoder(Constants.CollectorArmConstants.PIVOT_ENCODER_ID);
@@ -86,9 +83,8 @@ public class ArmConfiguration {
     }
    //Need to invert lift and pivot motors: https://www.reddit.com/r/FRC/comments/1id6sz2/how_to_invert_a_spark_max/
     private void configureMotors() {
-        SparkMax[] neoMotors = {liftMotor1, pivotMotor1, articulateMotor};
-        SparkMax[] reversedMotors = {liftMotor2, pivotMotor2};
-        SparkMax[] neo550Motors = {topIntakeMotor, bottomIntakeMotor};
+        SparkMax[] neoMotors = {m_Lift, m_Pivot, m_CoralArticulate};
+        SparkMax[] neo550Motors = {m_CoralIntake, m_CoralArticulate};
 
         for (SparkMax motor : neoMotors) {
             configureNEOMotor(motor, motorConfig, Constants.CollectorArmConstants.CURRENT_LIMIT_NEO);
@@ -97,13 +93,6 @@ public class ArmConfiguration {
         for (SparkMax motor : neo550Motors) {
             configure550Motor(motor, motorConfig, Constants.CollectorArmConstants.CURRENT_LIMIT_550);
         }
-
-        for (SparkMax motor : reversedMotors) {
-            configureReverseMotor(motor, motorConfig, Constants.CollectorArmConstants.CURRENT_LIMIT_NEO);
-        }
-        
-        liftMotor2.set(liftMotor1.get());
-        pivotMotor2.set(pivotMotor1.get());
 
     }
 
@@ -123,15 +112,6 @@ public class ArmConfiguration {
         neo550motor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
     }
 
-    private void configureReverseMotor(SparkMax neoMotors, SparkMaxConfig config, int currentLimit) {
-        config.idleMode(Constants.CollectorArmConstants.DISABLE_NEUTRAL_MODE ? IdleMode.kCoast : IdleMode.kBrake);
-        config.smartCurrentLimit(currentLimit);
-        config.secondaryCurrentLimit(Constants.CollectorArmConstants.MAX_CURRENT_LIMIT_NEO);
-        config.voltageCompensation(Constants.CollectorArmConstants.VOLTAGE_COMPENSATION);
-        config.inverted(true);
-        neoMotors.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
-    }
-    
     private void configureEncoders() {
         configureSingleEncoder(liftEncoder, Constants.CollectorArmConstants.ENCODER_TO_INCHES);
         configureSingleEncoder(pivotEncoder, Constants.CollectorArmConstants.ENCODER_TO_DEGREES);
@@ -242,11 +222,9 @@ public class ArmConfiguration {
                 SmartDashboard.putNumber("Pivot Setpoint", pivotPIDController.getSetpoint());
                 SmartDashboard.putNumber("Lift PID Error", liftPIDController.getPositionError());
                 SmartDashboard.putNumber("Pivot PID Error", pivotPIDController.getPositionError());
-                SmartDashboard.putNumber("Lift Motor 1 Output", liftMotor1.get());
-                SmartDashboard.putNumber("Lift Motor 2 Output", liftMotor2.get());
-                SmartDashboard.putNumber("Pivot Motor 1 Output", pivotMotor1.get());
-                SmartDashboard.putNumber("Pivot Motor 2 Output", pivotMotor2.get());
-                SmartDashboard.putNumber("Articulate Motor Output", articulateMotor.get());
+                SmartDashboard.putNumber("Lift Motor Output", m_Lift.get());
+                SmartDashboard.putNumber("Pivot Motor Output", m_Pivot.get());
+                SmartDashboard.putNumber("Articulate Motor Output", m_CoralArticulate.get());
                 
             
                 SmartDashboard.putNumber("Lift kP", liftPIDController.getP());
@@ -281,10 +259,10 @@ public class ArmConfiguration {
                 DataLogManager.log("Current State: Position=" + currentState.position + ", Velocity=" + currentState.velocity);
                 DataLogManager.log("Lift Height: " + liftEncoder.getPosition().getValueAsDouble());
                 DataLogManager.log("Pivot Angle: " + pivotEncoder.getPosition().getValueAsDouble());
-                DataLogManager.log("Lift Output 1: " + liftMotor1.get());
-                DataLogManager.log("Lift Output 2: " + liftMotor2.get());
-                DataLogManager.log("Pivot Output 1: " + pivotMotor1.get());
-                DataLogManager.log("Pivot Output 2: " + pivotMotor2.get());
+                DataLogManager.log("Lift Output 1: " + m_Lift.get());
+                DataLogManager.log("Pivot Output 1: " + m_Pivot.get());
+                DataLogManager.log("Articulate Output: " + m_CoralArticulate.get());
+    
     }
 
 }

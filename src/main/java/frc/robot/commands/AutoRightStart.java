@@ -20,7 +20,7 @@ public class AutoRightStart extends SequentialCommandGroup {
       swerve.swerveAuto(0.0, 1.5, 0.5, 0.2),   // Move right 1.5m and rotate slowly
       new WaitCommand(1),
       new InstantCommand(() -> collectorArm.moveToState(CollectorArmState.L3), collectorArm),// Move the collector arm to the L3 position
-      new RunCommand(() -> collectorArm.AutoCoral(), collectorArm)
+      new RunCommand(() -> collectorArm.AutoCollectCoral(), collectorArm)
         .withTimeout(2.0)
         .andThen(new InstantCommand(() -> collectorArm.stopArm(), collectorArm)),
       swerve.stopSwerveCommand());
