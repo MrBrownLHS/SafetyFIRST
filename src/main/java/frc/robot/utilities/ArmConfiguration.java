@@ -39,10 +39,11 @@ public class ArmConfiguration {
     public SlewRateLimiter rateLimiter;
     public PIDController liftPIDController, pivotPIDController;
     
+    
 
-    public SparkMax [] getLiftMotor() { return new SparkMax[]{m_Lift}; }
-    public SparkMax [] getPivotMotor() { return new SparkMax[]{m_Pivot}; }
-    public SparkMax [] getIntakeMotor() { return new SparkMax[]{m_CoralIntake}; }
+    public SparkMax getLiftMotor() {return m_Lift; } 
+    public SparkMax getPivotMotor() { return m_Pivot; }
+    public SparkMax getIntakeMotor() { return m_CoralIntake; }
     public SparkMax getArticulateMotor() { return m_CoralArticulate; }
     public CANcoder getLiftEncoder() { return liftEncoder; }
     public CANcoder getPivotEncoder() { return pivotEncoder; }
@@ -60,7 +61,6 @@ public class ArmConfiguration {
     public boolean isTuningMode() { return tuningMode; }
     public SlewRateLimiter getRateLimiter() { return rateLimiter; }
     
-    
     public ArmConfiguration() {
         m_Lift = new SparkMax(Constants.CollectorArmConstants.LIFT_MOTOR_ID, MotorType.kBrushless);
         m_Pivot= new SparkMax(Constants.CollectorArmConstants.PIVOT_MOTOR_ID, MotorType.kBrushless);
@@ -72,6 +72,9 @@ public class ArmConfiguration {
 
         liftPIDController = new PIDController(Constants.CollectorArmConstants.LIFT_kP, Constants.CollectorArmConstants.LIFT_kI, Constants.CollectorArmConstants.LIFT_kD);
         pivotPIDController = new PIDController(Constants.CollectorArmConstants.PIVOT_kP, Constants.CollectorArmConstants.PIVOT_kI, Constants.CollectorArmConstants.PIVOT_kD);
+
+        liftProfile = new TrapezoidProfile(liftConstraints);
+        pivotProfile = new TrapezoidProfile(pivotConstraints);
         
         motorConfig = new SparkMaxConfig();
        
@@ -79,6 +82,7 @@ public class ArmConfiguration {
         configureEncoders();
         configurePIDControllers(liftPIDController, Constants.CollectorArmConstants.LIFT_kP, Constants.CollectorArmConstants.LIFT_kI, Constants.CollectorArmConstants.LIFT_kD);
         configurePIDControllers(pivotPIDController, Constants.CollectorArmConstants.PIVOT_kP, Constants.CollectorArmConstants.PIVOT_kI, Constants.CollectorArmConstants.PIVOT_kD);
+
         
     }
    //Need to invert lift and pivot motors: https://www.reddit.com/r/FRC/comments/1id6sz2/how_to_invert_a_spark_max/

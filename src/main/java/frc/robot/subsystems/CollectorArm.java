@@ -37,7 +37,7 @@ public class CollectorArm extends SubsystemBase {
       }
     
   }
-  private final TrapezoidProfile liftProfile, pivotProfile;
+  
   private CollectorArmState currentState;
   private TrapezoidProfile.State liftState, pivotState, liftGoal, pivotGoal;
 
@@ -48,8 +48,9 @@ public class CollectorArm extends SubsystemBase {
     DataLogManager.log("CollectorArm Subsystem Initialized");
     SmartDashboard.putBoolean("Tuning Mode", false);
 
-    liftProfile = new TrapezoidProfile(armConfig.liftConstraints);
-    pivotProfile = new TrapezoidProfile(armConfig.pivotConstraints);
+
+    liftState = new TrapezoidProfile.State(0, 0);
+    pivotState = new TrapezoidProfile.State(0, 0);
   }
 
   public void moveToState(CollectorArmState state) {
@@ -68,8 +69,8 @@ public class CollectorArm extends SubsystemBase {
 
     double elapsedTime = 0.02;
 
-    liftState = liftProfile.calculate(elapsedTime, liftState, liftGoal);
-    pivotState = pivotProfile.calculate(elapsedTime, pivotState, pivotGoal);
+    liftState = armConfig.liftProfile.calculate(elapsedTime, liftState, liftGoal);
+    pivotState = armConfig.pivotProfile.calculate(elapsedTime, pivotState, pivotGoal);
 
     double liftFF = armConfig.liftFeedforward.calculate(liftState.velocity, 0);
     double pivotFF = armConfig.pivotFeedforward.calculate(pivotState.velocity, 0);
@@ -80,10 +81,11 @@ public class CollectorArm extends SubsystemBase {
     double smoothedLiftOutput = armConfig.rateLimiter.calculate(liftPID + liftFF);
     double smoothedPivotOutput = armConfig.rateLimiter.calculate(pivotPID + pivotFF);
 
-    if (!isAtTarget(state))
+    if (!isAtTarget(state)) {
 
     armConfig.m_Lift.set(smoothedLiftOutput);
     armConfig.m_Pivot.set(smoothedPivotOutput);
+    }
     
   } 
    
@@ -98,7 +100,7 @@ public class CollectorArm extends SubsystemBase {
   public void setLiftPosition(double targetInches) {
     if (Math.abs(targetInches - getLiftHeightInches()) > Constants.CollectorArmConstants.LIFT_TOLERANCE) {
       liftGoal = new TrapezoidProfile.State(targetInches, 0);
-      liftState = liftProfile.calculate(0.02, liftState, liftGoal);
+      liftState = armConfig.liftProfile.calculate(0.02, liftState, liftGoal);
 
       double pidOutput = armConfig.liftPIDController.calculate(getLiftHeightInches(), liftState.position);
       double ffOutput = armConfig.liftFeedforward.calculate(liftState.velocity, 0);
@@ -111,9 +113,9 @@ public class CollectorArm extends SubsystemBase {
   public void setPivotPosition(double targetAngle) {
     if (Math.abs(targetAngle - getPivotAngleDegrees()) > Constants.CollectorArmConstants.PIVOT_TOLERANCE) {
       pivotGoal = new TrapezoidProfile.State(targetAngle, 0);
-      pivotState = pivotProfile.calculate(0.02, pivotState, pivotGoal);
+      pivotState = armConfig.pivotProfile.calculate(0.02, pivotState, pivotGoal);
 
-      double pidOutput = armConfig.pivotPIDController.calculate(getLiftHeightInches(), pivotState.position);
+      double pidOutput = armConfig.pivotPIDController.calculate(getPivotAngleDegrees(), pivotState.position);
       double ffOutput = armConfig.pivotFeedforward.calculate(pivotState.velocity, 0);
 
       armConfig.m_Pivot.set(pidOutput + ffOutput);

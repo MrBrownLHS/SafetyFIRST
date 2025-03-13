@@ -22,13 +22,13 @@ public class Constants {
         public static final int CORAL_ARTICULATE_MOTOR_ID = 18;
         
         // PID Constants - NEEDS TUNING
-        public static final double LIFT_kP = 0.01;
-        public static final double LIFT_kI = 0.00;
-        public static final double LIFT_kD = 0.01;
+        public static final double LIFT_kP = 0.0;
+        public static final double LIFT_kI = 0.0;
+        public static final double LIFT_kD = 0.0;
         
-        public static final double PIVOT_kP = 0.01;
-        public static final double PIVOT_kI = 0.00;
-        public static final double PIVOT_kD = 0.01;
+        public static final double PIVOT_kP = 0.0;
+        public static final double PIVOT_kI = 0.0;
+        public static final double PIVOT_kD = 0.0;
        
         // Feedforward/Trapazoidal Constants - NEEDS TUNING
         public static final double LIFT_kS = 0.0;
@@ -41,20 +41,20 @@ public class Constants {
         public static final double PIVOT_kV = 0.0;
         public static final double PIVOT_kA = 0.0;
 
-        public static final double LIFT_MAX_VELOCITY = 3.0; // Max velocity of the lift - NEEDS TUNING
+        public static final double LIFT_MAX_VELOCITY = 1.0; // Max velocity of the lift - NEEDS TUNING
         public static final double LIFT_MAX_ACCELERATION = 1.0; // Max acceleration of the lift - NEEDS TUNING
-        public static final double PIVOT_MAX_VELOCITY = 5.0; // Max velocity of the pivot - NEEDS TUNING
+        public static final double PIVOT_MAX_VELOCITY = 1.0; // Max velocity of the pivot - NEEDS TUNING
         public static final double PIVOT_MAX_ACCELERATION = 1.0; // Max acceleration of the pivot - NEEDS TUNING
         public static final double PIVOT_MIN_ANGLE = 30; // Min angle of the pivot - NEEDS TUNING
         public static final double PIVOT_MAX_ANGLE = 180; // Max angle of the pivot - NEEDS TUNING
         public static final double LIFT_MIN_HEIGHT = 0; // Min height of the lift - NEEDS TUNING
         public static final double LIFT_MAX_HEIGHT = 50; // Max height of the lift - NEEDS TUNING
 
-
+        
 
         // Lift Encoder Postions - NEEDS TUNING
-        public static final double LIFT_TOLERANCE = 2.0; //Tolerance for PID - NEEDS TUNING
-        public static final double PIVOT_TOLERANCE = 2.0; //Tolerance for PID - NEEDS TUNING
+        public static final double LIFT_TOLERANCE = 1.0; //Tolerance for PID - NEEDS TUNING
+        public static final double PIVOT_TOLERANCE = 1.0; //Tolerance for PID - NEEDS TUNING
          
         public static final double ENCODER_TO_DEGREES = 360.0 / 4096.0; 
         public static final double COG_DIAMETER_INCHES = 2.0; // Diameter of the center of gravity pulley in inches - NEEDS TUNING
