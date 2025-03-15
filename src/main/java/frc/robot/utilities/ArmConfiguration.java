@@ -29,7 +29,7 @@ public class ArmConfiguration {
     public CANcoder liftEncoder, pivotEncoder;
     public CANcoderConfiguration liftEncoderConfig, pivotEncoderConfig;
     public MagnetSensorConfigs liftMagnetSensorConfig, pivotMagnetSensorConfig;
-    public final SparkMax m_Lift, m_Pivot, m_CoralIntake, m_CoralArticulate;
+    public final SparkMax m_Lift, m_Pivot;
     public final SparkMaxConfig motorConfig;
     private boolean tuningMode = false;
     public ArmFeedforward liftFeedforward, pivotFeedforward;
@@ -43,8 +43,6 @@ public class ArmConfiguration {
 
     public SparkMax getLiftMotor() {return m_Lift; } 
     public SparkMax getPivotMotor() { return m_Pivot; }
-    public SparkMax getIntakeMotor() { return m_CoralIntake; }
-    public SparkMax getArticulateMotor() { return m_CoralArticulate; }
     public CANcoder getLiftEncoder() { return liftEncoder; }
     public CANcoder getPivotEncoder() { return pivotEncoder; }
     public TrapezoidProfile.State getLiftGoal() { return liftGoal; }
@@ -64,9 +62,7 @@ public class ArmConfiguration {
     public ArmConfiguration() {
         m_Lift = new SparkMax(Constants.CollectorArmConstants.LIFT_MOTOR_ID, MotorType.kBrushless);
         m_Pivot= new SparkMax(Constants.CollectorArmConstants.PIVOT_MOTOR_ID, MotorType.kBrushless);
-        m_CoralArticulate = new SparkMax(Constants.CollectorArmConstants.CORAL_INTAKE_MOTOR_ID, MotorType.kBrushless);
-        m_CoralIntake = new SparkMax(Constants.CollectorArmConstants.CORAL_ARTICULATE_MOTOR_ID, MotorType.kBrushless);
-
+  
         liftEncoder = new CANcoder(Constants.CollectorArmConstants.LIFT_ENCODER_ID);
         pivotEncoder = new CANcoder(Constants.CollectorArmConstants.PIVOT_ENCODER_ID);
 
@@ -87,33 +83,21 @@ public class ArmConfiguration {
     }
    //Need to invert lift and pivot motors: https://www.reddit.com/r/FRC/comments/1id6sz2/how_to_invert_a_spark_max/
     private void configureMotors() {
-        SparkMax[] neoMotors = {m_Lift, m_Pivot, m_CoralArticulate};
-        SparkMax[] neo550Motors = {m_CoralIntake, m_CoralArticulate};
+        SparkMax[] neoMotors = {m_Lift, m_Pivot};
 
         for (SparkMax motor : neoMotors) {
             configureNEOMotor(motor, motorConfig, Constants.CollectorArmConstants.CURRENT_LIMIT_NEO);
         }
 
-        for (SparkMax motor : neo550Motors) {
-            configure550Motor(motor, motorConfig, Constants.CollectorArmConstants.CURRENT_LIMIT_550);
-        }
-
+       
     }
 
     private void configureNEOMotor(SparkMax neoMotors, SparkMaxConfig config, int currentLimit) {
-        config.idleMode(Constants.CollectorArmConstants.DISABLE_NEUTRAL_MODE ? IdleMode.kCoast : IdleMode.kBrake);
+        config.idleMode(IdleMode.kBrake);
         config.smartCurrentLimit(currentLimit);
         config.secondaryCurrentLimit(Constants.CollectorArmConstants.MAX_CURRENT_LIMIT_NEO);
         config.voltageCompensation(Constants.CollectorArmConstants.VOLTAGE_COMPENSATION);
         neoMotors.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
-    }
-
-    private void configure550Motor(SparkMax neo550motor, SparkMaxConfig config, int currentLimit) {
-        config.idleMode(Constants.CollectorArmConstants.DISABLE_NEUTRAL_MODE ? IdleMode.kCoast : IdleMode.kBrake);
-        config.smartCurrentLimit(currentLimit);
-        config.secondaryCurrentLimit(Constants.CollectorArmConstants.MAX_CURRENT_LIMIT_550);
-        config.voltageCompensation(Constants.CollectorArmConstants.VOLTAGE_COMPENSATION);
-        neo550motor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
     }
 
     private void configureEncoders() {
@@ -171,21 +155,23 @@ public class ArmConfiguration {
                                             Constants.CollectorArmConstants.PIVOT_kI,
                                             Constants.CollectorArmConstants.PIVOT_kD);
       pivotPIDController.setTolerance(Constants.CollectorArmConstants.PIVOT_TOLERANCE);
-  
+
+      liftProfile = new TrapezoidProfile(liftConstraints);
+      pivotProfile = new TrapezoidProfile(pivotConstraints);
+
       liftGoal = new TrapezoidProfile.State(0, 0);
       liftState = liftProfile.calculate(0.02, liftState, liftGoal);
 
       pivotGoal = new TrapezoidProfile.State(0, 0);
       pivotState = pivotProfile.calculate(0.02, pivotState, pivotGoal);
   
-      liftProfile = new TrapezoidProfile(liftConstraints);
-      pivotProfile = new TrapezoidProfile(pivotConstraints);
+
               
-      configurePIDControllers(liftPIDController, Constants.CollectorArmConstants.LIFT_kP,
-      Constants.CollectorArmConstants.LIFT_kI, Constants.CollectorArmConstants.LIFT_kD);
+     // configurePIDControllers(liftPIDController, Constants.CollectorArmConstants.LIFT_kP,
+      //Constants.CollectorArmConstants.LIFT_kI, Constants.CollectorArmConstants.LIFT_kD);
   
-      configurePIDControllers(pivotPIDController, Constants.CollectorArmConstants.PIVOT_kP,
-      Constants.CollectorArmConstants.PIVOT_kI, Constants.CollectorArmConstants.PIVOT_kD);
+      //configurePIDControllers(pivotPIDController, Constants.CollectorArmConstants.PIVOT_kP,
+      //Constants.CollectorArmConstants.PIVOT_kI, Constants.CollectorArmConstants.PIVOT_kD);
     }
 
  
@@ -228,7 +214,7 @@ public class ArmConfiguration {
                 SmartDashboard.putNumber("Pivot PID Error", pivotPIDController.getPositionError());
                 SmartDashboard.putNumber("Lift Motor Output", m_Lift.get());
                 SmartDashboard.putNumber("Pivot Motor Output", m_Pivot.get());
-                SmartDashboard.putNumber("Articulate Motor Output", m_CoralArticulate.get());
+                
                 
             
                 SmartDashboard.putNumber("Lift kP", liftPIDController.getP());
@@ -265,7 +251,7 @@ public class ArmConfiguration {
                 DataLogManager.log("Pivot Angle: " + pivotEncoder.getPosition().getValueAsDouble());
                 DataLogManager.log("Lift Output 1: " + m_Lift.get());
                 DataLogManager.log("Pivot Output 1: " + m_Pivot.get());
-                DataLogManager.log("Articulate Output: " + m_CoralArticulate.get());
+               
     
     }
 

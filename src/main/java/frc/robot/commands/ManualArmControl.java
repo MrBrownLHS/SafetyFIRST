@@ -6,6 +6,7 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import frc.robot.subsystems.CollectorArm;
 import frc.robot.utilities.constants.Constants;
@@ -13,7 +14,7 @@ import frc.robot.utilities.constants.Constants;
 
 public class ManualArmControl extends Command {
   private final CollectorArm collectorArm;
-  private final XboxController coPilotController;
+  private final Joystick coPilotController;
   
   private static final double LIFT_INCREMENT = 1.0;  // Inches per press
   private static final double PIVOT_INCREMENT = 2.0; // Degrees per press
@@ -21,10 +22,12 @@ public class ManualArmControl extends Command {
   private double manualLiftPosition;
   private double manualPivotAngle;
   
-  public ManualArmControl(CollectorArm collectorArm, XboxController coPilotController) {
+  public ManualArmControl(CollectorArm collectorArm, Joystick coPilotController) {
     this.collectorArm = collectorArm;
     this.coPilotController = coPilotController;
         addRequirements(collectorArm);
+    
+    
     
   }
 
@@ -41,16 +44,16 @@ public class ManualArmControl extends Command {
     if (coPilotController.getPOV() == 0) { 
         
         // Lift Control with Bumpers
-        if (coPilotController.getLeftBumper()) {
+        if (coPilotController.getRawButton(XboxController.Button.kLeftBumper.value)) {
             manualLiftPosition -= LIFT_INCREMENT; // Decrease lift height
         } 
-        if (coPilotController.getRightBumper()) {
+        if (coPilotController.getRawButton(XboxController.Button.kRightBumper.value)) {
             manualLiftPosition += LIFT_INCREMENT; // Increase lift height
         }
 
         // Pivot Control with Triggers
-        double leftTrigger = coPilotController.getLeftTriggerAxis();
-        double rightTrigger = coPilotController.getRightTriggerAxis();
+        double leftTrigger = coPilotController.getRawAxis(XboxController.Axis.kLeftTrigger.value);
+        double rightTrigger = coPilotController.getRawAxis(XboxController.Axis.kRightTrigger.value);
         
         if (leftTrigger > 0.1) {
             manualPivotAngle -= PIVOT_INCREMENT * leftTrigger; // Rotate arm down

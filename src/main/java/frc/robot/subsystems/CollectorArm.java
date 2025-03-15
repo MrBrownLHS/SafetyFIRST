@@ -5,8 +5,10 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import java.util.function.DoubleSupplier;
+import java.util.jar.Attributes.Name;
 
 import com.revrobotics.spark.SparkMax;
 
@@ -28,6 +30,7 @@ public class CollectorArm extends SubsystemBase {
     L1(20, -15),
     L2(30, 0),
     L3(40, 15);
+  
     
 
   public final double liftHeightInches, pivotAngleDegrees;
@@ -48,7 +51,7 @@ public class CollectorArm extends SubsystemBase {
     DataLogManager.log("CollectorArm Subsystem Initialized");
     SmartDashboard.putBoolean("Tuning Mode", false);
 
-
+    currentState = CollectorArmState.START;
     liftState = new TrapezoidProfile.State(0, 0);
     pivotState = new TrapezoidProfile.State(0, 0);
   }
@@ -88,6 +91,12 @@ public class CollectorArm extends SubsystemBase {
     }
     
   } 
+
+  public Command moveToStateCommand(CollectorArmState state, double timeout) {
+    return new RunCommand(() -> moveToState(state), this)
+      .until(() -> armConfig.liftPIDController.atSetpoint() && armConfig.pivotPIDController.atSetpoint())
+      .withTimeout(timeout);
+  }
    
   public double getLiftHeightInches() {
     return armConfig.liftEncoder.getAbsolutePosition().getValueAsDouble() * Constants.CollectorArmConstants.ENCODER_TO_INCHES;
@@ -125,8 +134,7 @@ public class CollectorArm extends SubsystemBase {
 
   public void stopArm() {
     SparkMax[] motors = {
-      armConfig.m_Lift, armConfig.m_Pivot,
-      armConfig.m_CoralIntake, armConfig.m_CoralArticulate,
+      armConfig.m_Lift, armConfig.m_Pivot
       
     };
 
@@ -141,37 +149,11 @@ public class CollectorArm extends SubsystemBase {
       return armConfig.liftPIDController.atSetpoint() && armConfig.pivotPIDController.atSetpoint();
     }
 
-   
-    public RunCommand ArticulateCoralCollector(DoubleSupplier joystickInput) {
-      return new RunCommand(() -> {
-        double rawInput = joystickInput.getAsDouble();
-        double adjustedInput = (Math.abs(rawInput) > Constants.CollectorArmConstants.DEADBAND) ? rawInput : 0.0;
-        double limitedInput = armConfig.rateLimiter.calculate(adjustedInput);
-        armConfig.m_CoralArticulate.set(limitedInput);
-      }, this);
-    }
-  
-    
 
-    public RunCommand CollectCoral(DoubleSupplier joystickInput) {
-      return new RunCommand(() -> {
-        double rawInput = joystickInput.getAsDouble();
-        armConfig.m_CoralIntake.set(rawInput);
-      }, this);
-    }
-
-    public RunCommand AutoCollectCoral() {
-      return new RunCommand(() -> {
-        armConfig.m_CoralIntake.set(Constants.CollectorArmConstants.AUTO_CORAL_RELEASE_SPEED);
-      }, this);
-    }
-
- 
-
-  private void updateDashboard() {
+private void updateDashboard() {
     SmartDashboard.putNumber("Lift Height", getLiftHeightInches());
     SmartDashboard.putNumber("Pivot Angle", getPivotAngleDegrees());
-    SmartDashboard.putString("Current Arm State", currentState.name());
+    SmartDashboard.putString("Current Arm State", currentState.toString());
 
     boolean newTuningMode = SmartDashboard.getBoolean("Tuning Mode", false);
     if (newTuningMode != tuningMode) {

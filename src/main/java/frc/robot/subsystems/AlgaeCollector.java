@@ -19,24 +19,24 @@ import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 public class AlgaeCollector extends SubsystemBase {
-  private final SparkMax m_AlgaeArticulate, m_AlgaeIntake1, m_AlgaeIntake2;
+  private final SparkMax m_AlgaeArticulate;// m_AlgaeIntake1, m_AlgaeIntake2;
   private final SparkMaxConfig algaeMotorConfig;
   public SlewRateLimiter algaeRateLimiter;
   /** Creates a new AlgaeCollector. */
   public AlgaeCollector() {
     m_AlgaeArticulate = new SparkMax(Constants.AlgaeCollectorConstants.ALGAE_ARTICULATE_MOTOR_ID, MotorType.kBrushless);
-    m_AlgaeIntake1 = new SparkMax(Constants.AlgaeCollectorConstants.ALGAE_INTAKE_MOTOR_1_ID, MotorType.kBrushless);
-    m_AlgaeIntake2 = new SparkMax(Constants.AlgaeCollectorConstants.ALGAE_INTAKE_MOTOR_2_ID, MotorType.kBrushless);
+    //m_AlgaeIntake1 = new SparkMax(Constants.AlgaeCollectorConstants.ALGAE_INTAKE_MOTOR_1_ID, MotorType.kBrushless);
+   // m_AlgaeIntake2 = new SparkMax(Constants.AlgaeCollectorConstants.ALGAE_INTAKE_MOTOR_2_ID, MotorType.kBrushless);
     algaeRateLimiter = new SlewRateLimiter(Constants.AlgaeCollectorConstants.ALGAE_RATE_LIMIT);
 
     algaeMotorConfig = new SparkMaxConfig();
     configureAlgaeMotor(m_AlgaeArticulate, algaeMotorConfig);
-    configureAlgaeMotor(m_AlgaeIntake1, algaeMotorConfig);
-    configureAlgaeMotor(m_AlgaeIntake2, algaeMotorConfig);
+    //configureAlgaeMotor(m_AlgaeIntake1, algaeMotorConfig);
+    //configureAlgaeMotor(m_AlgaeIntake2, algaeMotorConfig);
   }
 
   private void configureAlgaeMotor(SparkMax motor, SparkMaxConfig config){
-    config.idleMode(Constants.CollectorArmConstants.DISABLE_NEUTRAL_MODE ? IdleMode.kCoast : IdleMode.kBrake);
+    config.idleMode(IdleMode.kBrake);
     config.smartCurrentLimit(Constants.CollectorArmConstants.CURRENT_LIMIT_550);
     config.secondaryCurrentLimit(Constants.CollectorArmConstants.MAX_CURRENT_LIMIT_550);
     config.voltageCompensation(Constants.CollectorArmConstants.VOLTAGE_COMPENSATION);
@@ -55,15 +55,28 @@ public class AlgaeCollector extends SubsystemBase {
   public RunCommand CollectAlgae(DoubleSupplier joystickInput) {
       return new RunCommand(() -> {
         double rawInput = joystickInput.getAsDouble();
-        m_AlgaeIntake1.set(rawInput);
-        m_AlgaeIntake2.set(-rawInput);
+        //AlgaeIntake1.set(rawInput);
+        //AlgaeIntake2.set(-rawInput);
       }, this);
     }
 
+  public RunCommand ArticulateAndCollectAlgae(DoubleSupplier articulate, DoubleSupplier collect) {
+    return new RunCommand(() -> {
+      double rawInputArticulate = articulate.getAsDouble();
+      double adjustedInput = (Math.abs(rawInputArticulate) > Constants.CollectorArmConstants.DEADBAND) ? rawInputArticulate : 0.0;
+      double limitedInput = algaeRateLimiter.calculate(adjustedInput);
+      m_AlgaeArticulate.set(limitedInput);
+
+      double rawInputCollect = collect.getAsDouble();
+      //AlgaeIntake1.set(rawInputCollect);
+      //AlgaeIntake2.set(-rawInputCollect);
+    }, this);
+  }
+
   public RunCommand StopAlgae() {
     return new RunCommand(() -> {
-      m_AlgaeIntake1.stopMotor();
-      m_AlgaeIntake2.stopMotor();
+      //AlgaeIntake1.stopMotor();
+      //AlgaeIntake2.stopMotor();
       m_AlgaeArticulate.stopMotor();
     }, this);
   }

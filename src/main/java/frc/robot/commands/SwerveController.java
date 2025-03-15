@@ -45,7 +45,25 @@ public class SwerveController extends Command {
         Translation2d linearVelocity = new Translation2d(translationValue, strafeValue);
         double linearMagnitude = MathUtil.applyDeadband(linearVelocity.getNorm(), Constants.DriverConstants.kDeadband);
         linearMagnitude *= linearMagnitude;
-        linearVelocity = new Pose2d(new Translation2d(), linearVelocity.getAngle()).transformBy(new Transform2d(linearMagnitude, 0.0, new Rotation2d())).getTranslation();
+
+        Rotation2d angle = null;
+
+        if (linearVelocity.getNorm() > 0.001) { // Prevents divide by zero error
+            angle = linearVelocity.getAngle();
+        } else {
+            angle = new Rotation2d(0.0);
+        }
+
+        linearVelocity = new Pose2d(
+            new Translation2d(), 
+            angle
+        ).transformBy(
+            new Transform2d(
+                linearMagnitude, 
+                0.0, 
+                new Rotation2d()
+            )
+        ).getTranslation();
 
         double rotationValue = rotationLimiter.calculate(MathUtil.applyDeadband(rotationSupplier.getAsDouble(), Constants.DriverConstants.kDeadband));
         swerveSubsystem.drive(linearVelocity.times(Constants.SwerveConstants.PhysicalMaxTranslationSpeed), rotationValue * Constants.SwerveConstants.PhysicalMaxAngularVelocity, !robotCentricSupplier.getAsBoolean(), true);

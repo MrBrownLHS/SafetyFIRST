@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -11,12 +12,15 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 
 import frc.robot.commands.SwerveController;
 import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.utilities.constants.Constants;
 import frc.robot.subsystems.CollectorArm;
+import frc.robot.subsystems.CollectorHead;
+import frc.robot.subsystems.CoralCollector;
 import frc.robot.subsystems.CollectorArm.CollectorArmState;
 import frc.robot.subsystems.CageClimber;
 import frc.robot.subsystems.AlgaeCollector;
@@ -30,10 +34,12 @@ public class RobotContainer {
   private final JoystickButton resetHeading;
   private final JoystickButton robotCentric;
 
-  private final XboxController CoPilotController;
-  private final CollectorArm coralCollectorArm;
+  private final Joystick CoPilotController;
+  private final CollectorArm collectorArm;
   private final CageClimber cageClimber;
   private final AlgaeCollector algaeCollector;
+  private final CollectorHead collectorHead;
+  private final CoralCollector coralCollector;
   
   private final int translationAxis;
   private final int strafeAxis;
@@ -45,18 +51,24 @@ public class RobotContainer {
 
   private final SendableChooser<Command> autoChooser;
 
+    private final SlewRateLimiter translationLimiter = new SlewRateLimiter(2.9);
+    private final SlewRateLimiter strafeLimiter = new SlewRateLimiter(2.9);
+    private final SlewRateLimiter rotationLimiter = new SlewRateLimiter(2.9);
+
   public RobotContainer() {
     swerveSubsystem = new SwerveSubsystem();
     DriverController = new Joystick(0);
-    CoPilotController = new XboxController(1);
-    coralCollectorArm = new CollectorArm();
+    CoPilotController = new Joystick(1);
     cageClimber = new CageClimber();
     algaeCollector = new AlgaeCollector();
+    collectorHead = new CollectorHead();
+    coralCollector = new CoralCollector();
+    collectorArm = new CollectorArm();
 
      autoChooser = new SendableChooser<>();
-        autoChooser.setDefaultOption("Center Start", new AutoCenterStart(swerveSubsystem, coralCollectorArm));
-        autoChooser.addOption("Left Start", new AutoLeftStart(swerveSubsystem, coralCollectorArm));
-        autoChooser.addOption("Right Start", new AutoRightStart(swerveSubsystem, coralCollectorArm));
+        autoChooser.setDefaultOption("Center Start", new AutoCenterStart(swerveSubsystem));
+        autoChooser.addOption("Left Start", new AutoLeftStart(swerveSubsystem));
+        autoChooser.addOption("Right Start", new AutoRightStart(swerveSubsystem));
 
         SmartDashboard.putData("Auto Mode", autoChooser);
         
@@ -71,73 +83,73 @@ public class RobotContainer {
     
     swerveSubsystem.setDefaultCommand(new SwerveController(
             swerveSubsystem,
-            () -> DriverController.getRawAxis(translationAxis) * 0.25,
-            () -> DriverController.getRawAxis(strafeAxis) * 0.25,
-            () -> -DriverController.getRawAxis(rotationAxis) * 0.25,
+            () -> -translationLimiter.calculate(DriverController.getRawAxis(translationAxis) * 0.75),
+            () -> -strafeLimiter.calculate(DriverController.getRawAxis(strafeAxis) * 0.75),
+            () -> rotationLimiter.calculate(DriverController.getRawAxis(rotationAxis) * 0.75),
             () -> robotCentric.getAsBoolean()) // lambda probably not needed but why not
     );
 
-    coralCollectorArm.setDefaultCommand(
-      new RunCommand(() -> {
-        double articulateCoralIO= CoPilotController.getRawAxis(XboxController.Axis.kLeftY.value);
-        double coralIntakeIO = CoPilotController.getRawAxis(XboxController.Axis.kLeftX.value);
+    collectorHead.setDefaultCommand(
+      collectorHead.ArticulateCoralCollector(
+        () -> CoPilotController.getRawAxis(XboxController.Axis.kLeftY.value)
+      )
+    );
 
-        coralCollectorArm.ArticulateCoralCollector(() -> articulateCoralIO);
-        coralCollectorArm.CollectCoral(() -> coralIntakeIO);    
-      }, coralCollectorArm)
+    coralCollector.setDefaultCommand(
+      coralCollector.CollectCoral(
+        () -> CoPilotController.getRawAxis(XboxController.Axis.kLeftX.value)
+      )
     );
 
     algaeCollector.setDefaultCommand(
-      new RunCommand(() -> {
-        double articulateAlgeaIO = CoPilotController.getRawAxis(XboxController.Axis.kRightY.value);
-        double algaeIntakeIO = CoPilotController.getRawAxis(XboxController.Axis.kRightX.value);
-
-        algaeCollector.ArticulateAlgaeCollector(() -> articulateAlgeaIO);
-        algaeCollector.CollectAlgae(() -> algaeIntakeIO);
-      }, algaeCollector)
+      algaeCollector.ArticulateAndCollectAlgae(
+        () -> CoPilotController.getRawAxis(XboxController.Axis.kRightY.value),
+        () -> CoPilotController.getRawAxis(XboxController.Axis.kRightX.value)
+      )
     );
+
+    cageClimber.setDefaultCommand(
+      cageClimber.CageClimbStop());
+    
   configureBindings(); 
   }
 
   private void configureBindings() {
     resetHeading.whileTrue(new InstantCommand(() -> swerveSubsystem.resetHeading()));
 
-    new JoystickButton(CoPilotController, XboxController.Button.kA.value)
-    .onTrue(new InstantCommand(() -> coralCollectorArm.moveToState(CollectorArmState.COLLECT), coralCollectorArm)); 
+    //new JoystickButton(CoPilotController, XboxController.Button.kA.value)
+    //.onTrue(coralCollectorArm.moveToStateCommand(CollectorArmState.COLLECT, 3));
 
-    new JoystickButton(CoPilotController, XboxController.Button.kB.value)
-    .onTrue(new InstantCommand(() -> coralCollectorArm.moveToState(CollectorArmState.L1), coralCollectorArm));
+    //new JoystickButton(CoPilotController, XboxController.Button.kB.value)
+    //.onTrue(coralCollectorArm.moveToStateCommand(CollectorArmState.L1, 3));
 
-    new JoystickButton(CoPilotController, XboxController.Button.kX.value)
-    .onTrue(new InstantCommand(() -> coralCollectorArm.moveToState(CollectorArmState.L2), coralCollectorArm));
+    //new JoystickButton(CoPilotController, XboxController.Button.kX.value)
+    //.onTrue(coralCollectorArm.moveToStateCommand(CollectorArmState.L2, 3));
 
-    new JoystickButton(CoPilotController, XboxController.Button.kY.value)
-    .onTrue(new InstantCommand(() -> coralCollectorArm.moveToState(CollectorArmState.L3), coralCollectorArm));
+    //new JoystickButton(CoPilotController, XboxController.Button.kY.value)
+    //.onTrue(coralCollectorArm.moveToStateCommand(CollectorArmState.L3, 3));
 
-    new JoystickButton(CoPilotController, Constants.ControllerRawButtons.DPAD_EAST)
-    .whileTrue(new InstantCommand(() -> cageClimber.ReadyCageGrabber(), cageClimber));
-
-    new JoystickButton(CoPilotController, Constants.ControllerRawButtons.DPAD_WEST)
-    .whileTrue(new InstantCommand(() -> cageClimber.CageClimb(), cageClimber));
-
-    new JoystickButton(CoPilotController, Constants.ControllerRawButtons.DPAD_SOUTH)
-    .onTrue(new InstantCommand(() -> cageClimber.CageClimbStop(), cageClimber));
+    new JoystickButton(CoPilotController, XboxController.Button.kStart.value)
+    .onTrue(new InstantCommand(collectorArm::stopArm, collectorArm));
 
     new JoystickButton(CoPilotController, XboxController.Button.kBack.value)
     .onTrue(new InstantCommand(algaeCollector::StopAlgae));
 
-    new JoystickButton(CoPilotController, XboxController.Button.kStart.value)
-    .onTrue(new InstantCommand(coralCollectorArm::stopArm, coralCollectorArm));
+    new POVButton(CoPilotController, 90).whileTrue(
+      cageClimber.ReadyCageGrabber()
+    );
 
-    new JoystickButton(CoPilotController, Constants.ControllerRawButtons.DPAD_NORTH)
-    .whileTrue(new ManualArmControl(coralCollectorArm, CoPilotController));
+    new POVButton(CoPilotController, 270).whileTrue(
+      cageClimber.CageClimb()
+    );
 
+    new POVButton(CoPilotController, 180).onTrue(
+      cageClimber.CageClimbStop()
+    );
 
-
-
-    
-
-  
+    new POVButton(CoPilotController, 0).whileTrue(
+      new ManualArmControl(collectorArm, CoPilotController)
+    );
   }
 
   public Command getAutonomousCommand() {

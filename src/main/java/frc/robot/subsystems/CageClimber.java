@@ -30,7 +30,7 @@ public class CageClimber extends SubsystemBase {
   }
 
   private void configureWinchMotor(SparkMax motor, SparkMaxConfig config){
-    config.idleMode(Constants.CollectorArmConstants.DISABLE_NEUTRAL_MODE ? IdleMode.kCoast : IdleMode.kBrake);
+    config.idleMode(IdleMode.kBrake);
     config.smartCurrentLimit(Constants.CollectorArmConstants.CURRENT_LIMIT_NEO);
     config.secondaryCurrentLimit(Constants.CollectorArmConstants.MAX_CURRENT_LIMIT_NEO);
     config.voltageCompensation(Constants.CollectorArmConstants.VOLTAGE_COMPENSATION);
@@ -40,14 +40,14 @@ public class CageClimber extends SubsystemBase {
 
   public RunCommand ReadyCageGrabber() {
     return new RunCommand(() -> {
-      m_Winch.set(0.5);
+      m_Winch.set(-0.5);
     }, this);
     }
 
 
   public RunCommand CageClimb() {
     return new RunCommand(() -> {
-      m_Winch.set(-0.5);
+      m_Winch.set(0.5);
     }, this);
     }
 
