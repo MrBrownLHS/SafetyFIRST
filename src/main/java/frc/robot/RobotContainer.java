@@ -108,6 +108,10 @@ public class RobotContainer {
       )
     );
 
+    collectorArm.setDefaultCommand(
+      ManualArmControl
+    );
+
     cageClimber.setDefaultCommand(
       cageClimber.CageClimbStop());
     

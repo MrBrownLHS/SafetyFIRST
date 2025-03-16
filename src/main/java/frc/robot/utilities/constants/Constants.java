@@ -41,9 +41,9 @@ public class Constants {
         public static final double PIVOT_kV = 0.0;
         public static final double PIVOT_kA = 0.0;
 
-        public static final double LIFT_MAX_VELOCITY = 1.0; // Max velocity of the lift - NEEDS TUNING
+        public static final double LIFT_MAX_VELOCITY = 0.5; // Max velocity of the lift - NEEDS TUNING
         public static final double LIFT_MAX_ACCELERATION = 1.0; // Max acceleration of the lift - NEEDS TUNING
-        public static final double PIVOT_MAX_VELOCITY = 1.0; // Max velocity of the pivot - NEEDS TUNING
+        public static final double PIVOT_MAX_VELOCITY = 5.0; // Max velocity of the pivot - NEEDS TUNING
         public static final double PIVOT_MAX_ACCELERATION = 1.0; // Max acceleration of the pivot - NEEDS TUNING
         public static final double PIVOT_MIN_ANGLE = 30; // Min angle of the pivot - NEEDS TUNING
         public static final double PIVOT_MAX_ANGLE = 180; // Max angle of the pivot - NEEDS TUNING
@@ -222,7 +222,7 @@ public class Constants {
 
         /* Neutral Modes */
         public static final boolean activeNeutralMode = true; // What to do when neutral power is applied to the drivetrain while running
-        public static final boolean disabledNeutralMode = false; // What to do when neutral power is applied to the drivetrain while disabled
+        public static final boolean disabledNeutralMode = true; // What to do when neutral power is applied to the drivetrain while disabled
 
         /* Motor and Encoder Inversions (should all be CCW+) */
         public static final boolean driveInverted = SwerveModule.driveMotorInverted;

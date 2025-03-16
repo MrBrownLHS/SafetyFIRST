@@ -25,10 +25,7 @@ public class ManualArmControl extends Command {
   public ManualArmControl(CollectorArm collectorArm, Joystick coPilotController) {
     this.collectorArm = collectorArm;
     this.coPilotController = coPilotController;
-        addRequirements(collectorArm);
-    
-    
-    
+        addRequirements(collectorArm);    
   }
 
 
@@ -40,10 +37,7 @@ public class ManualArmControl extends Command {
 
   
   @Override
-  public void execute() {// If D-Pad North is pressed, override preset setpoints and allow manual control
-    if (coPilotController.getPOV() == 0) { 
-        
-        // Lift Control with Bumpers
+  public void execute() {
         if (coPilotController.getRawButton(XboxController.Button.kLeftBumper.value)) {
             manualLiftPosition -= LIFT_INCREMENT; // Decrease lift height
         } 
@@ -75,7 +69,7 @@ public class ManualArmControl extends Command {
         collectorArm.setLiftPosition(manualLiftPosition);
         collectorArm.setPivotPosition(manualPivotAngle);
     }
-}
+
 
   // Called once the command ends or is interrupted.
   @Override
@@ -87,3 +81,4 @@ public class ManualArmControl extends Command {
     return false;
   }
 }
+

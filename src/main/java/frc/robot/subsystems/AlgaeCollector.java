@@ -52,13 +52,13 @@ public class AlgaeCollector extends SubsystemBase {
       }, this);
     }
   
-  public RunCommand CollectAlgae(DoubleSupplier joystickInput) {
-      return new RunCommand(() -> {
-        double rawInput = joystickInput.getAsDouble();
+  //public RunCommand CollectAlgae(DoubleSupplier joystickInput) {
+      //return new RunCommand(() -> {
+        //double limitedInput = joystickInput.getAsDouble();
         //AlgaeIntake1.set(rawInput);
         //AlgaeIntake2.set(-rawInput);
-      }, this);
-    }
+      //}, this);
+   // }
 
   public RunCommand ArticulateAndCollectAlgae(DoubleSupplier articulate, DoubleSupplier collect) {
     return new RunCommand(() -> {
