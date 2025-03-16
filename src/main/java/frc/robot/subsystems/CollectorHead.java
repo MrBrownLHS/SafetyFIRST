@@ -37,8 +37,8 @@ public class CollectorHead extends SubsystemBase {
 
   private void configureArticulateCollectorMotor(SparkMax motor, SparkMaxConfig config){
     config.idleMode(IdleMode.kBrake);
-    config.smartCurrentLimit(Constants.CollectorArmConstants.CURRENT_LIMIT_550);
-    config.secondaryCurrentLimit(Constants.CollectorArmConstants.MAX_CURRENT_LIMIT_550);
+    config.smartCurrentLimit(Constants.CollectorArmConstants.CURRENT_LIMIT_NEO);
+    config.secondaryCurrentLimit(Constants.CollectorArmConstants.MAX_CURRENT_LIMIT_NEO);
     config.voltageCompensation(Constants.CollectorArmConstants.VOLTAGE_COMPENSATION);
     motor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
   }
