@@ -39,8 +39,8 @@ public class AlgaeCollector extends SubsystemBase {
     motor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
   }
 
-  public RunCommand AlgaeOut() {
-      return new RunCommand(() -> {
+  public Command AlgaeOut() {
+      return new Command(() -> {
         m_AlgaeArticulate.set(-0.5);
       }, this);
       }
