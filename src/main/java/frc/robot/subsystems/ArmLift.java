@@ -36,27 +36,32 @@ public class ArmLift extends SubsystemBase {
     private final TrapezoidProfile liftProfile;
     private final ArmFeedforward liftFF;
 
-    private static final double LIFT_INCREMENT = 1.0;  // Inches per button press
-    private static final double JOYSTICK_DEADBAND = 0.05; // Ignore small joystick movements
+    private static final double LIFT_COLLECT = 1.0;
+    private static final double LIFT_L1 = 5.0;
+    private static final double LIFT_L2 = 10.0;
+    private static final double LIFT_L3 = 15.0;
 
-    private static final double LIFT_MAX_VELOCITY = 1.0;
-    private static final double LIFT_MAX_ACCELERATION = 10;
+   
 
-    private static final double LIFT_MAX_HEIGHT = 10;
-    private static final double LIFT_MIN_HEIGHT = 0;
+    private static final double LIFT_MAX_VELOCITY = 10.0;
+    private static final double LIFT_MAX_ACCELERATION = 20.0;
+
+    private static final double LIFT_MAX_HEIGHT = 20.0;
+    private static final double LIFT_MIN_HEIGHT = 0.0;
 
     private static final double LIFT_GEAR_RATIO = 84.0;
     private static final double COG_DIAMETER_INCHES = 2.0;
     private static final double LIFT_ENCODER_TO_INCHES = (Math.PI * COG_DIAMETER_INCHES) / LIFT_GEAR_RATIO;
 
-    private static final double kP = 0.05;
+    private static final double kP = 0.1;
     private static final double kI = 0.0;
-    private static final double kD = 0.01;
-    private static final double kG = 0.3;
+    private static final double kD = 0.02;
+    private static final double kG = 0.4;
 
     public ArmLift() {
       m_Lift = new SparkMax(Constants.CollectorArmConstants.LIFT_MOTOR_ID, MotorType.kBrushless);
       liftEncoder = m_Lift.getEncoder();
+     
       motorConfig = new SparkMaxConfig();
 
       liftPID = new PIDController(kP, kI, kD);
@@ -98,35 +103,20 @@ public class ArmLift extends SubsystemBase {
         liftGoal = new TrapezoidProfile.State(targetInches, 0);
         liftState = liftProfile.calculate(0.02, liftState, liftGoal);
 
-        double pidOutput = liftPID.calculate(liftEncoder.getPosition(), liftState.position);
-        double feedforward = liftFF.calcualte(Math.to) //finish here based on AlgaeArticulate
+        double pidOutput = liftPID.calculate(getLiftHeight(), liftState.position);
+        double feedforward = liftFF.calculate(liftState.velocity, 0); // Conversion to inches
+        double motorOutput = pidOutput + feedforward;
+
+        m_Lift.set(MathUtil.clamp(motorOutput, -1.0, 1.0));
 
     }
 
     
-    public double getLiftHeightInches() {
-        return liftEncoder.getAbsolutePosition().getValueAsDouble()* Constants.CollectorArmConstants.ENCODER_TO_INCHES;
-    }
-
-    public void setLiftPower(double power) {
-        double currentHeight = getLiftHeightInches();
-        double safePower = MathUtil.clamp(power, -1.0, 1.0);
-
-        // Prevent movement beyond limits
-        if ((safePower < 0 && currentHeight <= Constants.CollectorArmConstants.LIFT_MIN_HEIGHT) || 
-            (safePower > 0 && currentHeight >= Constants.CollectorArmConstants.LIFT_MAX_HEIGHT)) {
-            safePower = 0; // Stop movement
-        }
-
-        m_Lift.set(safePower);
-    }
-
-    // 🏗 New: Lift Increment Control (for button presses)
+  // 🏗 New: Lift Increment Control (for button presses)
     public void incrementLift(boolean up) {
       final double targetHeight = MathUtil.clamp(
           getLiftHeightInches() + (up ? LIFT_INCREMENT : -LIFT_INCREMENT), 
-          Constants.CollectorArmConstants.LIFT_MIN_HEIGHT, 
-          Constants.CollectorArmConstants.LIFT_MAX_HEIGHT);
+          LIFT_MIN_HEIGHT, LIFT_MAX_HEIGHT);
       
       double direction = (targetHeight > getLiftHeightInches()) ? 1.0 : -1.0;
       m_Lift.set(direction * 0.5); // Adjust speed as needed
