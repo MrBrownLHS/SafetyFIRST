@@ -5,8 +5,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import java.util.function.DoubleSupplier;
-import java.util.jar.Attributes.Name;
-
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.MagnetSensorConfigs;
 import com.ctre.phoenix6.hardware.CANcoder;
@@ -15,32 +13,71 @@ import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
-
 import frc.robot.utilities.constants.Constants;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.DataLogManager;
-import edu.wpi.first.wpilibj.DriverStation; 
 import edu.wpi.first.math.MathUtil;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.RelativeEncoder;
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.controller.ArmFeedforward;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.math.MathUtil;
 
 
 public class ArmLift extends SubsystemBase {
     private final SparkMax m_Lift;
-    private final CANcoder liftEncoder;
+    private final RelativeEncoder liftEncoder;
     private final SparkMaxConfig motorConfig;
-    
+    private final PIDController liftPID;
+    private final TrapezoidProfile.Constraints liftConstraints;
+    private TrapezoidProfile.State liftGoal, liftState;
+    private final TrapezoidProfile liftProfile;
+    private final ArmFeedforward liftFF;
 
     private static final double LIFT_INCREMENT = 1.0;  // Inches per button press
     private static final double JOYSTICK_DEADBAND = 0.05; // Ignore small joystick movements
 
+    private static final double LIFT_MAX_VELOCITY = 1.0;
+    private static final double LIFT_MAX_ACCELERATION = 10;
+
+    private static final double LIFT_MAX_HEIGHT = 10;
+    private static final double LIFT_MIN_HEIGHT = 0;
+
+    private static final double LIFT_GEAR_RATIO = 84.0;
+    private static final double COG_DIAMETER_INCHES = 2.0;
+    private static final double LIFT_ENCODER_TO_INCHES = (Math.PI * COG_DIAMETER_INCHES) / LIFT_GEAR_RATIO;
+
+    private static final double kP = 0.05;
+    private static final double kI = 0.0;
+    private static final double kD = 0.01;
+    private static final double kG = 0.3;
+
     public ArmLift() {
       m_Lift = new SparkMax(Constants.CollectorArmConstants.LIFT_MOTOR_ID, MotorType.kBrushless);
-      liftEncoder = new CANcoder(Constants.CollectorArmConstants.LIFT_ENCODER_ID);
+      liftEncoder = m_Lift.getEncoder();
       motorConfig = new SparkMaxConfig();
 
+      liftPID = new PIDController(kP, kI, kD);
+      liftPID.setTolerance(2.0);
+
+      liftFF = new ArmFeedforward(0.1, kG, 0.02, 0.01);
+
+      liftConstraints = new TrapezoidProfile.Constraints(LIFT_MAX_VELOCITY, LIFT_MAX_ACCELERATION);
+      liftProfile = new TrapezoidProfile(liftConstraints);
+
+      liftGoal = new TrapezoidProfile.State(LIFT_MAX_HEIGHT, 0);
+      liftState = new TrapezoidProfile.State(liftEncoder.getPosition(), 0);
+
+        SmartDashboard.putNumber("Lift kP", kP);
+        SmartDashboard.putNumber("Lift kI", kI);
+        SmartDashboard.putNumber("Lift kD", kD);
+        SmartDashboard.putBoolean("Lift Tuning", false);
+
+
       configureMotors(m_Lift, motorConfig, Constants.CollectorArmConstants.CURRENT_LIMIT_NEO);
-      configureEncoders(liftEncoder, Constants.CollectorArmConstants.ENCODER_TO_INCHES);
+      resetEncoder();
     }
    
     private void configureMotors(SparkMax motor, SparkMaxConfig config, int currentLimit) {
@@ -51,19 +88,22 @@ public class ArmLift extends SubsystemBase {
         motor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
     }
 
-    private void configureEncoders(CANcoder encoder, double magnetOffset) {
-        CANcoderConfiguration encoderConfig = new CANcoderConfiguration();
-        MagnetSensorConfigs magnetConfig = new MagnetSensorConfigs();
-    
-        double zeroOffset = encoder.getAbsolutePosition().getValueAsDouble(); // Read initial position
-        magnetConfig.MagnetOffset = magnetOffset - zeroOffset; // Adjust offset dynamically
-        magnetConfig.SensorDirection = SensorDirectionValue.Clockwise_Positive;
-    
-        encoderConfig.MagnetSensor = magnetConfig;
-        encoder.getConfigurator().apply(encoderConfig);
+    public void resetEncoder(){
+        liftEncoder.setPosition(0.0);
     }
 
+    public void setPosition(double targetInches) {
+        targetInches = MathUtil.clamp(targetInches, LIFT_MAX_HEIGHT, LIFT_MIN_HEIGHT);
 
+        liftGoal = new TrapezoidProfile.State(targetInches, 0);
+        liftState = liftProfile.calculate(0.02, liftState, liftGoal);
+
+        double pidOutput = liftPID.calculate(liftEncoder.getPosition(), liftState.position);
+        double feedforward = liftFF.calcualte(Math.to) //finish here based on AlgaeArticulate
+
+    }
+
+    
     public double getLiftHeightInches() {
         return liftEncoder.getAbsolutePosition().getValueAsDouble()* Constants.CollectorArmConstants.ENCODER_TO_INCHES;
     }
