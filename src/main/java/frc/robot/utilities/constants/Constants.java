@@ -100,8 +100,8 @@ public class Constants {
 
     public static final class AlgaeCollectorConstants {
         public static final int ALGAE_ARTICULATE_MOTOR_ID = 20;
-        public static final int ALGAE_INTAKE_MOTOR_1_ID = 21;
-        public static final int ALGAE_INTAKE_MOTOR_2_ID = 22;
+        public static final int ALGAE_CLAW_MOTOR_ID= 21;
+        
 
         public static final double ALGAE_RATE_LIMIT = 2.9;
         public static final double INTAKE_SPEED = 0.25;

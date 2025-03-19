@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.utilities.constants.Constants;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.Command;
 
 import java.util.function.DoubleSupplier;
 
@@ -21,7 +22,7 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.math.MathUtil;
 
@@ -32,6 +33,8 @@ public class AlgaeArticulate extends SubsystemBase {
     private final PIDController algaeArticulatePID;
     private final TrapezoidProfile.Constraints articulateConstraints;
     private TrapezoidProfile.State articulateGoal, articulateState;
+    private final TrapezoidProfile algaeArticulateProfile;
+    private final ArmFeedforward algaeArticulateFF;
     private final SparkMaxConfig motorConfig;
     
     private static final double UP_POSITION = 0.0;   // Start position (Up)
@@ -43,17 +46,22 @@ public class AlgaeArticulate extends SubsystemBase {
     private static final double kP = 0.05;
     private static final double kI = 0.0;
     private static final double kD = 0.01;
+    private static final double kG = 0.3;
 
     public AlgaeArticulate() {
-        m_AlgaeArticulate = new SparkMax(Constants.CollectorArmConstants.ALGAE_ARTICULATE_MOTOR_ID, MotorType.kBrushless); // Set to your CAN ID
+        m_AlgaeArticulate = new SparkMax(Constants.AlgaeCollectorConstants.ALGAE_ARTICULATE_MOTOR_ID, MotorType.kBrushless); 
         motorConfig = new SparkMaxConfig();
-       
-
         algaeArticulateEncoder = m_AlgaeArticulate.getEncoder();
+
+        
         algaeArticulatePID = new PIDController(kP, kI, kD);
         algaeArticulatePID.setTolerance(2.0); // Within 2 degrees is "at target"
 
+        algaeArticulateFF = new ArmFeedforward(0.1, kG, 0.02, 0.01);
+
         articulateConstraints = new TrapezoidProfile.Constraints(MAX_VELOCITY, MAX_ACCELERATION);
+        algaeArticulateProfile = new TrapezoidProfile(articulateConstraints);
+
         articulateGoal = new TrapezoidProfile.State(UP_POSITION, 0);
         articulateState = new TrapezoidProfile.State(algaeArticulateEncoder.getPosition(), 0);
 
@@ -63,25 +71,33 @@ public class AlgaeArticulate extends SubsystemBase {
         SmartDashboard.putBoolean("AlgaeArticulate Tuning", false);
 
         configureMotors(m_AlgaeArticulate, motorConfig, Constants.CollectorArmConstants.CURRENT_LIMIT_NEO);
+
+        resetEncoder();
     }
 
     private void configureMotors(SparkMax motor, SparkMaxConfig config, int currentLimit) {
-        config.idleMode(IdleMode.kBrake);
-        config.smartCurrentLimit(currentLimit);
-        config.secondaryCurrentLimit(Constants.CollectorArmConstants.MAX_CURRENT_LIMIT_NEO);
-        config.voltageCompensation(Constants.CollectorArmConstants.VOLTAGE_COMPENSATION);
-        motor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
-    }
+      config.idleMode(IdleMode.kBrake);
+      config.smartCurrentLimit(currentLimit);
+      config.secondaryCurrentLimit(Constants.CollectorArmConstants.MAX_CURRENT_LIMIT_NEO);
+      config.voltageCompensation(Constants.CollectorArmConstants.VOLTAGE_COMPENSATION);
+      motor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+  }
+
+    public void resetEncoder() {
+      algaeArticulateEncoder.setPosition(0.0);
+  }
+ 
 
     public void setPosition(double targetDegrees) {
         targetDegrees = MathUtil.clamp(targetDegrees, UP_POSITION, OUT_POSITION);
 
         articulateGoal = new TrapezoidProfile.State(targetDegrees, 0);
-        TrapezoidProfile profile = new TrapezoidProfile(articulateConstraints);
-        articulateState = profile.calculate(0.02, articulateState, articulateGoal);
+        articulateState = algaeArticulateProfile.calculate(0.02, articulateState, articulateGoal);
 
         double pidOutput = algaeArticulatePID.calculate(algaeArticulateEncoder.getPosition(), articulateState.position);
-        m_AlgaeArticulate.set(pidOutput);
+        double feedforward = algaeArticulateFF.calculate(Math.toRadians(articulateState.position), 0.0);
+        double motorOutput = pidOutput + feedforward;
+        m_AlgaeArticulate.set(MathUtil.clamp(motorOutput, -1.0, 1.0));
     }
 
     public boolean isAtTarget() {
@@ -101,14 +117,14 @@ public class AlgaeArticulate extends SubsystemBase {
     }
 
     public Command manualControl(DoubleSupplier input) {
-        return new InstantCommand(() -> {
+        return new RunCommand(() -> {
             double rawInput = input.getAsDouble();
             double limitedInput = MathUtil.clamp(rawInput, -1.0, 1.0);
             m_AlgaeArticulate.set(limitedInput * 0.5); // Limit manual speed
         }, this);
     }
 
-    public InstantCommand stopMotor() {
+    public Command stopMotor() {
         return new InstantCommand(this::stop, this);
     }
 
@@ -122,6 +138,8 @@ public class AlgaeArticulate extends SubsystemBase {
             algaeArticulatePID.setI(SmartDashboard.getNumber("AlgaeArticulate kI", kI));
             algaeArticulatePID.setD(SmartDashboard.getNumber("AlgaeArticulate kD", kD));
         }
+    
+        
     }
 }
 
