@@ -5,7 +5,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import java.util.function.DoubleSupplier;
-import java.util.jar.Attributes.Name;
+
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.MagnetSensorConfigs;
@@ -26,11 +26,16 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 
 public class ArmPivot extends SubsystemBase {
     private final SparkMax m_Pivot;
-    private final CANcoder pivotEncoder;
+    private final RelativeEncoder pivotEncoder;
     private final SparkMaxConfig motorConfig;
+    private final PIDController pivotPID
+    private final TrapezoidProfile.Constraints pivotConstriants;
+    private TrapezoidProfile.State pivotGoal, pivotState;
+    private final TrapezoidProfile pivotProfile;
+    private final ArmFeedForward pivotFF;
+    
 
-    private static final double PIVOT_INCREMENT = 1.0;  // Inches per button press
-    private static final double JOYSTICK_DEADBAND = 0.05; // Ignore small joystick movements
+
 
     public ArmPivot() {
         m_Pivot = new SparkMax(Constants.CollectorArmConstants.PIVOT_MOTOR_ID, MotorType.kBrushless);
