@@ -3,12 +3,7 @@ package frc.robot.subsystems;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.RunCommand;
-import java.util.function.DoubleSupplier;
-import com.ctre.phoenix6.configs.CANcoderConfiguration;
-import com.ctre.phoenix6.configs.MagnetSensorConfigs;
-import com.ctre.phoenix6.hardware.CANcoder;
-import com.ctre.phoenix6.signals.SensorDirectionValue;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
@@ -22,8 +17,7 @@ import com.revrobotics.RelativeEncoder;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.controller.ArmFeedforward;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.math.MathUtil;
+
 
 
 public class ArmLift extends SubsystemBase {
@@ -40,6 +34,7 @@ public class ArmLift extends SubsystemBase {
     private static final double LIFT_L1 = 5.0;
     private static final double LIFT_L2 = 10.0;
     private static final double LIFT_L3 = 15.0;
+    private static final double LIFT_FLOOR = 3.0;
 
    
 
@@ -49,19 +44,18 @@ public class ArmLift extends SubsystemBase {
     private static final double LIFT_MAX_HEIGHT = 20.0;
     private static final double LIFT_MIN_HEIGHT = 0.0;
 
-    private static final double LIFT_GEAR_RATIO = 84.0;
+    private static final double LIFT_GEAR_RATIO = 64.0;
     private static final double COG_DIAMETER_INCHES = 2.0;
     private static final double LIFT_ENCODER_TO_INCHES = (Math.PI * COG_DIAMETER_INCHES) / LIFT_GEAR_RATIO;
 
-    private static final double kP = 0.1;
-    private static final double kI = 0.0;
-    private static final double kD = 0.02;
+    private static double kP = 0.1;
+    private static double kI = 0.0;
+    private static double kD = 0.01;
     private static final double kG = 0.4;
 
     public ArmLift() {
       m_Lift = new SparkMax(Constants.CollectorArmConstants.LIFT_MOTOR_ID, MotorType.kBrushless);
       liftEncoder = m_Lift.getEncoder();
-     
       motorConfig = new SparkMaxConfig();
 
       liftPID = new PIDController(kP, kI, kD);
@@ -97,67 +91,77 @@ public class ArmLift extends SubsystemBase {
         liftEncoder.setPosition(0.0);
     }
 
+    public double getLiftHeight() {
+        return liftEncoder.getPosition() * LIFT_ENCODER_TO_INCHES;
+    }
+
     public void setPosition(double targetInches) {
-        targetInches = MathUtil.clamp(targetInches, LIFT_MAX_HEIGHT, LIFT_MIN_HEIGHT);
+        liftGoal = new TrapezoidProfile.State(
+            MathUtil.clamp(targetInches, LIFT_MIN_HEIGHT, LIFT_MAX_HEIGHT), 0);   
+        
+    }
 
-        liftGoal = new TrapezoidProfile.State(targetInches, 0);
-        liftState = liftProfile.calculate(0.02, liftState, liftGoal);
+    public Command setLiftHeightCommand(double targetInches) {
+        return new InstantCommand(() -> setPosition(targetInches), this)
+        .andThen(new WaitUntilCommand(() -> Math.abs(getLiftHeight() - targetInches) < 1.0))
+        .andThen(StopLift());
+    }
 
-        double pidOutput = liftPID.calculate(getLiftHeight(), liftState.position);
-        double feedforward = liftFF.calculate(liftState.velocity, 0); // Conversion to inches
-        double motorOutput = pidOutput + feedforward;
+    public Command moveLiftToL1() {
+        return setLiftHeightCommand(LIFT_L1);
+    }
 
-        m_Lift.set(MathUtil.clamp(motorOutput, -1.0, 1.0));
+    public Command moveLiftToL2() {
+        return setLiftHeightCommand(LIFT_L2);
+    }
 
+    public Command moveLiftToL3() {
+        return setLiftHeightCommand(LIFT_L3);
+    }
+
+    public Command moveLiftToCollect() {
+        return setLiftHeightCommand(LIFT_COLLECT);
+    }
+
+    public Command moveLiftToFloor() {
+        return setLiftHeightCommand(LIFT_FLOOR);
     }
 
     
-  // 🏗 New: Lift Increment Control (for button presses)
-    public void incrementLift(boolean up) {
-      final double targetHeight = MathUtil.clamp(
-          getLiftHeightInches() + (up ? LIFT_INCREMENT : -LIFT_INCREMENT), 
-          LIFT_MIN_HEIGHT, LIFT_MAX_HEIGHT);
-      
-      double direction = (targetHeight > getLiftHeightInches()) ? 1.0 : -1.0;
-      m_Lift.set(direction * 0.5); // Adjust speed as needed
-  
-      // Stop the motor when reaching target
-      new Thread(() -> {
-          while ((direction > 0 && getLiftHeightInches() < targetHeight) ||
-                 (direction < 0 && getLiftHeightInches() > targetHeight)) {
-              try {
-                  Thread.sleep(10); // Small delay to check height periodically
-              } catch (InterruptedException e) {
-                  e.printStackTrace();
-              }
-          }
-          m_Lift.set(0); // Stop motor
-      }).start();
-
-    }
-
-    // 🏗 New: Joystick-Controlled Lift Movement with Deadband
-    public Command liftCommand(DoubleSupplier joystickInput) {
-        return new RunCommand(() -> {
-            double input = -joystickInput.getAsDouble();
-            if (Math.abs(input) > JOYSTICK_DEADBAND) {
-                setLiftPower(input);
-            } else {
-                setLiftPower(0); // Stop if input is too small
-            }
+    public Command StopLift() {
+        return new InstantCommand(() -> {
+            m_Lift.stopMotor();
+            liftPID.reset();
+            liftGoal = new TrapezoidProfile.State(getLiftHeight(), 0);
+            liftState = new TrapezoidProfile.State(getLiftHeight(), 0);
+            m_Lift.set(0);
         }, this);
     }
-
-    public Command StopLift() {
-    return new InstantCommand(() -> m_Lift.stopMotor(), this);
-}
       
-
-    
-
-
     @Override
     public void periodic() {
-        SmartDashboard.putNumber("Lift Height", getLiftHeightInches());
+        double error = Math.abs(getLiftHeight() - liftGoal.position);
+        if (error > 0.5) {
+            liftState = liftProfile.calculate(0.02, liftState, liftGoal);
+            double pidOutput = liftPID.calculate(getLiftHeight(), liftState.position);
+            double feedforward = liftFF.calculate(0, liftGoal.position);
+            double motorOutput = pidOutput + feedforward;
+            m_Lift.set(MathUtil.clamp(motorOutput, -1.0, 1.0));
+        } else {
+            m_Lift.stopMotor();
+        } 
+              
+        SmartDashboard.putNumber("Lift Height", getLiftHeight());
+
+        if (SmartDashboard.getBoolean("Lift Tuning", false)) {
+            kP = SmartDashboard.getNumber("Lift kP", kP);
+            kI = SmartDashboard.getNumber("Lift kI", kI);
+            kD = SmartDashboard.getNumber("Lift kD", kD);
+            liftPID.setP(kP);
+            liftPID.setI(kI);
+            liftPID.setD(kD);
+        }
     }
+         
 }
+

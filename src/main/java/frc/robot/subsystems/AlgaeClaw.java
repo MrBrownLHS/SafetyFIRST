@@ -38,6 +38,8 @@ public class AlgaeClaw extends SubsystemBase {
     resetEncoder();
   }
 
+ 
+
   private void configureMotors(SparkMax motor, SparkMaxConfig config, int currentLimit) {
     config.idleMode(IdleMode.kBrake);
     config.smartCurrentLimit(currentLimit);
@@ -50,6 +52,9 @@ public class AlgaeClaw extends SubsystemBase {
     clawEncoder.setPosition(0.0);
   }
 
+  public double getClawPosition() {
+      return clawEncoder.getPosition();
+  }
   public void openClaw() {
     m_Claw.set(0.3);
   }
@@ -69,11 +74,6 @@ public class AlgaeClaw extends SubsystemBase {
 
   }
 
-  
-  
-  public double getClawPosition() {
-      return clawEncoder.getPosition();
-  }
 
   public boolean isClamped() {
       return clawEncoder.getPosition() <= CLAW_CLAMP;
@@ -103,7 +103,7 @@ public class AlgaeClaw extends SubsystemBase {
 
   public Command ClampClaw() {
     return new InstantCommand(() -> setPosition(CLAW_CLAMP), this)
-            .andThen(new WaitUntilCommand(this::isOpen))
+            .andThen(new WaitUntilCommand(this::isClamped))
             .andThen(new InstantCommand(this::stopClaw));
   }
 
