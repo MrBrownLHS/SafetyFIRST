@@ -103,7 +103,7 @@ public class ArmLift extends SubsystemBase {
 
     public Command setLiftHeightCommand(double targetInches) {
         return new InstantCommand(() -> setPosition(targetInches), this)
-        .andThen(new WaitUntilCommand(() -> Math.abs(getLiftHeight() - targetInches) < 1.0))
+        .andThen(new WaitUntilCommand(() -> Math.abs(getLiftHeight() - targetInches) < 0.5))
         .andThen(StopLift());
     }
 
@@ -134,14 +134,14 @@ public class ArmLift extends SubsystemBase {
             liftPID.reset();
             liftGoal = new TrapezoidProfile.State(getLiftHeight(), 0);
             liftState = new TrapezoidProfile.State(getLiftHeight(), 0);
-            m_Lift.set(0);
+            m_Lift.set(liftFF.calculate(0, getLiftHeight()));
         }, this);
     }
       
     @Override
     public void periodic() {
         double error = Math.abs(getLiftHeight() - liftGoal.position);
-        if (error > 0.5) {
+        if (error > 0.2) {
             liftState = liftProfile.calculate(0.02, liftState, liftGoal);
             double pidOutput = liftPID.calculate(getLiftHeight(), liftState.position);
             double feedforward = liftFF.calculate(0, liftGoal.position);

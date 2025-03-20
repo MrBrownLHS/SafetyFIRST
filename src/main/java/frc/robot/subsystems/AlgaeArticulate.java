@@ -128,7 +128,7 @@ public class AlgaeArticulate extends SubsystemBase {
             algaeArticulatePID.reset();
             articulateGoal = new TrapezoidProfile.State(getAlgaeArticulateAngle(), 0);
             articulateState = new TrapezoidProfile.State(getAlgaeArticulateAngle(), 0);
-            m_AlgaeArticulate.set(0);
+            m_AlgaeArticulate.set(algaeArticulateFF.calculate(0, getAlgaeArticulateAngle()));
         }, this);
     }
     
@@ -136,7 +136,7 @@ public class AlgaeArticulate extends SubsystemBase {
     @Override
     public void periodic() {
         double error = Math.abs(getAlgaeArticulateAngle() - articulateGoal.position);
-        if(error > 0.5) {
+        if(error > 0.2) {
             articulateState = algaeArticulateProfile.calculate(0.02, articulateState, articulateGoal);
             double pidOutput = algaeArticulatePID.calculate(getAlgaeArticulateAngle(), articulateState.position);
             double feedforward = algaeArticulateFF.calculate(0, articulateGoal.position);
