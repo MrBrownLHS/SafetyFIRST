@@ -23,9 +23,9 @@ import frc.robot.utilities.constants.Constants;
 
 import frc.robot.subsystems.CollectorHead;
 import frc.robot.subsystems.CoralCollector;
-
+import frc.robot.subsystems.AlgaeClaw;
 import frc.robot.subsystems.CageClimber;
-import frc.robot.subsystems.AlgaeCollector;
+import frc.robot.subsystems.AlgaeArticulate;
 import frc.robot.subsystems.ArmLift;
 import frc.robot.subsystems.ArmPivot;
 import frc.robot.commands.AutoCenterStart;
@@ -41,7 +41,8 @@ public class RobotContainer {
 
   private final Joystick CoPilotController;
   private final CageClimber cageClimber;
-  private final AlgaeCollector algaeCollector;
+  private final AlgaeArticulate algaeArticulate;
+  private final AlgaeClaw algaeClaw;
   private final CollectorHead collectorHead;
   private final CoralCollector coralCollector;
   private final ArmLift armLift;
@@ -67,7 +68,8 @@ public class RobotContainer {
     DriverController = new Joystick(0);
     CoPilotController = new Joystick(1);
     cageClimber = new CageClimber();
-    algaeCollector = new AlgaeCollector();
+    algaeArticulate = new AlgaeArticulate();
+    algaeClaw = new AlgaeClaw();
     collectorHead = new CollectorHead();
     coralCollector = new CoralCollector();
     armLift = new ArmLift();
@@ -101,39 +103,33 @@ public class RobotContainer {
     );
 
    
-    armLift.setDefaultCommand(
-      armLift.liftCommand(
+    algaeArticulate.setDefaultCommand(
+      algaeArticulate.AlgaeUpDown(
       () -> CoPilotController.getRawAxis(XboxController.Axis.kRightY.value))
     );
 
+    algaeClaw.setDefaultCommand(
+      algaeClaw.StopClaw()
+    );
 
+    armLift.setDefaultCommand(
+      armLift.StopLift()
+    );
 
     armPivot.setDefaultCommand(
-     armPivot.pivotCommand(
-      () -> CoPilotController.getRawAxis(XboxController.Axis.kRightX.value))
+      armPivot.StopPivot()
     );
-  
     
-
    collectorHead.setDefaultCommand(
      collectorHead.ArticulateCoralCollector(
       () -> CoPilotController.getRawAxis(XboxController.Axis.kLeftY.value) * 0.1
       )
     );
 
-    coralCollector.setDefaultCommand(
-      coralCollector.CollectCoral(
-       () -> CoPilotController.getRawAxis(XboxController.Axis.kLeftX.value)
-   )
-   );
-
-    algaeCollector.setDefaultCommand(
-      algaeCollector.StopAlgae()
-    );
-
-  
+        
     cageClimber.setDefaultCommand(
-      cageClimber.CageClimbStop());
+      cageClimber.CageClimbStop()
+    );
 
       
   configureBindings(); 

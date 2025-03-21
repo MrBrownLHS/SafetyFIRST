@@ -15,9 +15,9 @@ public class Constants {
     public static final class CollectorArmConstants {
         // CAN IDs
         public static final int LIFT_MOTOR_ID = 13;
-        public static final int LIFT_ENCODER_ID = 14;
+        
         public static final int PIVOT_MOTOR_ID = 15;
-        public static final int PIVOT_ENCODER_ID = 16;
+        
         public static final int CORAL_COLLECT_MOTOR_ID = 17;
         public static final int CORAL_ARTICULATE_MOTOR_ID = 18;
         
@@ -30,32 +30,7 @@ public class Constants {
         public static final double PIVOT_kI = 0.0;
         public static final double PIVOT_kD = 0.0;
        
-        // Feedforward/Trapazoidal Constants - NEEDS TUNING
-        public static final double LIFT_kS = 0.0;
-        public static final double LIFT_kG = 0.0;
-        public static final double LIFT_kV = 0.0;
-        public static final double LIFT_kA = 0.0;
-
-        public static final double PIVOT_kS = 0.0;
-        public static final double PIVOT_kG = 0.0;
-        public static final double PIVOT_kV = 0.0;
-        public static final double PIVOT_kA = 0.0;
-
-        public static final double LIFT_MAX_VELOCITY = 0.5; // Max velocity of the lift - NEEDS TUNING
-        public static final double LIFT_MAX_ACCELERATION = 1.0; // Max acceleration of the lift - NEEDS TUNING
-        public static final double PIVOT_MAX_VELOCITY = 5.0; // Max velocity of the pivot - NEEDS TUNING
-        public static final double PIVOT_MAX_ACCELERATION = 1.0; // Max acceleration of the pivot - NEEDS TUNING
-        public static final double PIVOT_MIN_ANGLE = 30; // Min angle of the pivot - NEEDS TUNING
-        public static final double PIVOT_MAX_ANGLE = 180; // Max angle of the pivot - NEEDS TUNING
-        public static final double LIFT_MIN_HEIGHT = 0; // Min height of the lift - NEEDS TUNING
-        public static final double LIFT_MAX_HEIGHT = 50; // Max height of the lift - NEEDS TUNING
-
-        
-
-        // Lift Encoder Postions - NEEDS TUNING
-        public static final double LIFT_TOLERANCE = 1.0; //Tolerance for PID - NEEDS TUNING
-        public static final double PIVOT_TOLERANCE = 1.0; //Tolerance for PID - NEEDS TUNING
-         
+             
         public static final double ENCODER_TO_DEGREES = 360.0 / 4096.0; 
         public static final double COG_DIAMETER_INCHES = 2.0; // Diameter of the center of gravity pulley in inches - NEEDS TUNING
         public static final double LIFT_GEAR_RATIO = 1.0; // Gear ratio of the lift mechanism - NEEDS TUNING
@@ -101,10 +76,6 @@ public class Constants {
     public static final class AlgaeCollectorConstants {
         public static final int ALGAE_ARTICULATE_MOTOR_ID = 20;
         public static final int ALGAE_CLAW_MOTOR_ID= 21;
-        
-
-        public static final double ALGAE_RATE_LIMIT = 2.9;
-        public static final double INTAKE_SPEED = 0.25;
     }
 
     public static final class ModuleConstants {

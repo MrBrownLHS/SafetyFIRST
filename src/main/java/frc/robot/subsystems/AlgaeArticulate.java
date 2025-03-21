@@ -21,6 +21,7 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -36,21 +37,22 @@ public class AlgaeArticulate extends SubsystemBase {
     private final TrapezoidProfile algaeArticulateProfile;
     private final ArmFeedforward algaeArticulateFF;
     private final SparkMaxConfig motorConfig;
+    private final SlewRateLimiter algaeArticulateRateLimiter;
     
     private static final double UP_POSITION = 0.0;   // Start position (Up)
     private static final double OUT_POSITION = 110.0; // End position (Out)
 
-    private static final double ALGAE_ARTICULATE_MAX_VELOCITY = 120.0; // Degrees per second
+    private static final double ALGAE_ARTICULATE_MAX_VELOCITY = 90.0; // Degrees per second
     private static final double ALGAE_ARTICULATE_MAX_ACCELERATION = 150.0; // Degrees per second²
 
     private static final double ALGAE_ARTICULATE_GEAR_RATIO = 24.0; //double check and update
-    public static double ENCODER_TO_DEGREES = 360.0 / ALGAE_ARTICULATE_GEAR_RATIO;
+    public static double ALGAE_ARTICULATE_ENCODER_TO_DEGREES = 360.0 / ALGAE_ARTICULATE_GEAR_RATIO;
     //https://www.chiefdelphi.com/t/convert-neo-rotations-to-degrees-inches/495525/4
 
-    private static double kP = 0.05;
+    private static double kP = 0.025;
     private static double kI = 0.0;
-    private static double kD = 0.01;
-    private static final double kG = 0.4;
+    private static double kD = 0.001;
+    private static final double kG = 0.15;
 
     public AlgaeArticulate() {
         m_AlgaeArticulate = new SparkMax(Constants.AlgaeCollectorConstants.ALGAE_ARTICULATE_MOTOR_ID, MotorType.kBrushless); 
@@ -68,6 +70,8 @@ public class AlgaeArticulate extends SubsystemBase {
 
         articulateGoal = new TrapezoidProfile.State(UP_POSITION, 0);
         articulateState = new TrapezoidProfile.State(algaeArticulateEncoder.getPosition(), 0);
+
+        algaeArticulateRateLimiter = new SlewRateLimiter(Constants.CollectorArmConstants.ARTICULATE_RATE_LIMIT);
 
         SmartDashboard.putNumber("AlgaeArticulate kP", kP);
         SmartDashboard.putNumber("AlgaeArticulate kI", kI);
@@ -92,7 +96,7 @@ public class AlgaeArticulate extends SubsystemBase {
   }
 
     public double getAlgaeArticulateAngle() {
-        return algaeArticulateEncoder.getPosition() * ENCODER_TO_DEGREES;
+        return algaeArticulateEncoder.getPosition() * ALGAE_ARTICULATE_ENCODER_TO_DEGREES;
     }
  
 
@@ -101,23 +105,36 @@ public class AlgaeArticulate extends SubsystemBase {
             MathUtil.clamp(targetDegrees, UP_POSITION, OUT_POSITION), 0);
     }
 
-    public boolean isAtTarget() {
+    public boolean IsAtTarget() {
         return algaeArticulatePID.atSetpoint();
     }
 
-    public Command moveAlgaeToUpPosition() {
+    public Command MoveAlgaeToUpPosition() {
         return new InstantCommand(() -> setPosition(UP_POSITION), this);
     }
 
-    public Command moveAlgaeToOutPosition() {
+    public Command MoveAlgaeToOutPosition() {
         return new InstantCommand(() -> setPosition(OUT_POSITION), this);
     }
 
-    public Command manualAlgaeArticulateControl(DoubleSupplier input) {
+    public Command AlgaeUpDown (DoubleSupplier joystickInput) {
         return new RunCommand(() -> {
-            double rawInput = input.getAsDouble();
-            double limitedInput = MathUtil.clamp(rawInput, -1.0, 1.0);
-            m_AlgaeArticulate.set(limitedInput * 0.5); // Limit manual speed
+          double rawInput = joystickInput.getAsDouble();
+          double adjustedInput = (Math.abs(rawInput) > Constants.CollectorArmConstants.DEADBAND) ? rawInput : 0.0;
+          double limitedInput = algaeArticulateRateLimiter.calculate(adjustedInput);
+          m_AlgaeArticulate.set(limitedInput);
+        }, this);
+      }
+
+    public RunCommand SimpleAlgaeOut() {
+        return new RunCommand(() -> {
+            m_AlgaeArticulate.set(-0.5);
+        }, this);
+    }
+
+    public RunCommand SimpleAlgaeIn() {
+        return new RunCommand(() -> {
+            m_AlgaeArticulate.set(0.5);
         }, this);
     }
 
@@ -153,8 +170,7 @@ public class AlgaeArticulate extends SubsystemBase {
             kD = SmartDashboard.getNumber("Algae Articulate kD", kD);
             algaeArticulatePID.setP(kP);
             algaeArticulatePID.setI(kI);
-            algaeArticulatePID.setD(kD);
-        }
+            algaeArticulatePID.setD(kD);        }
         
         
                

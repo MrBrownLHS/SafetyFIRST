@@ -4,6 +4,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
@@ -34,7 +35,7 @@ public class ArmLift extends SubsystemBase {
     private static final double LIFT_L1 = 5.0;
     private static final double LIFT_L2 = 10.0;
     private static final double LIFT_L3 = 15.0;
-    private static final double LIFT_FLOOR = 3.0;
+    
 
    
 
@@ -59,7 +60,7 @@ public class ArmLift extends SubsystemBase {
       motorConfig = new SparkMaxConfig();
 
       liftPID = new PIDController(kP, kI, kD);
-      liftPID.setTolerance(2.0);
+      liftPID.setTolerance(0.2);
 
       liftFF = new ArmFeedforward(0.1, kG, 0.02, 0.01);
 
@@ -107,25 +108,35 @@ public class ArmLift extends SubsystemBase {
         .andThen(StopLift());
     }
 
-    public Command moveLiftToL1() {
+    public Command MoveLiftToL1() {
         return setLiftHeightCommand(LIFT_L1);
     }
 
-    public Command moveLiftToL2() {
+    public Command MoveLiftToL2() {
         return setLiftHeightCommand(LIFT_L2);
     }
 
-    public Command moveLiftToL3() {
+    public Command MoveLiftToL3() {
         return setLiftHeightCommand(LIFT_L3);
     }
 
-    public Command moveLiftToCollect() {
+    public Command MoveLiftToCollect() {
         return setLiftHeightCommand(LIFT_COLLECT);
     }
 
-    public Command moveLiftToFloor() {
-        return setLiftHeightCommand(LIFT_FLOOR);
+    public RunCommand SimpleLiftUp() {
+        return new RunCommand(() -> {
+            m_Lift.set(0.5);
+        }, this);
     }
+
+    public RunCommand SimpleLiftDown() {
+        return new RunCommand(() -> {
+            m_Lift.set(-0.5);
+        }, this);
+    }
+
+    
 
     
     public Command StopLift() {

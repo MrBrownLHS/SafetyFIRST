@@ -29,23 +29,23 @@ public class CoralCollector extends SubsystemBase {
   public SlewRateLimiter coralCollectorRateLimiter;
 
  
-  public CoralCollector() {
-    m_CoralCollect = new SparkMax(Constants.CollectorArmConstants.CORAL_COLLECT_MOTOR_ID, MotorType.kBrushless);
-    coralCollectorRateLimiter = new SlewRateLimiter(Constants.CollectorArmConstants.ARTICULATE_RATE_LIMIT);
-    coralCollectorMotorConfig = new SparkMaxConfig();
+    public CoralCollector() {
+      m_CoralCollect = new SparkMax(Constants.CollectorArmConstants.CORAL_COLLECT_MOTOR_ID, MotorType.kBrushless);
+      coralCollectorRateLimiter = new SlewRateLimiter(Constants.CollectorArmConstants.ARTICULATE_RATE_LIMIT);
+      coralCollectorMotorConfig = new SparkMaxConfig();
 
-    configureCoralCollectorMotor(m_CoralCollect, coralCollectorMotorConfig);
-  }
+      configureCoralCollectorMotor(m_CoralCollect, coralCollectorMotorConfig);
+    }
 
-  private void configureCoralCollectorMotor(SparkMax motor, SparkMaxConfig config){
-    config.idleMode(IdleMode.kBrake);
-    config.smartCurrentLimit(Constants.CollectorArmConstants.CURRENT_LIMIT_550);
-    config.secondaryCurrentLimit(Constants.CollectorArmConstants.MAX_CURRENT_LIMIT_550);
-    config.voltageCompensation(Constants.CollectorArmConstants.VOLTAGE_COMPENSATION);
-    motor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
-  }
+    private void configureCoralCollectorMotor(SparkMax motor, SparkMaxConfig config){
+      config.idleMode(IdleMode.kBrake);
+      config.smartCurrentLimit(Constants.CollectorArmConstants.CURRENT_LIMIT_550);
+      config.secondaryCurrentLimit(Constants.CollectorArmConstants.MAX_CURRENT_LIMIT_550);
+      config.voltageCompensation(Constants.CollectorArmConstants.VOLTAGE_COMPENSATION);
+      motor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+    }
 
-  public RunCommand CollectCoral(DoubleSupplier joystickInput) {
+    public RunCommand CollectCoral(DoubleSupplier joystickInput) {
       return new RunCommand(() -> {
         double rawInput = joystickInput.getAsDouble();
         double adjustedInput = (Math.abs(rawInput) > Constants.CollectorArmConstants.DEADBAND) ? rawInput : 0.0;
@@ -54,7 +54,20 @@ public class CoralCollector extends SubsystemBase {
       }, this);
     }
 
-  public RunCommand AutoCollectCoral() {
+    public RunCommand CoralIn() {
+      return new RunCommand(() -> {
+        m_CoralCollect.set(0.5);
+      }, this);
+    }
+
+    public RunCommand CoralOut() {
+      return new RunCommand(() -> {
+        m_CoralCollect.set(-0.5);
+      }, this);
+    }
+
+  
+    public RunCommand AutoCollectCoral() {
       return new RunCommand(() -> {
        m_CoralCollect.set(Constants.CollectorArmConstants.AUTO_CORAL_RELEASE_SPEED);
       }, this);

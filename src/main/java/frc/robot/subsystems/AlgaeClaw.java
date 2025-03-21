@@ -18,6 +18,7 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 
 
 public class AlgaeClaw extends SubsystemBase {
@@ -105,6 +106,18 @@ public class AlgaeClaw extends SubsystemBase {
     return new InstantCommand(() -> setPosition(CLAW_CLAMP), this)
             .andThen(new WaitUntilCommand(this::isClamped))
             .andThen(new InstantCommand(this::stopClaw));
+  }
+
+  public RunCommand SimpleClawClose() {
+    return new RunCommand(() -> {
+      m_Claw.set(-0.5);
+    }, this);
+  }
+
+  public RunCommand SimpleClawOpen() {
+    return new RunCommand(() -> {
+      m_Claw.set(0.5);
+    }, this);
   }
 
   public Command StopClaw() {
