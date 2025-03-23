@@ -84,10 +84,6 @@ public class AlgaeClaw extends SubsystemBase {
       return clawEncoder.getPosition() >= CLAW_OPEN;
   }
 
-  public void stopClaw() {
-    m_Claw.stopMotor();
-  } 
-
   public void setPosition(double position) {
       if (position == CLAW_OPEN) {
           openClaw();
@@ -120,10 +116,11 @@ public class AlgaeClaw extends SubsystemBase {
     }, this);
   }
 
-  public Command StopClaw() {
-    return new InstantCommand(this::stopClaw, this);
-
-  }
+  public Command stopClaw() {
+    return new InstantCommand(() -> {
+      m_Claw.stopMotor();
+    }, this);
+    }
 
  
   @Override

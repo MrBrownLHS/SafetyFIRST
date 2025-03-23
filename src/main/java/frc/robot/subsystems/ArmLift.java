@@ -108,6 +108,10 @@ public class ArmLift extends SubsystemBase {
         .andThen(StopLift());
     }
 
+    public RunCommand setLiftHeightManual(double targetInches) {
+        return new RunCommand(() -> setPosition(targetInches), this);
+    }
+
     public Command MoveLiftToL1() {
         return setLiftHeightCommand(LIFT_L1);
     }
@@ -123,6 +127,16 @@ public class ArmLift extends SubsystemBase {
     public Command MoveLiftToCollect() {
         return setLiftHeightCommand(LIFT_COLLECT);
     }
+
+    public RunCommand ManualLiftToMax() {
+        return setLiftHeightManual(LIFT_MAX_HEIGHT);
+    }
+
+    public RunCommand ManualLiftToMin() {
+        return setLiftHeightManual(LIFT_MIN_HEIGHT);
+    }
+
+    
 
     public RunCommand SimpleLiftUp() {
         return new RunCommand(() -> {

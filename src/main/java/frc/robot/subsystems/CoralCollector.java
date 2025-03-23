@@ -5,6 +5,8 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.revrobotics.spark.SparkMax;
@@ -71,6 +73,12 @@ public class CoralCollector extends SubsystemBase {
       return new RunCommand(() -> {
        m_CoralCollect.set(Constants.CollectorArmConstants.AUTO_CORAL_RELEASE_SPEED);
       }, this);
+    }
+
+    public Command CollectCoralStop() {
+    return new InstantCommand(() -> {
+      m_CoralCollect.stopMotor();
+    }, this);
     }
 
   @Override

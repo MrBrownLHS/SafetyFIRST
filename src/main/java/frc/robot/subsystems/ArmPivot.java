@@ -130,6 +130,20 @@ public class ArmPivot extends SubsystemBase {
             m_Pivot.set(-0.5);
         }, this);
     }
+
+    public RunCommand setPivotAngleManual(double targetDegrees) {
+        return new RunCommand(() -> setPivotPosition(targetDegrees), this);
+    }
+
+    public RunCommand ManualPivotToMax() {
+        return setPivotAngleManual(PIVOT_MAX);
+    }
+
+    public RunCommand ManualPivotToMin() {
+        return setPivotAngleManual(PIVOT_START);
+    }
+
+
     
 
     public Command StopPivot() {

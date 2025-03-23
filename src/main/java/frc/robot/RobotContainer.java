@@ -78,8 +78,8 @@ public class RobotContainer {
         DriverStation.startDataLog(DataLogManager.getLog());
         DataLogManager.log("Robot Initialized");
         SmartDashboard.putBoolean("Tuning Mode", false);
-
-     autoChooser = new SendableChooser<>();
+     
+    autoChooser = new SendableChooser<>();
         autoChooser.setDefaultOption("Center Start", new AutoCenterStart(swerveSubsystem));
         autoChooser.addOption("Left Start", new AutoLeftStart(swerveSubsystem));
         autoChooser.addOption("Right Start", new AutoRightStart(swerveSubsystem));
@@ -109,7 +109,7 @@ public class RobotContainer {
     );
 
     algaeClaw.setDefaultCommand(
-      algaeClaw.StopClaw()
+      algaeClaw.stopClaw()
     );
 
     armLift.setDefaultCommand(
@@ -122,7 +122,7 @@ public class RobotContainer {
     
    collectorHead.setDefaultCommand(
      collectorHead.ArticulateCoralCollector(
-      () -> CoPilotController.getRawAxis(XboxController.Axis.kLeftY.value) * 0.1
+      () -> CoPilotController.getRawAxis(XboxController.Axis.kLeftX.value) * 0.1
       )
     );
 
@@ -138,20 +138,43 @@ public class RobotContainer {
   private void configureBindings() {
     resetHeading.whileTrue(new InstantCommand(() -> swerveSubsystem.resetHeading()));
 
+    new JoystickButton(DriverController, XboxController.Button.kRightBumper.value)
+    .whileTrue(new RunCommand(() -> {
+        swerveSubsystem.drive(
+            new edu.wpi.first.math.geometry.Translation2d(
+                -translationLimiter.calculate(DriverController.getRawAxis(translationAxis) * 0.25),
+                -strafeLimiter.calculate(DriverController.getRawAxis(strafeAxis) * 0.25)
+            ),
+            rotationLimiter.calculate(DriverController.getRawAxis(rotationAxis) * 0.25),
+            robotCentric.getAsBoolean(),
+            false // Adjust this boolean as needed based on your method's requirements
+        );
+    }, swerveSubsystem));
+
+    new JoystickButton(CoPilotController, XboxController.Axis.kLeftTrigger.value)
+    .whileTrue(new RunCommand(() -> coralCollector.CollectCoral(() -> -0.5), coralCollector));
+
+    new JoystickButton(CoPilotController, XboxController.Axis.kRightTrigger.value)
+    .whileTrue(new RunCommand(() -> coralCollector.CollectCoral(() -> 0.5), coralCollector));
+
+
     new JoystickButton(CoPilotController, XboxController.Button.kRightBumper.value)
-    .whileTrue(algaeCollector.AlgaeOut());
+    .whileTrue(algaeClaw.ClampClaw());
 
     new JoystickButton(CoPilotController, XboxController.Button.kLeftBumper.value)
-    .whileTrue(algaeCollector.AlgaeIn());
+    .whileTrue(algaeClaw.OpenClaw());
 
     new JoystickButton(CoPilotController, XboxController.Button.kX.value)
-    .onTrue(armLift.StopLift());
+    .whileTrue(armPivot.ManualPivotToMin());
     
     new JoystickButton(CoPilotController, XboxController.Button.kY.value)
-    .onTrue(armPivot.StopPivot());
+    .whileTrue(armPivot.ManualPivotToMax());
 
-    new JoystickButton(CoPilotController, XboxController.Button.kBack.value)
-    .onTrue(new InstantCommand(algaeCollector::StopAlgae));
+    new JoystickButton(CoPilotController, XboxController.Button.kA.value)
+    .whileTrue(armLift.ManualLiftToMax());
+
+    new JoystickButton(CoPilotController, XboxController.Button.kB.value)
+    .whileTrue(armLift.ManualLiftToMin());
 
     new POVButton(CoPilotController, 90).whileTrue(
       cageClimber.ReadyCageGrabber()
@@ -161,12 +184,18 @@ public class RobotContainer {
       cageClimber.CageClimb()
     );
 
-    new POVButton(CoPilotController, 180).onTrue(
-      cageClimber.CageClimbStop()
-    );
-
+    new POVButton(CoPilotController, 180)
+      .onTrue(new InstantCommand(() -> {
+      cageClimber.CageClimbStop();
+      algaeArticulate.stopAlgaeArticulateMotor();
+      algaeClaw.stopClaw();
+      armLift.StopLift();
+      armPivot.StopPivot();
+      collectorHead.CollectorHeadStop();
+      coralCollector.CollectCoralStop();
+      }));
+    }
     
-  }
 
   public Command getAutonomousCommand() {
     return autoChooser.getSelected();
