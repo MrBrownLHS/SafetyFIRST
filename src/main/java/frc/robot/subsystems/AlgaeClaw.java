@@ -35,7 +35,7 @@ public class AlgaeClaw extends SubsystemBase {
     motorConfig = new SparkMaxConfig();
     clawEncoder = m_Claw.getEncoder();
 
-    configureMotors(m_Claw, motorConfig, Constants.CollectorArmConstants.CURRENT_LIMIT_550);
+    configureMotors(m_Claw, motorConfig, Constants.CollectorArmConstants.CURRENT_LIMIT_NEO);
     resetEncoder();
   }
 
@@ -44,7 +44,7 @@ public class AlgaeClaw extends SubsystemBase {
   private void configureMotors(SparkMax motor, SparkMaxConfig config, int currentLimit) {
     config.idleMode(IdleMode.kBrake);
     config.smartCurrentLimit(currentLimit);
-    config.secondaryCurrentLimit(Constants.CollectorArmConstants.MAX_CURRENT_LIMIT_550);
+    config.secondaryCurrentLimit(Constants.CollectorArmConstants.MAX_CURRENT_LIMIT_NEO);
     config.voltageCompensation(Constants.CollectorArmConstants.VOLTAGE_COMPENSATION);
     motor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
   }
@@ -106,13 +106,13 @@ public class AlgaeClaw extends SubsystemBase {
 
   public RunCommand SimpleClawClose() {
     return new RunCommand(() -> {
-      m_Claw.set(-0.5);
+      m_Claw.set(-0.10);
     }, this);
   }
 
   public RunCommand SimpleClawOpen() {
     return new RunCommand(() -> {
-      m_Claw.set(0.5);
+      m_Claw.set(0.10);
     }, this);
   }
 

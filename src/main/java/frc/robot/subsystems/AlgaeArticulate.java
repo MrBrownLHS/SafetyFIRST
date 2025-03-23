@@ -40,19 +40,23 @@ public class AlgaeArticulate extends SubsystemBase {
     private final SlewRateLimiter algaeArticulateRateLimiter;
     
     private static final double UP_POSITION = 0.0;   // Start position (Up)
-    private static final double OUT_POSITION = 110.0; // End position (Out)
+    private static final double OUT_POSITION = -58.0; // End position (Out)
 
     private static final double ALGAE_ARTICULATE_MAX_VELOCITY = 90.0; // Degrees per second
     private static final double ALGAE_ARTICULATE_MAX_ACCELERATION = 150.0; // Degrees per second²
 
-    private static final double ALGAE_ARTICULATE_GEAR_RATIO = 24.0; //double check and update
+    private static final double ALGAE_ARTICULATE_GEAR_RATIO = 12.0; //double check and update
     public static double ALGAE_ARTICULATE_ENCODER_TO_DEGREES = 360.0 / ALGAE_ARTICULATE_GEAR_RATIO;
     //https://www.chiefdelphi.com/t/convert-neo-rotations-to-degrees-inches/495525/4
 
-    private static double kP = 0.025;
+    private static double kP = 0.0;
     private static double kI = 0.0;
-    private static double kD = 0.001;
-    private static final double kG = 0.15;
+    private static double kD = 0.0;
+    private static final double kG = 0.0;
+    private static final double kS = 0.0;
+    private static final double kA = 0.0;
+    private static final double kV = 0.0;
+
 
     public AlgaeArticulate() {
         m_AlgaeArticulate = new SparkMax(Constants.AlgaeCollectorConstants.ALGAE_ARTICULATE_MOTOR_ID, MotorType.kBrushless); 
@@ -63,7 +67,7 @@ public class AlgaeArticulate extends SubsystemBase {
         algaeArticulatePID = new PIDController(kP, kI, kD);
         algaeArticulatePID.setTolerance(2.0); // Within 2 degrees is "at target"
 
-        algaeArticulateFF = new ArmFeedforward(0.1, kG, 0.02, 0.01);
+        algaeArticulateFF = new ArmFeedforward(kG, kS, kV, kA);
 
         articulateConstraints = new TrapezoidProfile.Constraints(ALGAE_ARTICULATE_MAX_VELOCITY, ALGAE_ARTICULATE_MAX_ACCELERATION);
         algaeArticulateProfile = new TrapezoidProfile(articulateConstraints);
@@ -76,6 +80,10 @@ public class AlgaeArticulate extends SubsystemBase {
         SmartDashboard.putNumber("AlgaeArticulate kP", kP);
         SmartDashboard.putNumber("AlgaeArticulate kI", kI);
         SmartDashboard.putNumber("AlgaeArticulate kD", kD);
+        SmartDashboard.putNumber("AlgaeArticulate kS", kS);
+        SmartDashboard.putNumber("AlgaeArticulate kG", kG);
+        SmartDashboard.putNumber("AlgaeArticulate kA", kA);
+        SmartDashboard.putNumber("AlgaeArticulate kA", kV);
         SmartDashboard.putBoolean("AlgaeArticulate Tuning", false);
 
         configureMotors(m_AlgaeArticulate, motorConfig, Constants.CollectorArmConstants.CURRENT_LIMIT_NEO);
@@ -128,13 +136,13 @@ public class AlgaeArticulate extends SubsystemBase {
 
     public RunCommand SimpleAlgaeOut() {
         return new RunCommand(() -> {
-            m_AlgaeArticulate.set(-0.5);
+            m_AlgaeArticulate.set(0.5);
         }, this);
     }
 
     public RunCommand SimpleAlgaeIn() {
         return new RunCommand(() -> {
-            m_AlgaeArticulate.set(0.5);
+            m_AlgaeArticulate.set(0.75);
         }, this);
     }
 
@@ -168,9 +176,12 @@ public class AlgaeArticulate extends SubsystemBase {
             kP = SmartDashboard.getNumber("Algae Articulate kP", kP);
             kI = SmartDashboard.getNumber("Algae Articulate kI", kI);
             kD = SmartDashboard.getNumber("Algae Articulate kD", kD);
+
             algaeArticulatePID.setP(kP);
             algaeArticulatePID.setI(kI);
-            algaeArticulatePID.setD(kD);        }
+            algaeArticulatePID.setD(kD); 
+                     // Removed as ArmFeedforward does not support setS
+              }
         
         
                
