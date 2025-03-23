@@ -47,15 +47,7 @@ public class CoralCollector extends SubsystemBase {
       motor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
     }
 
-    public RunCommand CollectCoral(DoubleSupplier joystickInput) {
-      return new RunCommand(() -> {
-        double rawInput = joystickInput.getAsDouble();
-        double adjustedInput = (Math.abs(rawInput) > Constants.CollectorArmConstants.DEADBAND) ? rawInput : 0.0;
-        double limitedInput = coralCollectorRateLimiter.calculate(adjustedInput);
-        m_CoralCollect.set(limitedInput);
-      }, this);
-    }
-
+  
     public RunCommand CoralIn() {
       return new RunCommand(() -> {
         m_CoralCollect.set(0.5);
@@ -77,7 +69,7 @@ public class CoralCollector extends SubsystemBase {
 
     public Command CollectCoralStop() {
     return new InstantCommand(() -> {
-      m_CoralCollect.stopMotor();
+      m_CoralCollect.set(0.0);
     }, this);
     }
 

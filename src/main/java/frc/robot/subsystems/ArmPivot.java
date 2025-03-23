@@ -148,7 +148,7 @@ public class ArmPivot extends SubsystemBase {
 
     public Command StopPivot() {
       return new InstantCommand(() -> {
-        m_Pivot.stopMotor();
+        m_Pivot.set(0.0);
         pivotPID.reset();
         pivotGoal = new TrapezoidProfile.State(getPivotAngle(), 0);
         pivotState = new TrapezoidProfile.State(getPivotAngle(), 0);

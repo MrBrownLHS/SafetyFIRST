@@ -38,6 +38,7 @@ import frc.robot.commands.AutoRightStart;
 public class RobotContainer {
   private final JoystickButton resetHeading;
   private final JoystickButton robotCentric;
+  private final JoystickButton slowDriveMode;
 
   private final Joystick CoPilotController;
   private final CageClimber cageClimber;
@@ -52,12 +53,11 @@ public class RobotContainer {
   private final int strafeAxis;
   private final int rotationAxis;
   
-  
   private final Joystick DriverController;
   private final SwerveSubsystem swerveSubsystem;
 
   private final SendableChooser<Command> autoChooser;
-  private boolean tuningMode = false;
+  
 
     private final SlewRateLimiter translationLimiter = new SlewRateLimiter(2.9);
     private final SlewRateLimiter strafeLimiter = new SlewRateLimiter(2.9);
@@ -74,10 +74,11 @@ public class RobotContainer {
     coralCollector = new CoralCollector();
     armLift = new ArmLift();
     armPivot = new ArmPivot();
+
     DataLogManager.start();
         DriverStation.startDataLog(DataLogManager.getLog());
         DataLogManager.log("Robot Initialized");
-        SmartDashboard.putBoolean("Tuning Mode", false);
+        
      
     autoChooser = new SendableChooser<>();
         autoChooser.setDefaultOption("Center Start", new AutoCenterStart(swerveSubsystem));
@@ -89,11 +90,12 @@ public class RobotContainer {
 
     resetHeading = new JoystickButton(DriverController, Constants.ControllerRawButtons.XboxController.Button.kY.value);
     robotCentric = new JoystickButton(DriverController, Constants.ControllerRawButtons.XboxController.Button.kX.value);
+    slowDriveMode = new JoystickButton(DriverController, Constants.ControllerRawButtons.XboxController.Button.kRightBumper.value);
 
     translationAxis = Constants.ControllerRawButtons.XboxController.Axis.kLeftY.value;
     strafeAxis = Constants.ControllerRawButtons.XboxController.Axis.kLeftX.value;
     rotationAxis = Constants.ControllerRawButtons.XboxController.Axis.kRightX.value;
-    
+      
     swerveSubsystem.setDefaultCommand(new SwerveController(
             swerveSubsystem,
             () -> -translationLimiter.calculate(DriverController.getRawAxis(translationAxis) * 0.75),
@@ -104,13 +106,11 @@ public class RobotContainer {
 
    
     algaeArticulate.setDefaultCommand(
-      algaeArticulate.AlgaeUpDown(
-      () -> CoPilotController.getRawAxis(XboxController.Axis.kRightY.value) * 0.10
-      )
+      algaeArticulate.StopAlgaeArticulateMotor()
     );
 
     algaeClaw.setDefaultCommand(
-      algaeClaw.stopClaw()
+      algaeClaw.StopClaw()
     );
 
     armLift.setDefaultCommand(
@@ -121,12 +121,13 @@ public class RobotContainer {
       armPivot.StopPivot()
     );
     
-   collectorHead.setDefaultCommand(
-     collectorHead.ArticulateCoralCollector(
-      () -> CoPilotController.getRawAxis(XboxController.Axis.kLeftX.value) * 0.1
-      )
+    collectorHead.setDefaultCommand(
+      collectorHead.CollectorHeadStop()
     );
 
+    coralCollector.setDefaultCommand(
+      coralCollector.CollectCoralStop()
+    );
         
     cageClimber.setDefaultCommand(
       cageClimber.CageClimbStop()
@@ -139,31 +140,31 @@ public class RobotContainer {
   private void configureBindings() {
     resetHeading.whileTrue(new InstantCommand(() -> swerveSubsystem.resetHeading()));
 
-    new JoystickButton(DriverController, XboxController.Button.kRightBumper.value)
-    .whileTrue(new RunCommand(() -> {
-        swerveSubsystem.drive(
-            new edu.wpi.first.math.geometry.Translation2d(
-                -translationLimiter.calculate(DriverController.getRawAxis(translationAxis) * 0.25),
-                -strafeLimiter.calculate(DriverController.getRawAxis(strafeAxis) * 0.25)
-            ),
-            rotationLimiter.calculate(DriverController.getRawAxis(rotationAxis) * 0.25),
-            robotCentric.getAsBoolean(),
-            false // Adjust this boolean as needed based on your method's requirements
-        );
-    }, swerveSubsystem));
+    slowDriveMode.whileTrue(new SwerveController(
+      swerveSubsystem,
+      () -> -translationLimiter.calculate(DriverController.getRawAxis(translationAxis) * 0.25),
+      () -> -strafeLimiter.calculate(DriverController.getRawAxis(strafeAxis) * 0.25),
+      () -> rotationLimiter.calculate(DriverController.getRawAxis(rotationAxis) * 0.25),
+      () -> robotCentric.getAsBoolean())
+  );
+
+    new JoystickButton(CoPilotController, XboxController.Axis.kRightY.value)
+    .whileTrue(algaeArticulate.AlgaeUpDown(() -> CoPilotController.getRawAxis(XboxController.Axis.kRightY.value)));
+
+    new JoystickButton(CoPilotController, XboxController.Axis.kLeftX.value)
+    .whileTrue(collectorHead.ArticulateCoralCollector(() -> CoPilotController.getRawAxis(XboxController.Axis.kLeftX.value)));
 
     new JoystickButton(CoPilotController, XboxController.Axis.kLeftTrigger.value)
-    .whileTrue(new RunCommand(() -> coralCollector.CollectCoral(() -> -0.5), coralCollector));
+    .whileTrue(coralCollector.CoralIn());
 
     new JoystickButton(CoPilotController, XboxController.Axis.kRightTrigger.value)
-    .whileTrue(new RunCommand(() -> coralCollector.CollectCoral(() -> 0.5), coralCollector));
-
+    .whileTrue(coralCollector.CoralOut());
 
     new JoystickButton(CoPilotController, XboxController.Button.kRightBumper.value)
-    .whileTrue(algaeClaw.SimpleClawClose());
+    .whileTrue(algaeClaw.ClawClose());
 
     new JoystickButton(CoPilotController, XboxController.Button.kLeftBumper.value)
-    .whileTrue(algaeClaw.SimpleClawOpen());
+    .whileTrue(algaeClaw.ClawOpen());
 
     new JoystickButton(CoPilotController, XboxController.Button.kX.value)
     .whileTrue(armPivot.ManualPivotToMin());
@@ -188,8 +189,8 @@ public class RobotContainer {
     new POVButton(CoPilotController, 180)
       .onTrue(new InstantCommand(() -> {
       cageClimber.CageClimbStop();
-      algaeArticulate.stopAlgaeArticulateMotor();
-      algaeClaw.stopClaw();
+      algaeArticulate.StopAlgaeArticulateMotor();
+      algaeClaw.StopClaw();
       armLift.StopLift();
       armPivot.StopPivot();
       collectorHead.CollectorHeadStop();

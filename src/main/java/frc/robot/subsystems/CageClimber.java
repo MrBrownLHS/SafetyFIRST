@@ -55,7 +55,7 @@ public class CageClimber extends SubsystemBase {
 
   public Command CageClimbStop() {
     return new InstantCommand(() -> {
-      m_Winch.stopMotor();
+      m_Winch.set(0.0);
     }, this);
     }
 

@@ -155,7 +155,7 @@ public class ArmLift extends SubsystemBase {
     
     public Command StopLift() {
         return new InstantCommand(() -> {
-            m_Lift.stopMotor();
+            m_Lift.set(0.0);
             liftPID.reset();
             liftGoal = new TrapezoidProfile.State(getLiftHeight(), 0);
             liftState = new TrapezoidProfile.State(getLiftHeight(), 0);

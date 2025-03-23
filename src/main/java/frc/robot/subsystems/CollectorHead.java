@@ -56,7 +56,7 @@ public class CollectorHead extends SubsystemBase {
   
   public Command CollectorHeadStop() {
     return new InstantCommand(() -> {
-      m_CoralArticulate.stopMotor();
+      m_CoralArticulate.set(0.0);
     }, this);
     }
   
