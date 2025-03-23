@@ -159,10 +159,10 @@ public class RobotContainer {
 
 
     new JoystickButton(CoPilotController, XboxController.Button.kRightBumper.value)
-    .whileTrue(algaeClaw.ClampClaw());
+    .whileTrue(algaeClaw.SimpleClawClose());
 
     new JoystickButton(CoPilotController, XboxController.Button.kLeftBumper.value)
-    .whileTrue(algaeClaw.OpenClaw());
+    .whileTrue(algaeClaw.SimpleClawOpen());
 
     new JoystickButton(CoPilotController, XboxController.Button.kX.value)
     .whileTrue(armPivot.ManualPivotToMin());
