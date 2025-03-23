@@ -105,7 +105,8 @@ public class RobotContainer {
    
     algaeArticulate.setDefaultCommand(
       algaeArticulate.AlgaeUpDown(
-      () -> CoPilotController.getRawAxis(XboxController.Axis.kRightY.value))
+      () -> CoPilotController.getRawAxis(XboxController.Axis.kRightY.value) * 0.25
+      )
     );
 
     algaeClaw.setDefaultCommand(
