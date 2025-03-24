@@ -15,12 +15,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
-import edu.wpi.first.wpilibj2.command.RunCommand;
-
 import frc.robot.commands.SwerveController;
 import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.utilities.constants.Constants;
-
 import frc.robot.subsystems.CollectorHead;
 import frc.robot.subsystems.CoralCollector;
 import frc.robot.subsystems.AlgaeClaw;
@@ -39,7 +36,7 @@ public class RobotContainer {
   private final JoystickButton resetHeading;
   private final JoystickButton robotCentric;
   private final JoystickButton slowDriveMode;
-
+  
   private final Joystick CoPilotController;
   private final CageClimber cageClimber;
   private final AlgaeArticulate algaeArticulate;
@@ -52,6 +49,8 @@ public class RobotContainer {
   private final int translationAxis;
   private final int strafeAxis;
   private final int rotationAxis;
+  private final int algaeArticulateAxis;
+  private final int collectorHeadAxis;
   
   private final Joystick DriverController;
   private final SwerveSubsystem swerveSubsystem;
@@ -91,10 +90,14 @@ public class RobotContainer {
     resetHeading = new JoystickButton(DriverController, Constants.ControllerRawButtons.XboxController.Button.kY.value);
     robotCentric = new JoystickButton(DriverController, Constants.ControllerRawButtons.XboxController.Button.kX.value);
     slowDriveMode = new JoystickButton(DriverController, Constants.ControllerRawButtons.XboxController.Button.kRightBumper.value);
+    
 
     translationAxis = Constants.ControllerRawButtons.XboxController.Axis.kLeftY.value;
     strafeAxis = Constants.ControllerRawButtons.XboxController.Axis.kLeftX.value;
     rotationAxis = Constants.ControllerRawButtons.XboxController.Axis.kRightX.value;
+    algaeArticulateAxis = Constants.ControllerRawButtons.XboxController.Axis.kRightY.value;
+    collectorHeadAxis = Constants.ControllerRawButtons.XboxController.Axis.kLeftX.value;
+
       
     swerveSubsystem.setDefaultCommand(new SwerveController(
             swerveSubsystem,
@@ -148,16 +151,16 @@ public class RobotContainer {
       () -> robotCentric.getAsBoolean())
   );
 
-    new JoystickButton(CoPilotController, XboxController.Axis.kRightY.value)
-    .whileTrue(algaeArticulate.AlgaeUpDown(() -> CoPilotController.getRawAxis(XboxController.Axis.kRightY.value)));
+    new JoystickButton(DriverController, Constants.ControllerRawButtons.XboxController.Axis.kRightY.value)
+        .whileTrue(algaeArticulate.AlgaeUpDown(() -> DriverController.getRawAxis(algaeArticulateAxis)));
 
-    new JoystickButton(CoPilotController, XboxController.Axis.kLeftX.value)
-    .whileTrue(collectorHead.ArticulateCoralCollector(() -> CoPilotController.getRawAxis(XboxController.Axis.kLeftX.value)));
+    new JoystickButton(CoPilotController, Constants.ControllerRawButtons.XboxController.Axis.kLeftX.value)
+    .whileTrue(collectorHead.ArticulateCoralCollector(() -> CoPilotController.getRawAxis(collectorHeadAxis)));
 
-    new JoystickButton(CoPilotController, XboxController.Axis.kLeftTrigger.value)
+    new JoystickButton(CoPilotController, Constants.ControllerRawButtons.XboxController.Axis.kLeftTrigger.value)
     .whileTrue(coralCollector.CoralIn());
 
-    new JoystickButton(CoPilotController, XboxController.Axis.kRightTrigger.value)
+    new JoystickButton(CoPilotController, Constants.ControllerRawButtons.XboxController.Axis.kRightTrigger.value)
     .whileTrue(coralCollector.CoralOut());
 
     new JoystickButton(CoPilotController, XboxController.Button.kRightBumper.value)
