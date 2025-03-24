@@ -4,7 +4,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
-import java.util.function.DoubleSupplier;
+
 
 
 import com.revrobotics.RelativeEncoder;
@@ -46,11 +46,12 @@ public class ArmPivot extends SubsystemBase {
 
     private static final double PIVOT_GEAR_RATIO = 84.0; //double check and update
     public static double PIVOT_ENCODER_TO_DEGREES = 360.0 / PIVOT_GEAR_RATIO;
+    public static final double SOFT_STOP_BUFFER = 10.0;
 
     private static double kP = 0.025;
     private static double kI = 0.0;
-    private static double kD = 0.001;
-    private static final double kG = 0.15;
+    private static double kD = 0.0;
+    private static final double kG = 0.2;
 
     public ArmPivot() {
         m_Pivot = new SparkMax(Constants.CollectorArmConstants.PIVOT_MOTOR_ID, MotorType.kBrushless);
@@ -60,7 +61,7 @@ public class ArmPivot extends SubsystemBase {
         pivotPID = new PIDController(kP, kI, kD);
         pivotPID.setTolerance(0.2);
 
-        pivotFF = new ArmFeedforward(0.1, kG, 0.02, 0.01);
+        pivotFF = new ArmFeedforward(0.0, kG, 0.0, 0.0);
 
         pivotConstraints = new TrapezoidProfile.Constraints(PIVOT_MAX_VELOCITY, PIVOT_MAX_ACCELERATION);
         pivotProfile = new TrapezoidProfile(pivotConstraints);
@@ -71,6 +72,7 @@ public class ArmPivot extends SubsystemBase {
         SmartDashboard.putNumber("Pivot kP", kP);
         SmartDashboard.putNumber("Pivot kI", kI);
         SmartDashboard.putNumber("Pivot kD", kD);
+        SmartDashboard.putNumber("Pivot kG", kG);
         SmartDashboard.putBoolean("Pivot Tuning", false);
         
 
@@ -97,6 +99,24 @@ public class ArmPivot extends SubsystemBase {
     public void setPivotPosition(double targetDegrees) {
         pivotGoal = new TrapezoidProfile.State(
             MathUtil.clamp(targetDegrees, PIVOT_START, PIVOT_MAX), 0);
+        pivotState = pivotProfile.calculate(0.02, pivotState, pivotGoal);
+        double pidOutput = pivotPID.calculate(getPivotAngle(), pivotState.position);
+        double feedforward = pivotFF.calculate(0, pivotGoal.position);
+        double motorOutput = MathUtil.clamp(pidOutput + feedforward, -1.0, 1.0); 
+        motorOutput = applySoftStop(motorOutput, getPivotAngle());  
+        m_Pivot.set(motorOutput);
+    }
+
+    private double applySoftStop(double output, double armAngle) {
+        if (armAngle < PIVOT_START + SOFT_STOP_BUFFER) {
+            double scale = (armAngle - PIVOT_START) / SOFT_STOP_BUFFER;
+            return output * MathUtil.clamp(scale, 0.2, 1.0); // Limit to min 20% speed
+        } 
+        if (armAngle > PIVOT_MAX - SOFT_STOP_BUFFER) {
+            double scale = (PIVOT_MAX - armAngle) / SOFT_STOP_BUFFER;
+            return output * MathUtil.clamp(scale, 0.2, 1.0);
+        }
+        return output;
     }
 
     public boolean isAtTarget() {
@@ -165,6 +185,7 @@ public class ArmPivot extends SubsystemBase {
             double pidOutput = pivotPID.calculate(getPivotAngle(), pivotState.position);
             double feedforward = pivotFF.calculate(0, pivotGoal.position);
             double motorOutput = pidOutput + feedforward;
+            motorOutput = applySoftStop(motorOutput, getPivotAngle());
             m_Pivot.set(MathUtil.clamp(motorOutput, -1.0, 1.0));
         } else {
             m_Pivot.stopMotor();
