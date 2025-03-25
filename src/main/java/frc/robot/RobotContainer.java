@@ -28,6 +28,7 @@ import frc.robot.subsystems.ArmPivot;
 import frc.robot.commands.AutoCenterStart;
 import frc.robot.commands.AutoLeftStart;
 import frc.robot.commands.AutoRightStart;
+import frc.robot.subsystems.Camera;
 
 
 
@@ -56,6 +57,7 @@ public class RobotContainer {
   private final SwerveSubsystem swerveSubsystem;
 
   private final SendableChooser<Command> autoChooser;
+  private final Camera botCam;
   
 
     private final SlewRateLimiter translationLimiter = new SlewRateLimiter(2.9);
@@ -73,6 +75,7 @@ public class RobotContainer {
     coralCollector = new CoralCollector();
     armLift = new ArmLift();
     armPivot = new ArmPivot();
+    botCam = new Camera();
 
     DataLogManager.start();
         DriverStation.startDataLog(DataLogManager.getLog());
@@ -161,6 +164,12 @@ public class RobotContainer {
 
     new JoystickButton(DriverController, Constants.ControllerRawButtons.XboxController.Axis.kRightY.value)
         .whileTrue(algaeArticulate.AlgaeUpDown(() -> DriverController.getRawAxis(algaeArticulateAxis)));
+    
+    new JoystickButton(DriverController, Constants.ControllerRawButtons.XboxController.Button.kA.value)
+    .onTrue(botCam.InitializeBotCam());
+
+    new JoystickButton(DriverController, Constants.ControllerRawButtons.XboxController.Button.kB.value)
+    .onTrue(botCam.StopBotCam());
 
     new JoystickButton(CoPilotController, Constants.ControllerRawButtons.XboxController.Axis.kLeftX.value)
     .whileTrue(collectorHead.ArticulateCoralCollector(() -> CoPilotController.getRawAxis(collectorHeadAxis)));

@@ -49,7 +49,7 @@ public class ArmLift extends SubsystemBase {
     private static final double COG_DIAMETER_INCHES = 2.0;
     private static final double LIFT_ENCODER_TO_INCHES = (Math.PI * COG_DIAMETER_INCHES) / LIFT_GEAR_RATIO;
 
-    private static double kP = 0.1;
+    private static double kP = 0.025;
     private static double kI = 0.0;
     private static double kD = 0.01;
     private static double kG = 0.4;
@@ -106,7 +106,12 @@ public class ArmLift extends SubsystemBase {
 
     public void setPosition(double targetInches) {
         liftGoal = new TrapezoidProfile.State(
-            MathUtil.clamp(targetInches, LIFT_MIN_HEIGHT, LIFT_MAX_HEIGHT), 0);   
+            MathUtil.clamp(targetInches, LIFT_MIN_HEIGHT, LIFT_MAX_HEIGHT), 0);
+        liftState = liftProfile.calculate(0.02, liftState, liftGoal);
+        double pidOutput = liftPID.calculate(getLiftHeight(), liftState.position);
+        double feedforward = liftFF.calculate(0, liftGoal.position);
+        double motorOutput = pidOutput + feedforward;
+        m_Lift.set(MathUtil.clamp(motorOutput, -1.0, 1.0));   
         
     }
 
@@ -123,7 +128,7 @@ public class ArmLift extends SubsystemBase {
     public Command LiftToCollect() {
         return setLiftHeightCommand(LIFT_COLLECT);
     }
-    
+
     public Command LiftToL1() {
         return setLiftHeightCommand(LIFT_L1);
     }
