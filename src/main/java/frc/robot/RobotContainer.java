@@ -151,6 +151,14 @@ public class RobotContainer {
       () -> robotCentric.getAsBoolean())
   );
 
+  //Drive Controls
+
+  //Algae Controls
+
+  //Coral Arm Controls
+
+  //Climber Controls
+
     new JoystickButton(DriverController, Constants.ControllerRawButtons.XboxController.Axis.kRightY.value)
         .whileTrue(algaeArticulate.AlgaeUpDown(() -> DriverController.getRawAxis(algaeArticulateAxis)));
 

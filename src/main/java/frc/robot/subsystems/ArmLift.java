@@ -29,7 +29,7 @@ public class ArmLift extends SubsystemBase {
     private final TrapezoidProfile.Constraints liftConstraints;
     private TrapezoidProfile.State liftGoal, liftState;
     private final TrapezoidProfile liftProfile;
-    private final ArmFeedforward liftFF;
+    private ArmFeedforward liftFF;
 
     private static final double LIFT_COLLECT = 1.0;
     private static final double LIFT_L1 = 5.0;
@@ -52,7 +52,10 @@ public class ArmLift extends SubsystemBase {
     private static double kP = 0.1;
     private static double kI = 0.0;
     private static double kD = 0.01;
-    private static final double kG = 0.4;
+    private static double kG = 0.4;
+    private static double kS = 0.1;
+    private static double kV = 0.02;
+    private static double kA = 0.01;
 
     public ArmLift() {
       m_Lift = new SparkMax(Constants.CollectorArmConstants.LIFT_MOTOR_ID, MotorType.kBrushless);
@@ -62,7 +65,7 @@ public class ArmLift extends SubsystemBase {
       liftPID = new PIDController(kP, kI, kD);
       liftPID.setTolerance(0.2);
 
-      liftFF = new ArmFeedforward(0.1, kG, 0.02, 0.01);
+      liftFF = new ArmFeedforward(kS, kG, kV, kA);
 
       liftConstraints = new TrapezoidProfile.Constraints(LIFT_MAX_VELOCITY, LIFT_MAX_ACCELERATION);
       liftProfile = new TrapezoidProfile(liftConstraints);
@@ -70,10 +73,15 @@ public class ArmLift extends SubsystemBase {
       liftGoal = new TrapezoidProfile.State(LIFT_MAX_HEIGHT, 0);
       liftState = new TrapezoidProfile.State(liftEncoder.getPosition(), 0);
 
+        SmartDashboard.putBoolean("Lift Tuning", false);
         SmartDashboard.putNumber("Lift kP", kP);
         SmartDashboard.putNumber("Lift kI", kI);
         SmartDashboard.putNumber("Lift kD", kD);
-        SmartDashboard.putBoolean("Lift Tuning", false);
+        SmartDashboard.putNumber("Lift kS", kS);
+        SmartDashboard.putNumber("Lift kG", kG);
+        SmartDashboard.putNumber("Lift kV", kV);
+        SmartDashboard.putNumber("Lift kA", kA);
+        
 
 
       configureMotors(m_Lift, motorConfig, Constants.CollectorArmConstants.CURRENT_LIMIT_NEO);
@@ -112,21 +120,23 @@ public class ArmLift extends SubsystemBase {
         return new RunCommand(() -> setPosition(targetInches), this);
     }
 
-    public Command MoveLiftToL1() {
+    public Command LiftToCollect() {
+        return setLiftHeightCommand(LIFT_COLLECT);
+    }
+    
+    public Command LiftToL1() {
         return setLiftHeightCommand(LIFT_L1);
     }
 
-    public Command MoveLiftToL2() {
+    public Command LiftToL2() {
         return setLiftHeightCommand(LIFT_L2);
     }
 
-    public Command MoveLiftToL3() {
+    public Command LiftToL3() {
         return setLiftHeightCommand(LIFT_L3);
     }
 
-    public Command MoveLiftToCollect() {
-        return setLiftHeightCommand(LIFT_COLLECT);
-    }
+    
 
     public RunCommand ManualLiftToMax() {
         return setLiftHeightManual(LIFT_MAX_HEIGHT);
@@ -173,7 +183,7 @@ public class ArmLift extends SubsystemBase {
             double motorOutput = pidOutput + feedforward;
             m_Lift.set(MathUtil.clamp(motorOutput, -1.0, 1.0));
         } else {
-            m_Lift.stopMotor();
+            StopLift();
         } 
               
         SmartDashboard.putNumber("Lift Height", getLiftHeight());
@@ -182,9 +192,14 @@ public class ArmLift extends SubsystemBase {
             kP = SmartDashboard.getNumber("Lift kP", kP);
             kI = SmartDashboard.getNumber("Lift kI", kI);
             kD = SmartDashboard.getNumber("Lift kD", kD);
+            kS = SmartDashboard.getNumber("Lift kS", kS);
+            kG = SmartDashboard.getNumber("Lift kG", kG);
+            kV = SmartDashboard.getNumber("Lift kV", kV);
+            kA = SmartDashboard.getNumber("Lift kA", kA);
             liftPID.setP(kP);
             liftPID.setI(kI);
             liftPID.setD(kD);
+            liftFF = new ArmFeedforward(kS, kG, kV, kA);
         }
     }
          

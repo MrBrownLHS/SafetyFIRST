@@ -31,7 +31,7 @@ public class ArmPivot extends SubsystemBase {
     private final TrapezoidProfile.Constraints pivotConstraints;
     private TrapezoidProfile.State pivotGoal, pivotState;
     private final TrapezoidProfile pivotProfile;
-    private final ArmFeedforward pivotFF;
+    private ArmFeedforward pivotFF;
     
 
     private static final double PIVOT_START = 0.0;
@@ -50,7 +50,10 @@ public class ArmPivot extends SubsystemBase {
     private static double kP = 0.025;
     private static double kI = 0.0;
     private static double kD = 0.001;
-    private static final double kG = 0.15;
+    private static double kG = 0.15;
+    private static double kS = 0.1;
+    private static double kV = 0.02;
+    private static double kA = 0.01;
 
     public ArmPivot() {
         m_Pivot = new SparkMax(Constants.CollectorArmConstants.PIVOT_MOTOR_ID, MotorType.kBrushless);
@@ -60,7 +63,7 @@ public class ArmPivot extends SubsystemBase {
         pivotPID = new PIDController(kP, kI, kD);
         pivotPID.setTolerance(0.2);
 
-        pivotFF = new ArmFeedforward(0.1, kG, 0.02, 0.01);
+        pivotFF = new ArmFeedforward(kS, kG, kV, kA);
 
         pivotConstraints = new TrapezoidProfile.Constraints(PIVOT_MAX_VELOCITY, PIVOT_MAX_ACCELERATION);
         pivotProfile = new TrapezoidProfile(pivotConstraints);
@@ -68,10 +71,15 @@ public class ArmPivot extends SubsystemBase {
         pivotGoal = new TrapezoidProfile.State(PIVOT_START, 0);
         pivotState = new TrapezoidProfile.State(pivotEncoder.getPosition(), 0);
 
+        SmartDashboard.putBoolean("Pivot Tuning", false);
         SmartDashboard.putNumber("Pivot kP", kP);
         SmartDashboard.putNumber("Pivot kI", kI);
         SmartDashboard.putNumber("Pivot kD", kD);
-        SmartDashboard.putBoolean("Pivot Tuning", false);
+        SmartDashboard.putNumber("Pivot kS", kS);
+        SmartDashboard.putNumber("Pivot kG", kG);
+        SmartDashboard.putNumber("Pivot kV", kV);
+        SmartDashboard.putNumber("Pivot kA", kA);
+        
         
 
         configureMotors(m_Pivot, motorConfig, Constants.CollectorArmConstants.CURRENT_LIMIT_NEO);
@@ -107,15 +115,15 @@ public class ArmPivot extends SubsystemBase {
         return new InstantCommand(() -> setPivotPosition(PIVOT_COLLECT), this);
     }
 
-    public Command PivotToLevel1() {
+    public Command PivotToL1() {
         return new InstantCommand(() -> setPivotPosition(PIVOT_L1), this);
     }
 
-    public Command PivotToLevel2() {
+    public Command PivotToL2() {
         return new InstantCommand(() -> setPivotPosition(PIVOT_L2), this);
     }
 
-    public Command PivotToLevel3() {
+    public Command PivotToL3() {
         return new InstantCommand(() -> setPivotPosition(PIVOT_L3), this);
     }  
     
@@ -131,16 +139,16 @@ public class ArmPivot extends SubsystemBase {
         }, this);
     }
 
-    public RunCommand setPivotAngleManual(double targetDegrees) {
+    public RunCommand setPivotPositionManual(double targetDegrees) {
         return new RunCommand(() -> setPivotPosition(targetDegrees), this);
     }
 
     public RunCommand ManualPivotToMax() {
-        return setPivotAngleManual(PIVOT_MAX);
+        return setPivotPositionManual(PIVOT_MAX);
     }
 
     public RunCommand ManualPivotToMin() {
-        return setPivotAngleManual(PIVOT_START);
+        return setPivotPositionManual(PIVOT_START);
     }
 
 
@@ -176,9 +184,14 @@ public class ArmPivot extends SubsystemBase {
             kP = SmartDashboard.getNumber("Pivot kP", kP);
             kI = SmartDashboard.getNumber("Pivot kI", kI);
             kD = SmartDashboard.getNumber("Pivot kD", kD);
+            kS = SmartDashboard.getNumber("Pivot kS", kS);
+            kG = SmartDashboard.getNumber("Pivot kG", kG);
+            kV = SmartDashboard.getNumber("Pivot kV", kV);
+            kA = SmartDashboard.getNumber("Pivot kA", kA);
             pivotPID.setP(kP);
             pivotPID.setI(kI);
             pivotPID.setD(kD);
+            pivotFF = new ArmFeedforward(kS, kG, kV, kA);
         }
     }
 }
