@@ -28,6 +28,10 @@ import frc.robot.subsystems.ArmPivot;
 import frc.robot.commands.AutoCenterStart;
 import frc.robot.commands.AutoLeftStart;
 import frc.robot.commands.AutoRightStart;
+import frc.robot.commands.MoveArmToCollect;
+import frc.robot.commands.MoveArmToL1;
+import frc.robot.commands.MoveArmToL2;
+import frc.robot.commands.MoveArmToL3;
 import frc.robot.subsystems.Camera;
 
 
@@ -58,6 +62,10 @@ public class RobotContainer {
 
   private final SendableChooser<Command> autoChooser;
   private final Camera botCam;
+  private final MoveArmToCollect armCollect;
+  private final MoveArmToL1 armL1;
+  private final MoveArmToL2 armL2;
+  private final MoveArmToL3 armL3;
   
 
     private final SlewRateLimiter translationLimiter = new SlewRateLimiter(2.9);
@@ -76,6 +84,10 @@ public class RobotContainer {
     armLift = new ArmLift();
     armPivot = new ArmPivot();
     botCam = new Camera();
+    armCollect = new MoveArmToCollect(armLift, armPivot);
+    armL1 = new MoveArmToL1(armLift, armPivot);
+    armL2 = new MoveArmToL2(armLift, armPivot);
+    armL3 = new MoveArmToL3(armLift, armPivot);
 
     DataLogManager.start();
         DriverStation.startDataLog(DataLogManager.getLog());
@@ -110,7 +122,10 @@ public class RobotContainer {
             () -> robotCentric.getAsBoolean()) // lambda probably not needed but why not
     );
 
-   
+    botCam.setDefaultCommand(
+      botCam.InitializeBotCam()
+    );
+
     algaeArticulate.setDefaultCommand(
       algaeArticulate.StopAlgaeArticulateMotor()
     );
@@ -144,79 +159,101 @@ public class RobotContainer {
   }
 
   private void configureBindings() {
+   
+  //Drive Controls
     resetHeading.whileTrue(new InstantCommand(() -> swerveSubsystem.resetHeading()));
 
     slowDriveMode.whileTrue(new SwerveController(
-      swerveSubsystem,
-      () -> -translationLimiter.calculate(DriverController.getRawAxis(translationAxis) * 0.25),
-      () -> -strafeLimiter.calculate(DriverController.getRawAxis(strafeAxis) * 0.25),
-      () -> rotationLimiter.calculate(DriverController.getRawAxis(rotationAxis) * 0.25),
-      () -> robotCentric.getAsBoolean())
-  );
-
-  //Drive Controls
+        swerveSubsystem,
+          () -> -translationLimiter.calculate(DriverController.getRawAxis(translationAxis) * 0.25),
+          () -> -strafeLimiter.calculate(DriverController.getRawAxis(strafeAxis) * 0.25),
+          () -> rotationLimiter.calculate(DriverController.getRawAxis(rotationAxis) * 0.25),
+          () -> robotCentric.getAsBoolean())
+    );
 
   //Algae Controls
-
-  //Coral Arm Controls
-
-  //Climber Controls
-
     new JoystickButton(DriverController, Constants.ControllerRawButtons.XboxController.Axis.kRightY.value)
-        .whileTrue(algaeArticulate.AlgaeUpDown(() -> DriverController.getRawAxis(algaeArticulateAxis)));
-    
-    new JoystickButton(DriverController, Constants.ControllerRawButtons.XboxController.Button.kA.value)
-    .onTrue(botCam.InitializeBotCam());
-
-    new JoystickButton(DriverController, Constants.ControllerRawButtons.XboxController.Button.kB.value)
-    .onTrue(botCam.StopBotCam());
-
-    new JoystickButton(CoPilotController, Constants.ControllerRawButtons.XboxController.Axis.kLeftX.value)
-    .whileTrue(collectorHead.ArticulateCoralCollector(() -> CoPilotController.getRawAxis(collectorHeadAxis)));
-
-    new JoystickButton(CoPilotController, Constants.ControllerRawButtons.XboxController.Axis.kLeftTrigger.value)
-    .whileTrue(coralCollector.CoralIn());
-
-    new JoystickButton(CoPilotController, Constants.ControllerRawButtons.XboxController.Axis.kRightTrigger.value)
-    .whileTrue(coralCollector.CoralOut());
+            .whileTrue(algaeArticulate.AlgaeUpDown(() -> DriverController.getRawAxis(algaeArticulateAxis)));
 
     new JoystickButton(CoPilotController, XboxController.Button.kRightBumper.value)
-    .whileTrue(algaeClaw.ClawClose());
+        .whileTrue(algaeClaw.ClawClose());
 
     new JoystickButton(CoPilotController, XboxController.Button.kLeftBumper.value)
-    .whileTrue(algaeClaw.ClawOpen());
+        .whileTrue(algaeClaw.ClawOpen());
+
+  //Coral Arm Controls
+    new JoystickButton(CoPilotController, Constants.ControllerRawButtons.XboxController.Axis.kLeftX.value)
+            .whileTrue(collectorHead.ArticulateCoralCollector(() -> CoPilotController.getRawAxis(collectorHeadAxis)));
+
+    new JoystickButton(CoPilotController, Constants.ControllerRawButtons.XboxController.Axis.kLeftTrigger.value)
+        .whileTrue(coralCollector.CoralIn());
+
+    new JoystickButton(CoPilotController, Constants.ControllerRawButtons.XboxController.Axis.kRightTrigger.value)
+        .whileTrue(coralCollector.CoralOut());
+     
+    new JoystickButton(CoPilotController, XboxController.Button.kA.value)
+        .onTrue(armCollect);
+    
+    new JoystickButton(CoPilotController, XboxController.Button.kB.value)
+        .onTrue(armL1);
 
     new JoystickButton(CoPilotController, XboxController.Button.kX.value)
-    .whileTrue(armPivot.ManualPivotToMin());
-    
+        .onTrue(armL2);
+
     new JoystickButton(CoPilotController, XboxController.Button.kY.value)
-    .whileTrue(armPivot.ManualPivotToMax());
+        .onTrue(armL3);
+        
+  //Manual Arm Controls
+    //new JoystickButton(CoPilotController, XboxController.Button.kX.value)
+    //    .whileTrue(armPivot.ManualPivotToMin());
+        
+    //new JoystickButton(CoPilotController, XboxController.Button.kY.value)
+      //  .whileTrue(armPivot.ManualPivotToMax());
+    
+    //new JoystickButton(CoPilotController, XboxController.Button.kA.value)
+        //.whileTrue(armLift.ManualLiftToMax());
+    
+    //new JoystickButton(CoPilotController, XboxController.Button.kB.value)
+        //.whileTrue(armLift.ManualLiftToMin());
 
-    new JoystickButton(CoPilotController, XboxController.Button.kA.value)
-    .whileTrue(armLift.ManualLiftToMax());
-
-    new JoystickButton(CoPilotController, XboxController.Button.kB.value)
-    .whileTrue(armLift.ManualLiftToMin());
-
+  //Climber Controls
     new POVButton(CoPilotController, 90).whileTrue(
-      cageClimber.ReadyCageGrabber()
-    );
+          cageClimber.ReadyCageGrabber()
+        );
 
     new POVButton(CoPilotController, 270).whileTrue(
-      cageClimber.CageClimb()
-    );
+          cageClimber.CageClimb()
+        );
 
+  //Stop All Subsystems
     new POVButton(CoPilotController, 180)
-      .onTrue(new InstantCommand(() -> {
-      cageClimber.CageClimbStop();
-      algaeArticulate.StopAlgaeArticulateMotor();
-      algaeClaw.StopClaw();
-      armLift.StopLift();
-      armPivot.StopPivot();
-      collectorHead.CollectorHeadStop();
-      coralCollector.CollectCoralStop();
-      }));
-    }
+    .onTrue(new InstantCommand(() -> {
+    cageClimber.CageClimbStop();
+    algaeArticulate.StopAlgaeArticulateMotor();
+    algaeClaw.StopClaw();
+    armLift.StopLift();
+    armPivot.StopPivot();
+    collectorHead.CollectorHeadStop();
+    coralCollector.CollectCoralStop();
+    }));
+}
+    
+    //new JoystickButton(DriverController, Constants.ControllerRawButtons.XboxController.Button.kA.value)
+    //.onTrue(botCam.InitializeBotCam());
+
+    //new JoystickButton(DriverController, Constants.ControllerRawButtons.XboxController.Button.kB.value)
+    //.onTrue(botCam.StopBotCam());
+
+    
+
+   
+
+    
+
+    
+
+    
+    
     
 
   public Command getAutonomousCommand() {
