@@ -60,9 +60,10 @@ public class ArmPivot extends SubsystemBase {
         m_Pivot = new SparkMax(Constants.CollectorArmConstants.PIVOT_MOTOR_ID, MotorType.kBrushless);
         pivotEncoder = m_Pivot.getEncoder();
         motorConfig = new SparkMaxConfig();
+        resetEncoder();
 
         pivotPID = new PIDController(kP, kI, kD);
-        pivotPID.setTolerance(0.2);
+        pivotPID.setTolerance(2.0);
 
         pivotFF = new ArmFeedforward(kS, kG, kV, kA);
 
@@ -70,7 +71,7 @@ public class ArmPivot extends SubsystemBase {
         pivotProfile = new TrapezoidProfile(pivotConstraints);
 
         pivotGoal = new TrapezoidProfile.State(PIVOT_START, 0);
-        pivotState = new TrapezoidProfile.State(pivotEncoder.getPosition(), 0);
+        pivotState = new TrapezoidProfile.State(0.0, 0);
 
         SmartDashboard.putBoolean("Pivot Tuning", false);
         SmartDashboard.putNumber("Pivot kP", kP);
@@ -84,7 +85,7 @@ public class ArmPivot extends SubsystemBase {
         
 
         configureMotors(m_Pivot, motorConfig, Constants.CollectorArmConstants.CURRENT_LIMIT_NEO);
-        resetEncoder();
+        
     }
 
     private void configureMotors(SparkMax motor, SparkMaxConfig config, int currentLimit) {
@@ -117,11 +118,11 @@ public class ArmPivot extends SubsystemBase {
     private double applySoftStop(double output, double armAngle) {
         if (armAngle < PIVOT_START + SOFT_STOP_BUFFER) {
             double scale = (armAngle - PIVOT_START) / SOFT_STOP_BUFFER;
-            return output * MathUtil.clamp(scale, 0.2, 1.0); // Limit to min 20% speed
+            return output * MathUtil.clamp(armAngle, PIVOT_START, PIVOT_MAX); // Limit to min 20% speed
         } 
         if (armAngle > PIVOT_MAX - SOFT_STOP_BUFFER) {
             double scale = (PIVOT_MAX - armAngle) / SOFT_STOP_BUFFER;
-            return output * MathUtil.clamp(scale, 0.2, 1.0);
+            return output * MathUtil.clamp(armAngle, PIVOT_START, PIVOT_MAX); // Limit to min 20% speed
         }
         return output;
     }

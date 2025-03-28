@@ -62,8 +62,10 @@ public class ArmLift extends SubsystemBase {
       liftEncoder = m_Lift.getEncoder();
       motorConfig = new SparkMaxConfig();
 
+      resetEncoder();
+
       liftPID = new PIDController(kP, kI, kD);
-      liftPID.setTolerance(0.0);
+      liftPID.setTolerance(0.1);
 
       liftFF = new ArmFeedforward(kS, kG, kV, kA);
 
@@ -71,7 +73,7 @@ public class ArmLift extends SubsystemBase {
       liftProfile = new TrapezoidProfile(liftConstraints);
 
       liftGoal = new TrapezoidProfile.State(LIFT_MAX_HEIGHT, 0);
-      liftState = new TrapezoidProfile.State(liftEncoder.getPosition(), 0);
+      liftState = new TrapezoidProfile.State(0.0, 0);
 
         SmartDashboard.putBoolean("Lift Tuning", false);
         SmartDashboard.putNumber("Lift kP", kP);
@@ -85,7 +87,7 @@ public class ArmLift extends SubsystemBase {
 
 
       configureMotors(m_Lift, motorConfig, Constants.CollectorArmConstants.CURRENT_LIMIT_NEO);
-      resetEncoder();
+      
     }
    
     private void configureMotors(SparkMax motor, SparkMaxConfig config, int currentLimit) {

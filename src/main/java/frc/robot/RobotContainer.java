@@ -55,6 +55,8 @@ public class RobotContainer {
   private final int translationAxis;
   private final int strafeAxis;
   private final int rotationAxis;
+  private final int algaeArticulateAxis;
+  private final int coralArticulateAxis;
   
   private final Joystick DriverController;
   private final SwerveSubsystem swerveSubsystem;
@@ -109,6 +111,8 @@ public class RobotContainer {
     translationAxis = Constants.ControllerRawButtons.XboxController.Axis.kLeftY.value;
     strafeAxis = Constants.ControllerRawButtons.XboxController.Axis.kLeftX.value;
     rotationAxis = Constants.ControllerRawButtons.XboxController.Axis.kRightX.value;
+    algaeArticulateAxis = Constants.ControllerRawButtons.XboxController.Axis.kRightY.value;
+    coralArticulateAxis = Constants.ControllerRawButtons.XboxController.Axis.kRightX.value;
 
       
     swerveSubsystem.setDefaultCommand(new SwerveController(
@@ -169,10 +173,8 @@ public class RobotContainer {
     );
 
   //Algae Controls
-    new RunCommand(() -> {
-      double joystickValue = CoPilotController.getRawAxis(Constants.ControllerRawButtons.XboxController.Axis.kRightY.value);
-      algaeArticulate.AlgaeUpDown(() -> joystickValue);
-      }, algaeArticulate);
+    new JoystickButton(CoPilotController, Constants.ControllerRawButtons.XboxController.Axis.kRightY.value)
+        .whileTrue(algaeArticulate.AlgaeUpDown(() -> CoPilotController.getRawAxis(algaeArticulateAxis)));
 
     new JoystickButton(CoPilotController, Constants.ControllerRawButtons.XboxController.Button.kRightBumper.value)
         .whileTrue(algaeClaw.ClawClose());
@@ -181,35 +183,26 @@ public class RobotContainer {
         .whileTrue(algaeClaw.ClawOpen());
 
   //Coral Arm Controls
+    new JoystickButton(CoPilotController, Constants.ControllerRawButtons.XboxController.Axis.kLeftX.value)
+        .whileTrue(collectorHead.ArticulateCoralCollector(() -> CoPilotController.getRawAxis(coralArticulateAxis)));
 
-  new RunCommand(() -> {
-    double joystickValue = CoPilotController.getRawAxis(Constants.ControllerRawButtons.XboxController.Axis.kLeftX.value);
-    collectorHead.ArticulateCoralCollector(() -> joystickValue);
-    }, collectorHead);
+    new JoystickButton(CoPilotController, Constants.ControllerRawButtons.XboxController.Axis.kLeftTrigger.value)
+        .whileTrue(coralCollector.CoralIn());
 
-  new RunCommand(() -> {
-    double triggerValue = CoPilotController.getRawAxis(XboxController.Axis.kLeftTrigger.value); // Get left trigger value (0.0 to 1.0)
-    
-    if (triggerValue > 0.1) { // If the trigger is pressed
-        coralCollector.CoralIn(); // Set motor to spin in one direction
-    } else {
-        coralCollector.CollectCoralStop(); // Stop motor when trigger is not pressed
-    }
-}, coralCollector);
-
-// Bind the CoralOut command to the RIGHT trigger (spins in the opposite direction)
-new RunCommand(() -> {
-    double triggerValue = CoPilotController.getRawAxis(XboxController.Axis.kRightTrigger.value); // Get right trigger value (0.0 to 1.0)
-    
-    if (triggerValue > 0.1) { // If the trigger is pressed
-        coralCollector.CoralOut(); // Set motor to spin in the opposite direction
-    } else {
-        coralCollector.CollectCoralStop(); // Stop motor when trigger is not pressed
-    }
-}, coralCollector);
+    new JoystickButton(CoPilotController, Constants.ControllerRawButtons.XboxController.Axis.kRightTrigger.value)
+        .whileTrue(coralCollector.CoralOut());
      
-    //new JoystickButton(CoPilotController, XboxController.Button.kA.value)
-        //.onTrue(armCollect);
+    new JoystickButton(CoPilotController, Constants.ControllerRawButtons.XboxController.Button.kA.value)
+        .onTrue(new MoveArmToCollect(armLift, armPivot));
+    
+    new JoystickButton(CoPilotController, Constants.ControllerRawButtons.XboxController.Button.kB.value)
+        .onTrue(new MoveArmToL1(armLift, armPivot));
+    
+    new JoystickButton(CoPilotController, Constants.ControllerRawButtons.XboxController.Button.kX.value)
+        .onTrue(new MoveArmToL2(armLift, armPivot));
+
+    new JoystickButton(CoPilotController, Constants.ControllerRawButtons.XboxController.Button.kY.value)
+        .onTrue(new MoveArmToL3(armLift, armPivot));
     
     //new JoystickButton(CoPilotController, XboxController.Button.kB.value)
         //.onTrue(armL1);
@@ -221,17 +214,17 @@ new RunCommand(() -> {
         //.onTrue(armL3);
         
   //Manual Arm Controls
-    new JoystickButton(CoPilotController, Constants.ControllerRawButtons.XboxController.Button.kX.value)
-        .whileTrue(armPivot.SimplePivotBack());
+    //new JoystickButton(CoPilotController, Constants.ControllerRawButtons.XboxController.Button.kX.value)
+        //.whileTrue(armPivot.SimplePivotBack());
         
-    new JoystickButton(CoPilotController, Constants.ControllerRawButtons.XboxController.Button.kY.value)
-       .whileTrue(armPivot.SimplePivotForward());
+    //new JoystickButton(CoPilotController, Constants.ControllerRawButtons.XboxController.Button.kY.value)
+      // .whileTrue(armPivot.SimplePivotForward());
     
-    new JoystickButton(CoPilotController, Constants.ControllerRawButtons.XboxController.Button.kA.value)
-        .whileTrue(armLift.SimpleLiftUp());
+    //new JoystickButton(CoPilotController, Constants.ControllerRawButtons.XboxController.Button.kA.value)
+       // .whileTrue(armLift.SimpleLiftUp());
     
-    new JoystickButton(CoPilotController, Constants.ControllerRawButtons.XboxController.Button.kB.value)
-        .whileTrue(armLift.SimpleLiftDown());
+   // new JoystickButton(CoPilotController, Constants.ControllerRawButtons.XboxController.Button.kB.value)
+        //.whileTrue(armLift.SimpleLiftDown());
 
   //Climber Controls
     new POVButton(CoPilotController, 90).whileTrue(

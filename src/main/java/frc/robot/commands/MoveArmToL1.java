@@ -41,14 +41,4 @@ public class MoveArmToL1 extends SequentialCommandGroup {
 }
 
 //*A different command structure to try */
-//public MoveArmToL1(ArmLift lift, ArmPivot pivot) {
-  //addCommands(
-    //lift.LiftToL1().until(lift::isAtTarget),  // 🚀 Wait until Lift is at L1
-    //pivot.PivotToL1().until(pivot::isAtTarget), // 🚀 Wait until Pivot is at L1
-    //new InstantCommand(() -> { // Ensure Stop Commands
-      //lift.StopLift();
-      //pivot.StopPivot();
-    //})
-  //);
-//}
-//}
+// Removed duplicate constructor to avoid compilation error.
