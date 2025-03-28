@@ -35,26 +35,26 @@ public class ArmPivot extends SubsystemBase {
     
 
     private static final double PIVOT_START = 0.0;
-    private static final double PIVOT_COLLECT = 1.0;
-    private static final double PIVOT_L1 = 5.0;
-    private static final double PIVOT_L2 = 10.0;
-    private static final double PIVOT_L3 = 15.0;
-    private static final double PIVOT_MAX = 90.0;
+    private static final double PIVOT_COLLECT = -63.0;
+    private static final double PIVOT_L1 = -117.0;
+    private static final double PIVOT_L2 = -142;
+    private static final double PIVOT_L3 = -297.0;
+    private static final double PIVOT_MAX = -297.0;
 
-    private static final double PIVOT_MAX_VELOCITY = 90.0; // Degrees per second
+    private static final double PIVOT_MAX_VELOCITY = 10.0; // Degrees per second
     private static final double PIVOT_MAX_ACCELERATION = 150.0; // Degrees per second²
 
     private static final double PIVOT_GEAR_RATIO = 84.0; //double check and update
     public static double PIVOT_ENCODER_TO_DEGREES = 360.0 / PIVOT_GEAR_RATIO;
     public static final double SOFT_STOP_BUFFER = 10.0;
 
-    private static double kP = 0.025;
+    private static double kP = 0.05;
     private static double kI = 0.0;
-    private static double kD = 0.001;
-    private static double kG = 0.15;
-    private static double kS = 0.1;
-    private static double kV = 0.02;
-    private static double kA = 0.01;
+    private static double kD = 0.0;
+    private static double kG = 2.0;
+    private static double kS = 0.01;
+    private static double kV = 0.0;
+    private static double kA = 0.0;
 
     public ArmPivot() {
         m_Pivot = new SparkMax(Constants.CollectorArmConstants.PIVOT_MOTOR_ID, MotorType.kBrushless);
@@ -108,7 +108,7 @@ public class ArmPivot extends SubsystemBase {
             MathUtil.clamp(targetDegrees, PIVOT_START, PIVOT_MAX), 0);
         pivotState = pivotProfile.calculate(0.02, pivotState, pivotGoal);
         double pidOutput = pivotPID.calculate(getPivotAngle(), pivotState.position);
-        double feedforward = pivotFF.calculate(0, pivotGoal.position);
+        double feedforward = pivotFF.calculate(0, pivotState.position);
         double motorOutput = MathUtil.clamp(pidOutput + feedforward, -1.0, 1.0); 
         motorOutput = applySoftStop(motorOutput, getPivotAngle());  
         m_Pivot.set(motorOutput);
@@ -179,7 +179,6 @@ public class ArmPivot extends SubsystemBase {
         pivotPID.reset();
         pivotGoal = new TrapezoidProfile.State(getPivotAngle(), 0);
         pivotState = new TrapezoidProfile.State(getPivotAngle(), 0);
-        m_Pivot.set(pivotFF.calculate(0, getPivotAngle()));
       }, this);
     }
 

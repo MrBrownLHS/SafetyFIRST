@@ -31,19 +31,19 @@ public class ArmLift extends SubsystemBase {
     private final TrapezoidProfile liftProfile;
     private ArmFeedforward liftFF;
 
-    private static final double LIFT_COLLECT = 1.0;
-    private static final double LIFT_L1 = 5.0;
-    private static final double LIFT_L2 = 10.0;
-    private static final double LIFT_L3 = 15.0;
+    private static final double LIFT_COLLECT = 15.0;
+    private static final double LIFT_L1 = 15.0;
+    private static final double LIFT_L2 = 15.0;
+    private static final double LIFT_L3 = 18.0;
     
 
    
 
-    private static final double LIFT_MAX_VELOCITY = 10.0;
+    private static final double LIFT_MAX_VELOCITY = 5.0;
     private static final double LIFT_MAX_ACCELERATION = 20.0;
 
-    private static final double LIFT_MAX_HEIGHT = 20.0;
-    private static final double LIFT_MIN_HEIGHT = 0.0;
+    private static final double LIFT_MAX_HEIGHT = -18.0;
+    private static final double LIFT_MIN_HEIGHT = -1.0;
 
     private static final double LIFT_GEAR_RATIO = 64.0;
     private static final double COG_DIAMETER_INCHES = 2.0;
@@ -52,7 +52,7 @@ public class ArmLift extends SubsystemBase {
     private static double kP = 0.025;
     private static double kI = 0.0;
     private static double kD = 0.01;
-    private static double kG = 0.4;
+    private static double kG = 0.6;
     private static double kS = 0.1;
     private static double kV = 0.02;
     private static double kA = 0.01;
@@ -63,7 +63,7 @@ public class ArmLift extends SubsystemBase {
       motorConfig = new SparkMaxConfig();
 
       liftPID = new PIDController(kP, kI, kD);
-      liftPID.setTolerance(0.2);
+      liftPID.setTolerance(0.0);
 
       liftFF = new ArmFeedforward(kS, kG, kV, kA);
 
@@ -109,7 +109,7 @@ public class ArmLift extends SubsystemBase {
             MathUtil.clamp(targetInches, LIFT_MIN_HEIGHT, LIFT_MAX_HEIGHT), 0);
         liftState = liftProfile.calculate(0.02, liftState, liftGoal);
         double pidOutput = liftPID.calculate(getLiftHeight(), liftState.position);
-        double feedforward = liftFF.calculate(0, liftGoal.position);
+        double feedforward = liftFF.calculate(0, liftState.position);
         double motorOutput = pidOutput + feedforward;
         m_Lift.set(MathUtil.clamp(motorOutput, -1.0, 1.0));   
         
@@ -174,7 +174,6 @@ public class ArmLift extends SubsystemBase {
             liftPID.reset();
             liftGoal = new TrapezoidProfile.State(getLiftHeight(), 0);
             liftState = new TrapezoidProfile.State(getLiftHeight(), 0);
-            m_Lift.set(liftFF.calculate(0, getLiftHeight()));
         }, this);
     }
       

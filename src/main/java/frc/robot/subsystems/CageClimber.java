@@ -42,14 +42,14 @@ public class CageClimber extends SubsystemBase {
 
   public RunCommand ReadyCageGrabber() {
     return new RunCommand(() -> {
-      m_Winch.set(-0.5);
+      m_Winch.set(0.5);
     }, this);
     }
 
 
   public RunCommand CageClimb() {
     return new RunCommand(() -> {
-      m_Winch.set(0.5);
+      m_Winch.set(-0.5);
     }, this);
     }
 

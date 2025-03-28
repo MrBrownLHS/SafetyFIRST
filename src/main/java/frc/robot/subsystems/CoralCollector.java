@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.revrobotics.spark.SparkMax;
 import edu.wpi.first.math.filter.SlewRateLimiter;
+import java.util.function.DoubleSupplier;
 
 
 import com.revrobotics.spark.config.SparkMaxConfig;
@@ -29,9 +30,11 @@ public class CoralCollector extends SubsystemBase {
   private final SparkMax m_CoralCollect;
   private final SparkMaxConfig coralCollectorMotorConfig;
   public SlewRateLimiter coralCollectorRateLimiter;
+  
 
  
     public CoralCollector() {
+      coralCollectorRateLimiter = new SlewRateLimiter(Constants.CollectorArmConstants.ARTICULATE_RATE_LIMIT);
       m_CoralCollect = new SparkMax(Constants.CollectorArmConstants.CORAL_COLLECT_MOTOR_ID, MotorType.kBrushless);
       coralCollectorRateLimiter = new SlewRateLimiter(Constants.CollectorArmConstants.ARTICULATE_RATE_LIMIT);
       coralCollectorMotorConfig = new SparkMaxConfig();
@@ -46,6 +49,8 @@ public class CoralCollector extends SubsystemBase {
       config.voltageCompensation(Constants.CollectorArmConstants.VOLTAGE_COMPENSATION);
       motor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
     }
+
+ 
 
   
     public RunCommand CoralIn() {
