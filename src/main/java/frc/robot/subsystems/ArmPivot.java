@@ -149,13 +149,13 @@ public class ArmPivot extends SubsystemBase {
     
     public RunCommand SimplePivotForward() {
         return new RunCommand(() -> {
-            m_Pivot.set(0.5);
+            m_Pivot.set(-0.5);
         }, this);
     }
 
     public RunCommand SimplePivotBack() {
         return new RunCommand(() -> {
-            m_Pivot.set(-0.5);
+            m_Pivot.set(0.5);
         }, this);
     }
 

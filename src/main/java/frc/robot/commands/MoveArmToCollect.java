@@ -15,8 +15,8 @@ public class MoveArmToCollect extends SequentialCommandGroup {
   
   public MoveArmToCollect(ArmLift lift, ArmPivot pivot) {
     addCommands(
-      LiftCommand(lift),
-      PivotCommand(pivot),
+      LiftCommand(lift)
+      .andThen(() -> PivotCommand(pivot)),
       StopCommands(lift, pivot)
     );
   }

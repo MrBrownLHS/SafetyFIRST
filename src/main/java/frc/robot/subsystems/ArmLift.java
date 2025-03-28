@@ -31,10 +31,10 @@ public class ArmLift extends SubsystemBase {
     private final TrapezoidProfile liftProfile;
     private ArmFeedforward liftFF;
 
-    private static final double LIFT_COLLECT = 15.0;
-    private static final double LIFT_L1 = 15.0;
-    private static final double LIFT_L2 = 15.0;
-    private static final double LIFT_L3 = 18.0;
+    private static final double LIFT_COLLECT = -15.0;
+    private static final double LIFT_L1 = -15.0;
+    private static final double LIFT_L2 = -15.0;
+    private static final double LIFT_L3 = -18.0;
     
 
    
@@ -51,11 +51,11 @@ public class ArmLift extends SubsystemBase {
 
     private static double kP = 0.025;
     private static double kI = 0.0;
-    private static double kD = 0.01;
+    private static double kD = 0.0;
     private static double kG = 0.6;
-    private static double kS = 0.1;
-    private static double kV = 0.02;
-    private static double kA = 0.01;
+    private static double kS = 0.0;
+    private static double kV = 0.0;
+    private static double kA = 0.0;
 
     public ArmLift() {
       m_Lift = new SparkMax(Constants.CollectorArmConstants.LIFT_MOTOR_ID, MotorType.kBrushless);
@@ -96,6 +96,7 @@ public class ArmLift extends SubsystemBase {
         config.secondaryCurrentLimit(Constants.CollectorArmConstants.MAX_CURRENT_LIMIT_NEO);
         config.voltageCompensation(Constants.CollectorArmConstants.VOLTAGE_COMPENSATION);
         motor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+
     }
 
     public void resetEncoder(){
@@ -157,13 +158,13 @@ public class ArmLift extends SubsystemBase {
 
     public RunCommand SimpleLiftUp() {
         return new RunCommand(() -> {
-            m_Lift.set(0.5);
+            m_Lift.set(-0.5);
         }, this);
     }
 
     public RunCommand SimpleLiftDown() {
         return new RunCommand(() -> {
-            m_Lift.set(-0.5);
+            m_Lift.set(0.5);
         }, this);
     }
 

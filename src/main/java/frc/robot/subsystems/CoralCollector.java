@@ -10,6 +10,8 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.revrobotics.spark.SparkMax;
+
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import java.util.function.DoubleSupplier;
 
@@ -52,17 +54,16 @@ public class CoralCollector extends SubsystemBase {
 
  
 
-  
     public RunCommand CoralIn() {
       return new RunCommand(() -> {
-        m_CoralCollect.set(0.5);
+          m_CoralCollect.set(0.15); // Clamp to valid range
       }, this);
     }
 
     public RunCommand CoralOut() {
-      return new RunCommand(() -> {
-        m_CoralCollect.set(-0.5);
-      }, this);
+        return new RunCommand(() -> {
+            m_CoralCollect.set(-0.15); // Clamp to valid range
+        }, this);
     }
 
   
