@@ -25,14 +25,24 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
 public class ArmPivot extends SubsystemBase {
-    private final SparkMax m_Pivot;
-    private final RelativeEncoder pivotEncoder;
-    private final SparkMaxConfig motorConfig;
-    private final PIDController pivotPID;
-    private final TrapezoidProfile.Constraints pivotConstraints;
-    private TrapezoidProfile.State pivotGoal, pivotState;
-    private final TrapezoidProfile pivotProfile;
-    private ArmFeedforward pivotFF;
+    private final SparkMax m_Pivot
+    = new SparkMax(Constants.CollectorArmConstants.PIVOT_MOTOR_ID, MotorType.kBrushless);;
+    private final RelativeEncoder pivotEncoder 
+    = m_Pivot.getEncoder();
+    private final SparkMaxConfig motorConfig 
+    = new SparkMaxConfig();
+    private final PIDController pivotPID 
+    = new PIDController(kP, kI, kD);
+    private final TrapezoidProfile.Constraints pivotConstraints 
+    = new TrapezoidProfile.Constraints(PIVOT_MAX_VELOCITY, PIVOT_MAX_ACCELERATION);
+    private TrapezoidProfile.State pivotGoal 
+    = new TrapezoidProfile.State(PIVOT_START, 0);
+    private TrapezoidProfile.State pivotState 
+    = new TrapezoidProfile.State(0.0, 0);;
+    private final TrapezoidProfile pivotProfile
+    = new TrapezoidProfile(pivotConstraints);
+    private ArmFeedforward pivotFF 
+    = new ArmFeedforward(kS, kG, kV, kA);
     
 
     private static final double PIVOT_START = 0.0;
@@ -45,10 +55,9 @@ public class ArmPivot extends SubsystemBase {
     private static final double PIVOT_MAX_VELOCITY = 10.0; // Degrees per second
     private static final double PIVOT_MAX_ACCELERATION = 150.0; // Degrees per second²
 
-    private static final double PIVOT_GEAR_RATIO = 84.0; //double check and update
+    private static final double PIVOT_GEAR_RATIO = 100.0; //double check and update
     public static double PIVOT_ENCODER_TO_DEGREES = 360.0 / PIVOT_GEAR_RATIO;
-    public static final double SOFT_STOP_BUFFER = 10.0;
-
+    
     private static double kP = 0.05;
     private static double kI = 0.0;
     private static double kD = 0.0;
@@ -58,22 +67,14 @@ public class ArmPivot extends SubsystemBase {
     private static double kA = 0.0;
 
     public ArmPivot() {
-        m_Pivot = new SparkMax(Constants.CollectorArmConstants.PIVOT_MOTOR_ID, MotorType.kBrushless);
-        pivotEncoder = m_Pivot.getEncoder();
-        motorConfig = new SparkMaxConfig();
+        configureMotors(m_Pivot, motorConfig, Constants.CollectorArmConstants.MAX_CURRENT_LIMIT_NEO);
         resetEncoder();
-
-        pivotPID = new PIDController(kP, kI, kD);
-        pivotPID.setTolerance(2.0);
-
-        pivotFF = new ArmFeedforward(kS, kG, kV, kA);
-
-        pivotConstraints = new TrapezoidProfile.Constraints(PIVOT_MAX_VELOCITY, PIVOT_MAX_ACCELERATION);
-        pivotProfile = new TrapezoidProfile(pivotConstraints);
-
-        pivotGoal = new TrapezoidProfile.State(PIVOT_START, 0);
-        pivotState = new TrapezoidProfile.State(0.0, 0);
-
+        configurePID();
+        updateSmartDashboard();
+    }
+        
+    private void updateSmartDashboard() {
+        SmartDashboard.putNumber("Pivot Angle", getPivotAngle());
         SmartDashboard.putBoolean("Pivot Tuning", false);
         SmartDashboard.putNumber("Pivot kP", kP);
         SmartDashboard.putNumber("Pivot kI", kI);
@@ -81,12 +82,7 @@ public class ArmPivot extends SubsystemBase {
         SmartDashboard.putNumber("Pivot kS", kS);
         SmartDashboard.putNumber("Pivot kG", kG);
         SmartDashboard.putNumber("Pivot kV", kV);
-        SmartDashboard.putNumber("Pivot kA", kA);
-        
-        
-
-        configureMotors(m_Pivot, motorConfig, Constants.CollectorArmConstants.CURRENT_LIMIT_NEO);
-        
+        SmartDashboard.putNumber("Pivot kA", kA);        
     }
 
     private void configureMotors(SparkMax motor, SparkMaxConfig config, int currentLimit) {
@@ -101,40 +97,44 @@ public class ArmPivot extends SubsystemBase {
         pivotEncoder.setPosition(0.0);
     }
 
+    private void configurePID() {
+        pivotPID.setP(kP);
+        pivotPID.setI(kI);
+        pivotPID.setD(kD);
+        pivotPID.setTolerance(0.1);
+    }
+
+    private double encoderToDegrees(double encoderPosition) {
+        return encoderPosition * PIVOT_ENCODER_TO_DEGREES;
+    }
+    
+    private double degreesToEncoder(double degrees) {
+        return degrees / PIVOT_ENCODER_TO_DEGREES;
+    }
+     
     public double getPivotAngle() {
-        return pivotEncoder.getPosition() *  PIVOT_ENCODER_TO_DEGREES;
+        return encoderToDegrees(pivotEncoder.getPosition());
     }
 
     public void setPivotPosition(double targetDegrees) {
         pivotGoal = new TrapezoidProfile.State(
             MathUtil.clamp(targetDegrees, PIVOT_START, PIVOT_MAX), 0);
         pivotState = pivotProfile.calculate(0.02, pivotState, pivotGoal);
-        double pidOutput = pivotPID.calculate(getPivotAngle(), pivotState.position);
-        double feedforward = pivotFF.calculate(0, pivotState.position);
-        double motorOutput = MathUtil.clamp(pidOutput + feedforward, -1.0, 1.0); 
-        motorOutput = applySoftStop(motorOutput, getPivotAngle());  
-        //m_Pivot.set(motorOutput);
-        m_Pivot.getClosedLoopController().setReference(motorOutput, ControlType.kPosition);
+        double positionRotations = degreesToEncoder(pivotGoal.position);
+        m_Pivot.getClosedLoopController().setReference(positionRotations, ControlType.kPosition);
     }
 
-    private double applySoftStop(double output, double armAngle) {
-        if (armAngle < PIVOT_START + SOFT_STOP_BUFFER) {
-            double scale = (armAngle - PIVOT_START) / SOFT_STOP_BUFFER;
-            return output * MathUtil.clamp(armAngle, PIVOT_START, PIVOT_MAX); // Limit to min 20% speed
-        } 
-        if (armAngle > PIVOT_MAX - SOFT_STOP_BUFFER) {
-            double scale = (PIVOT_MAX - armAngle) / SOFT_STOP_BUFFER;
-            return output * MathUtil.clamp(armAngle, PIVOT_START, PIVOT_MAX); // Limit to min 20% speed
-        }
-        return output;
-    }
-
+    
     public boolean isAtTarget() {
         return pivotPID.atSetpoint();
     }
 
+    public Command pivotToPosition(double targetDegrees) {
+        return new InstantCommand(() -> setPivotPosition(targetDegrees), this);
+    }
+
     public Command PivotToCollect() {
-        return new InstantCommand(() -> setPivotPosition(PIVOT_COLLECT), this);
+        return pivotToPosition(PIVOT_COLLECT); //Change the other setpoint commands
     }
 
     public Command PivotToL1() {
@@ -188,18 +188,7 @@ public class ArmPivot extends SubsystemBase {
     
     @Override
     public void periodic() {
-        double error = Math.abs(getPivotAngle() - pivotGoal.position);
-        if(error > 0.2) {
-            pivotState = pivotProfile.calculate(0.02, pivotState, pivotGoal);
-            double pidOutput = pivotPID.calculate(getPivotAngle(), pivotState.position);
-            double feedforward = pivotFF.calculate(0, pivotGoal.position);
-            double motorOutput = pidOutput + feedforward;
-            motorOutput = applySoftStop(motorOutput, getPivotAngle());
-            m_Pivot.set(MathUtil.clamp(motorOutput, -1.0, 1.0));
-        } else {
-            m_Pivot.stopMotor();
-        }
-
+        updateSmartDashboard();
         SmartDashboard.putNumber("Pivot Angle", getPivotAngle());
 
         if (SmartDashboard.getBoolean("Pivot Tuning", false)) {
@@ -210,10 +199,7 @@ public class ArmPivot extends SubsystemBase {
             kG = SmartDashboard.getNumber("Pivot kG", kG);
             kV = SmartDashboard.getNumber("Pivot kV", kV);
             kA = SmartDashboard.getNumber("Pivot kA", kA);
-            pivotPID.setP(kP);
-            pivotPID.setI(kI);
-            pivotPID.setD(kD);
-            pivotFF = new ArmFeedforward(kS, kG, kV, kA);
+            configurePID();
         }
     }
 }
