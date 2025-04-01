@@ -35,7 +35,7 @@ public class Constants {
         public static final double COG_DIAMETER_INCHES = 2.0; // Diameter of the center of gravity pulley in inches - NEEDS TUNING
         public static final double LIFT_GEAR_RATIO = 1.0; // Gear ratio of the lift mechanism - NEEDS TUNING
         public static final double ENCODER_TO_INCHES = (Math.PI * COG_DIAMETER_INCHES) / 360.0 / LIFT_GEAR_RATIO; 
-        public static final double DEADBAND = 0.05;
+        public static final double DEADBAND = 0.1;
         
 
         //Intake Motor Speeds - NEEDS TUNING

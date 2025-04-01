@@ -9,10 +9,12 @@ import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.event.EventLoop;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import frc.robot.commands.SwerveController;
@@ -32,6 +34,7 @@ import frc.robot.commands.MoveArmToCollect;
 import frc.robot.commands.MoveArmToL1;
 import frc.robot.commands.MoveArmToL2;
 import frc.robot.commands.MoveArmToL3;
+import frc.robot.commands.RunCoralCollector;
 import frc.robot.subsystems.Camera;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 
@@ -44,6 +47,7 @@ public class RobotContainer {
   private final JoystickButton slowDriveMode;
   
   private final XboxController CoPilotController;
+  private static final CommandXboxController CopilotCommandController = new CommandXboxController(1);
   private final CageClimber cageClimber;
   private final AlgaeArticulate algaeArticulate;
   private final AlgaeClaw algaeClaw;
@@ -70,6 +74,7 @@ public class RobotContainer {
     private final SlewRateLimiter translationLimiter = new SlewRateLimiter(2.9);
     private final SlewRateLimiter strafeLimiter = new SlewRateLimiter(2.9);
     private final SlewRateLimiter rotationLimiter = new SlewRateLimiter(2.9);
+
 
   public RobotContainer() {
     swerveSubsystem = new SwerveSubsystem();
@@ -149,9 +154,9 @@ public class RobotContainer {
       cageClimber.CageClimbStop()
     );
 
-    coralCollector.setDefaultCommand(
-      coralCollector.CollectCoralStop()
-    );
+    // coralCollector.setDefaultCommand(
+    //   coralCollector.CollectCoralStop()
+    // );
 
       
   configureBindings(); 
@@ -179,15 +184,15 @@ public class RobotContainer {
         .whileTrue(algaeClaw.ClawOpen());
 
   //Coral Arm Controls
-    new POVButton(CoPilotController, 0).whileTrue(
-          coralCollector.CoralOut()
-        );
-    new POVButton(CoPilotController, 180).whileTrue(
-          coralCollector.CoralIn()
-        );
+    //new POVButton(CoPilotController, 0).whileTrue(
+         // coralCollector.CoralOut()
+      //  );
+    // new POVButton(CoPilotController, 180).whileTrue(
+    //       coralCollector.CoralIn()
+    //     );
 
-    
-        
+    CopilotCommandController.axisMagnitudeGreaterThan(2, 0.5).whileTrue(new RunCoralCollector(coralCollector, 0.25));
+    CopilotCommandController.axisMagnitudeGreaterThan(3, 0.5).whileTrue(new RunCoralCollector(coralCollector, -0.25));
 
     //new JoystickButton(CoPilotController, XboxController.Axis.kRightTrigger.value)
     //.whileTrue(coralCollector.CoralIn(() -> CoPilotController.getRawAxis(XboxController.Axis.kRightTrigger.value)));

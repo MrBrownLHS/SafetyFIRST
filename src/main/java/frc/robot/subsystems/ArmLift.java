@@ -114,7 +114,7 @@ public class ArmLift extends SubsystemBase {
         double pidOutput = liftPID.calculate(getLiftHeight(), liftState.position);
         double feedforward = liftFF.calculate(0, liftState.position);
         double motorOutput = pidOutput + feedforward;
-        m_Lift.set(MathUtil.clamp(motorOutput, -1.0, 1.0));   
+        m_Lift.set(MathUtil.clamp(motorOutput, -1.0, 1.0));
         
     }
 

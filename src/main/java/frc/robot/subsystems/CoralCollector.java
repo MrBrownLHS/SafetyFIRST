@@ -52,7 +52,9 @@ public class CoralCollector extends SubsystemBase {
       motor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
     }
 
- 
+    public void runCoralCollector(double speed){
+      m_CoralCollect.set(speed);
+    }
 
     public RunCommand CoralIn() {
       return new RunCommand(() -> {

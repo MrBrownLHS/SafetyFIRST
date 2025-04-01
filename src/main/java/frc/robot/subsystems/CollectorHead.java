@@ -31,7 +31,7 @@ public class CollectorHead extends SubsystemBase {
   
   public CollectorHead() {
     m_CoralArticulate = new SparkMax(Constants.CollectorArmConstants.CORAL_ARTICULATE_MOTOR_ID, MotorType.kBrushless);
-    articulateCollectorRateLimiter = new SlewRateLimiter(Constants.CollectorArmConstants.ARTICULATE_RATE_LIMIT);
+    articulateCollectorRateLimiter = new SlewRateLimiter(2.9);
     articulateCollectorMotorConfig = new SparkMaxConfig();
 
     configureArticulateCollectorMotor(m_CoralArticulate, articulateCollectorMotorConfig);
@@ -45,15 +45,30 @@ public class CollectorHead extends SubsystemBase {
     motor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
   }
 
-  public RunCommand ArticulateCoralCollector(DoubleSupplier joystickInput) {
-      return new RunCommand(() -> {
-        double rawInput = joystickInput.getAsDouble();
-        double adjustedInput = (Math.abs(rawInput) > Constants.CollectorArmConstants.DEADBAND) ? rawInput : 0.0;
-        double limitedInput = articulateCollectorRateLimiter.calculate(adjustedInput);
-        m_CoralArticulate.set(limitedInput);
-      }, this);
-    }
+  // public RunCommand ArticulateCoralCollector(DoubleSupplier joystickInput) {
+  //     return new RunCommand(() -> {
+  //       double rawInput = joystickInput.getAsDouble();
+  //       double adjustedInput = (Math.abs(rawInput) > Constants.CollectorArmConstants.DEADBAND) ? rawInput : 0.0;
+  //       double limitedInput = articulateCollectorRateLimiter.calculate(adjustedInput);
+  //       m_CoralArticulate.set(limitedInput);
+  //     }, this);
+  //   }
   
+  public RunCommand ArticulateCoralCollector(DoubleSupplier joystickInput) {
+    return new RunCommand(() -> {
+        double rawInput = joystickInput.getAsDouble();
+        double adjustedInput = (Math.abs(rawInput) > 0.1)? rawInput : 0.0;
+
+        // If adjusted input is 0.0, explicitly stop the motor
+        if (adjustedInput == 0.0) {
+            m_CoralArticulate.set(0.0);
+        } else {
+            double limitedInput = articulateCollectorRateLimiter.calculate(adjustedInput);
+            m_CoralArticulate.set(limitedInput);
+        }
+    }, this);
+  }
+
   public Command CollectorHeadStop() {
     return new InstantCommand(() -> {
       m_CoralArticulate.set(0.0);

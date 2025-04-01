@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 
 
 import com.revrobotics.RelativeEncoder;
+import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
@@ -112,7 +113,8 @@ public class ArmPivot extends SubsystemBase {
         double feedforward = pivotFF.calculate(0, pivotState.position);
         double motorOutput = MathUtil.clamp(pidOutput + feedforward, -1.0, 1.0); 
         motorOutput = applySoftStop(motorOutput, getPivotAngle());  
-        m_Pivot.set(motorOutput);
+        //m_Pivot.set(motorOutput);
+        m_Pivot.getClosedLoopController().setReference(motorOutput, ControlType.kPosition);
     }
 
     private double applySoftStop(double output, double armAngle) {
