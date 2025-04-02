@@ -154,11 +154,7 @@ public class RobotContainer {
       cageClimber.CageClimbStop()
     );
 
-    // coralCollector.setDefaultCommand(
-    //   coralCollector.CollectCoralStop()
-    // );
-
-      
+ 
   configureBindings(); 
   }
 
@@ -183,56 +179,47 @@ public class RobotContainer {
     new JoystickButton(CoPilotController, XboxController.Button.kLeftBumper.value)
         .whileTrue(algaeClaw.ClawOpen());
 
-  //Coral Arm Controls
-    //new POVButton(CoPilotController, 0).whileTrue(
-         // coralCollector.CoralOut()
-      //  );
-    // new POVButton(CoPilotController, 180).whileTrue(
-    //       coralCollector.CoralIn()
-    //     );
-
+ 
     CopilotCommandController.axisMagnitudeGreaterThan(2, 0.5).whileTrue(new RunCoralCollector(coralCollector, 0.25));
     CopilotCommandController.axisMagnitudeGreaterThan(3, 0.5).whileTrue(new RunCoralCollector(coralCollector, -0.25));
 
-    //new JoystickButton(CoPilotController, XboxController.Axis.kRightTrigger.value)
-    //.whileTrue(coralCollector.CoralIn(() -> CoPilotController.getRawAxis(XboxController.Axis.kRightTrigger.value)));
 
-    //new JoystickButton(CoPilotController, XboxController.Axis.kLeftTrigger.value)
-    //.whileTrue(coralCollector.CoralOut(() -> CoPilotController.getRawAxis(XboxController.Axis.kLeftTrigger.value)));
-
-    //new JoystickButton(CoPilotController, Constants.ControllerRawButtons.XboxController.Button.kA.value)
-      //  .onTrue(new MoveArmToCollect(armLift, armPivot));
+    // new JoystickButton(CoPilotController, Constants.ControllerRawButtons.XboxController.Button.kA.value)
+    //    .onTrue(new MoveArmToCollect(armLift, armPivot));
     
-    //new JoystickButton(CoPilotController, Constants.ControllerRawButtons.XboxController.Button.kB.value)
-      //  .onTrue(new MoveArmToL1(armLift, armPivot));
+    // new JoystickButton(CoPilotController, Constants.ControllerRawButtons.XboxController.Button.kB.value)
+    //    .onTrue(new MoveArmToL1(armLift, armPivot));
     
-    //new JoystickButton(CoPilotController, Constants.ControllerRawButtons.XboxController.Button.kX.value)
-      //  .onTrue(new MoveArmToL2(armLift, armPivot));
+    // new JoystickButton(CoPilotController, Constants.ControllerRawButtons.XboxController.Button.kX.value)
+    //    .onTrue(new MoveArmToL2(armLift, armPivot));
 
-    //new JoystickButton(CoPilotController, Constants.ControllerRawButtons.XboxController.Button.kY.value)
-      //  .onTrue(new MoveArmToL3(armLift, armPivot));
+    // new JoystickButton(CoPilotController, Constants.ControllerRawButtons.XboxController.Button.kY.value)
+    //    .onTrue(new MoveArmToL3(armLift, armPivot));
     
-    //new JoystickButton(CoPilotController, XboxController.Button.kB.value)
-        //.onTrue(armL1);
+    new JoystickButton(CoPilotController, XboxController.Button.kA.value)
+        .onTrue(armCollect);
 
-    //new JoystickButton(CoPilotController, XboxController.Button.kX.value)
-        //.onTrue(armL2);
+    new JoystickButton(CoPilotController, XboxController.Button.kB.value)
+        .onTrue(armL1);
 
-    //new JoystickButton(CoPilotController, XboxController.Button.kY.value)
-        //.onTrue(armL3);
+    new JoystickButton(CoPilotController, XboxController.Button.kX.value)
+        .onTrue(armL2);
+
+    new JoystickButton(CoPilotController, XboxController.Button.kY.value)
+        .onTrue(armL3);
         
   //Manual Arm Controls
-    new JoystickButton(CoPilotController, Constants.ControllerRawButtons.XboxController.Button.kX.value)
-        .whileTrue(armPivot.SimplePivotBack());
+    // new JoystickButton(CoPilotController, Constants.ControllerRawButtons.XboxController.Button.kX.value)
+    //     .whileTrue(armPivot.SimplePivotBack());
         
-    new JoystickButton(CoPilotController, Constants.ControllerRawButtons.XboxController.Button.kY.value)
-        .whileTrue(armPivot.SimplePivotForward());
+    // new JoystickButton(CoPilotController, Constants.ControllerRawButtons.XboxController.Button.kY.value)
+    //     .whileTrue(armPivot.SimplePivotForward());
     
-    new JoystickButton(CoPilotController, Constants.ControllerRawButtons.XboxController.Button.kA.value)
-        .whileTrue(armLift.SimpleLiftUp());
+    // new JoystickButton(CoPilotController, Constants.ControllerRawButtons.XboxController.Button.kA.value)
+    //     .whileTrue(armLift.SimpleLiftUp());
     
-    new JoystickButton(CoPilotController, Constants.ControllerRawButtons.XboxController.Button.kB.value)
-        .whileTrue(armLift.SimpleLiftDown());
+    // new JoystickButton(CoPilotController, Constants.ControllerRawButtons.XboxController.Button.kB.value)
+    //     .whileTrue(armLift.SimpleLiftDown());
 
   //Climber Controls
     new POVButton(CoPilotController, 90).whileTrue(
@@ -258,11 +245,7 @@ public class RobotContainer {
     }));
 }
     
-    //new JoystickButton(DriverController, Constants.ControllerRawButtons.XboxController.Button.kA.value)
-    //.onTrue(botCam.InitializeBotCam());
 
-    //new JoystickButton(DriverController, Constants.ControllerRawButtons.XboxController.Button.kB.value)
-    //.onTrue(botCam.StopBotCam());
 
     
 

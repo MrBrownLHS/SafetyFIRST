@@ -19,7 +19,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.math.controller.ArmFeedforward;
 
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
@@ -41,9 +40,7 @@ public class ArmPivot extends SubsystemBase {
     = new TrapezoidProfile.State(0.0, 0);;
     private final TrapezoidProfile pivotProfile
     = new TrapezoidProfile(pivotConstraints);
-    private ArmFeedforward pivotFF 
-    = new ArmFeedforward(kS, kG, kV, kA);
-    
+
 
     private static final double PIVOT_START = 0.0;
     private static final double PIVOT_COLLECT = -63.0;
@@ -61,10 +58,6 @@ public class ArmPivot extends SubsystemBase {
     private static double kP = 0.05;
     private static double kI = 0.0;
     private static double kD = 0.0;
-    private static double kG = 2.0;
-    private static double kS = 0.01;
-    private static double kV = 0.0;
-    private static double kA = 0.0;
 
     public ArmPivot() {
         configureMotors(m_Pivot, motorConfig, Constants.CollectorArmConstants.MAX_CURRENT_LIMIT_NEO);
@@ -76,13 +69,9 @@ public class ArmPivot extends SubsystemBase {
     private void updateSmartDashboard() {
         SmartDashboard.putNumber("Pivot Angle", getPivotAngle());
         SmartDashboard.putBoolean("Pivot Tuning", false);
-        SmartDashboard.putNumber("Pivot kP", kP);
-        SmartDashboard.putNumber("Pivot kI", kI);
-        SmartDashboard.putNumber("Pivot kD", kD);
-        SmartDashboard.putNumber("Pivot kS", kS);
-        SmartDashboard.putNumber("Pivot kG", kG);
-        SmartDashboard.putNumber("Pivot kV", kV);
-        SmartDashboard.putNumber("Pivot kA", kA);        
+        SmartDashboard.putNumber("Pivot kP", SmartDashboard.getNumber("Pivot kP", kP));
+        SmartDashboard.putNumber("Pivot kI", SmartDashboard.getNumber("Pivot kI", kI));
+        SmartDashboard.putNumber("Pivot kD", SmartDashboard.getNumber("Pivot kD", kD));    
     }
 
     private void configureMotors(SparkMax motor, SparkMaxConfig config, int currentLimit) {
@@ -134,19 +123,19 @@ public class ArmPivot extends SubsystemBase {
     }
 
     public Command PivotToCollect() {
-        return pivotToPosition(PIVOT_COLLECT); //Change the other setpoint commands
+        return pivotToPosition(PIVOT_COLLECT); 
     }
 
     public Command PivotToL1() {
-        return new InstantCommand(() -> setPivotPosition(PIVOT_L1), this);
+        return pivotToPosition(PIVOT_L1);
     }
 
     public Command PivotToL2() {
-        return new InstantCommand(() -> setPivotPosition(PIVOT_L2), this);
+        return pivotToPosition(PIVOT_L2);
     }
 
     public Command PivotToL3() {
-        return new InstantCommand(() -> setPivotPosition(PIVOT_L3), this);
+        return pivotToPosition(PIVOT_L3);
     }  
     
     public RunCommand SimplePivotForward() {
@@ -189,17 +178,20 @@ public class ArmPivot extends SubsystemBase {
     @Override
     public void periodic() {
         updateSmartDashboard();
-        SmartDashboard.putNumber("Pivot Angle", getPivotAngle());
+    SmartDashboard.putNumber("Pivot Angle", getPivotAngle());
 
         if (SmartDashboard.getBoolean("Pivot Tuning", false)) {
-            kP = SmartDashboard.getNumber("Pivot kP", kP);
-            kI = SmartDashboard.getNumber("Pivot kI", kI);
-            kD = SmartDashboard.getNumber("Pivot kD", kD);
-            kS = SmartDashboard.getNumber("Pivot kS", kS);
-            kG = SmartDashboard.getNumber("Pivot kG", kG);
-            kV = SmartDashboard.getNumber("Pivot kV", kV);
-            kA = SmartDashboard.getNumber("Pivot kA", kA);
-            configurePID();
+            double newKP = SmartDashboard.getNumber("Pivot kP", kP);
+            double newKI = SmartDashboard.getNumber("Pivot kI", kI);
+            double newKD = SmartDashboard.getNumber("Pivot kD", kD);
+
+            if (newKP != kP || newKI != kI || newKD != kD) {
+                kP = newKP;
+                kI = newKI;
+                kD = newKD;
+                configurePID();
+                System.out.println("Updated PID values: kP=" + kP + ", kI=" + kI + ", kD=" + kD);
+            }
         }
     }
 }
