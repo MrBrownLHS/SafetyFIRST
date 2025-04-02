@@ -14,8 +14,8 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 public class MoveArmToL1 extends SequentialCommandGroup {
   public MoveArmToL1(ArmLift lift, ArmPivot pivot) {
     addCommands(
-      LiftCommand(lift)
-      .andThen(() -> PivotCommand(pivot)),
+      LiftCommand(lift),
+      PivotCommand(pivot),
       StopCommands(lift, pivot)
     );
   }

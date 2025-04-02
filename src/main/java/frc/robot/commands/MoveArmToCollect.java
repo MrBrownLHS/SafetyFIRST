@@ -15,21 +15,21 @@ public class MoveArmToCollect extends SequentialCommandGroup {
   
   public MoveArmToCollect(ArmLift lift, ArmPivot pivot) {
     addCommands(
-      LiftCommand(lift)
-      .andThen(() -> PivotCommand(pivot)),
-      StopCommands(lift, pivot)
+        LiftCommand(lift),
+        PivotCommand(pivot),
+        StopCommands(lift, pivot)
     );
-  }
+}
 
   private Command LiftCommand(ArmLift lift) {
     return lift.LiftToCollect()
-               .withTimeout(3) // Add a timeout of 2 seconds
+               .withTimeout(3)  
                .andThen(() -> lift.StopLift()); // Stop lift after completion or interruption
   }
 
   private Command PivotCommand(ArmPivot pivot) {
     return pivot.PivotToCollect()
-                .withTimeout(2) // Add a timeout of 2 seconds
+                .withTimeout(3)               
                 .andThen(() -> pivot.StopPivot());// Stop pivot after completion or interruption
   } 
 

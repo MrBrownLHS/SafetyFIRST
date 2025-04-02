@@ -138,13 +138,11 @@ public class RobotContainer {
       algaeClaw.StopClaw()
     );
 
-    armLift.setDefaultCommand(
-      armLift.StopLift()
-    );
+    // armLift.setDefaultCommand(
+    //   new InstantCommand(() -> {}));
 
-    armPivot.setDefaultCommand(
-      armPivot.StopPivot() 
-    );
+    // armPivot.setDefaultCommand(
+    //   new InstantCommand(() -> {}));
     
     collectorHead.setDefaultCommand(
       collectorHead.ArticulateCoralCollector(() -> CoPilotController.getRawAxis(XboxController.Axis.kLeftX.value) * 0.25)
@@ -184,29 +182,29 @@ public class RobotContainer {
     CopilotCommandController.axisMagnitudeGreaterThan(3, 0.5).whileTrue(new RunCoralCollector(coralCollector, -0.25));
 
 
-    // new JoystickButton(CoPilotController, Constants.ControllerRawButtons.XboxController.Button.kA.value)
-    //    .onTrue(new MoveArmToCollect(armLift, armPivot));
-    
-    // new JoystickButton(CoPilotController, Constants.ControllerRawButtons.XboxController.Button.kB.value)
-    //    .onTrue(new MoveArmToL1(armLift, armPivot));
-    
-    // new JoystickButton(CoPilotController, Constants.ControllerRawButtons.XboxController.Button.kX.value)
-    //    .onTrue(new MoveArmToL2(armLift, armPivot));
-
-    // new JoystickButton(CoPilotController, Constants.ControllerRawButtons.XboxController.Button.kY.value)
-    //    .onTrue(new MoveArmToL3(armLift, armPivot));
-    
     new JoystickButton(CoPilotController, XboxController.Button.kA.value)
-        .onTrue(armCollect);
-
+       .onTrue(new MoveArmToCollect(armLift, armPivot));
+    
     new JoystickButton(CoPilotController, XboxController.Button.kB.value)
-        .onTrue(armL1);
-
+       .onTrue(new MoveArmToL1(armLift, armPivot));
+    
     new JoystickButton(CoPilotController, XboxController.Button.kX.value)
-        .onTrue(armL2);
+       .onTrue(new MoveArmToL2(armLift, armPivot));
 
     new JoystickButton(CoPilotController, XboxController.Button.kY.value)
-        .onTrue(armL3);
+       .onTrue(new MoveArmToL3(armLift, armPivot));
+    
+    // new JoystickButton(CoPilotController, XboxController.Button.kA.value)
+    //     .onTrue(armCollect);
+
+    // new JoystickButton(CoPilotController, XboxController.Button.kB.value)
+    //     .onTrue(armL1);
+
+    // new JoystickButton(CoPilotController, XboxController.Button.kX.value)
+    //     .onTrue(armL2);
+
+    // new JoystickButton(CoPilotController, XboxController.Button.kY.value)
+    //     .onTrue(armL3);
         
   //Manual Arm Controls
     // new JoystickButton(CoPilotController, Constants.ControllerRawButtons.XboxController.Button.kX.value)
