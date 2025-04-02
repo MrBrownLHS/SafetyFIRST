@@ -46,29 +46,29 @@ public class RobotContainer {
   private final JoystickButton robotCentric;
   private final JoystickButton slowDriveMode;
   
-  private final XboxController CoPilotController;
+  private final XboxController CoPilotController = new XboxController(1);
   private static final CommandXboxController CopilotCommandController = new CommandXboxController(1);
-  private final CageClimber cageClimber;
-  private final AlgaeArticulate algaeArticulate;
-  private final AlgaeClaw algaeClaw;
-  private final CollectorHead collectorHead;
-  private final CoralCollector coralCollector;
-  private final ArmLift armLift;
-  private final ArmPivot armPivot;
+  private final CageClimber cageClimber = new CageClimber();
+  private final AlgaeArticulate algaeArticulate = new AlgaeArticulate();
+  private final AlgaeClaw algaeClaw = new AlgaeClaw();
+  private final CollectorHead collectorHead = new CollectorHead();
+  private final CoralCollector coralCollector = new CoralCollector();
+  private final ArmLift armLift = new ArmLift();
+  private final ArmPivot armPivot = new ArmPivot();
   
   private final int translationAxis;
   private final int strafeAxis;
   private final int rotationAxis;
   
-  private final Joystick DriverController;
-  private final SwerveSubsystem swerveSubsystem;
+  private final Joystick DriverController= new Joystick(0);
+  private final SwerveSubsystem swerveSubsystem = new SwerveSubsystem();
 
   private final SendableChooser<Command> autoChooser;
-  private final Camera botCam;
-  private final MoveArmToCollect armCollect;
-  private final MoveArmToL1 armL1;
-  private final MoveArmToL2 armL2;
-  private final MoveArmToL3 armL3;
+  private final Camera botCam = new Camera();
+  private final MoveArmToCollect armCollect = new MoveArmToCollect(armLift, armPivot);
+  private final MoveArmToL1 armL1 = new MoveArmToL1(armLift, armPivot);
+  private final MoveArmToL2 armL2 = new MoveArmToL2(armLift, armPivot);
+  private final MoveArmToL3 armL3 = new MoveArmToL3(armLift, armPivot);
   
 
     private final SlewRateLimiter translationLimiter = new SlewRateLimiter(2.9);
@@ -77,22 +77,7 @@ public class RobotContainer {
 
 
   public RobotContainer() {
-    swerveSubsystem = new SwerveSubsystem();
-    DriverController = new Joystick(0);
-    CoPilotController = new XboxController(1);
-    cageClimber = new CageClimber();
-    algaeArticulate = new AlgaeArticulate();
-    algaeClaw = new AlgaeClaw();
-    collectorHead = new CollectorHead();
-    coralCollector = new CoralCollector();
-    armLift = new ArmLift();
-    armPivot = new ArmPivot();
-    botCam = new Camera();
-    armCollect = new MoveArmToCollect(armLift, armPivot);
-    armL1 = new MoveArmToL1(armLift, armPivot);
-    armL2 = new MoveArmToL2(armLift, armPivot);
-    armL3 = new MoveArmToL3(armLift, armPivot);
-
+   
     DataLogManager.start();
         DriverStation.startDataLog(DataLogManager.getLog());
         DataLogManager.log("Robot Initialized");
@@ -183,29 +168,18 @@ public class RobotContainer {
 
 
     new JoystickButton(CoPilotController, XboxController.Button.kA.value)
-       .onTrue(new MoveArmToCollect(armLift, armPivot));
+       .onTrue(armCollect);
     
     new JoystickButton(CoPilotController, XboxController.Button.kB.value)
-       .onTrue(new MoveArmToL1(armLift, armPivot));
+       .onTrue(armL1);
     
     new JoystickButton(CoPilotController, XboxController.Button.kX.value)
-       .onTrue(new MoveArmToL2(armLift, armPivot));
+       .onTrue(armL2);
 
     new JoystickButton(CoPilotController, XboxController.Button.kY.value)
-       .onTrue(new MoveArmToL3(armLift, armPivot));
+       .onTrue(armL3);
     
-    // new JoystickButton(CoPilotController, XboxController.Button.kA.value)
-    //     .onTrue(armCollect);
-
-    // new JoystickButton(CoPilotController, XboxController.Button.kB.value)
-    //     .onTrue(armL1);
-
-    // new JoystickButton(CoPilotController, XboxController.Button.kX.value)
-    //     .onTrue(armL2);
-
-    // new JoystickButton(CoPilotController, XboxController.Button.kY.value)
-    //     .onTrue(armL3);
-        
+         
   //Manual Arm Controls
     // new JoystickButton(CoPilotController, Constants.ControllerRawButtons.XboxController.Button.kX.value)
     //     .whileTrue(armPivot.SimplePivotBack());

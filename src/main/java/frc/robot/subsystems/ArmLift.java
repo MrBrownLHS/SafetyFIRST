@@ -155,6 +155,7 @@ public class ArmLift extends SubsystemBase {
     }
       
     @Override
+
     public void periodic() {
         updateSmartDashboard();
                       
