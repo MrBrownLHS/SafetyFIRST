@@ -215,6 +215,9 @@ public class RobotContainer {
     collectorHead.CollectorHeadStop();
     coralCollector.CollectCoralStop();
     }));
+
+    new JoystickButton(CoPilotController, XboxController.Button.kA.value)
+    .onTrue(new InstantCommand(() -> System.out.println("A button pressed")));
 }
     
 

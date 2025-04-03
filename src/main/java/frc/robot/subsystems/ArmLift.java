@@ -111,7 +111,8 @@ public class ArmLift extends SubsystemBase {
             MathUtil.clamp(targetInches, LIFT_MIN_HEIGHT, LIFT_MAX_HEIGHT), 0);
         liftState = liftProfile.calculate(0.02, liftState, liftGoal);
         double distanceRotations = inchesToEncoder(liftGoal.position);
-        m_Lift.getClosedLoopController().setReference(distanceRotations, ControlType.kPosition);  
+        m_Lift.getClosedLoopController().setReference(distanceRotations, ControlType.kPosition);
+        System.out.println("LiftCommand completed");  
     }
 
     public boolean isLiftAtTarget() {

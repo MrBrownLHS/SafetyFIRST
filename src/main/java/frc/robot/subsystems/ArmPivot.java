@@ -111,6 +111,7 @@ public class ArmPivot extends SubsystemBase {
         pivotState = pivotProfile.calculate(0.02, pivotState, pivotGoal);
         double positionRotations = degreesToEncoder(pivotGoal.position);
         m_Pivot.getClosedLoopController().setReference(positionRotations, ControlType.kPosition);
+        System.out.println("PivotCommand completed");
     }
 
     
