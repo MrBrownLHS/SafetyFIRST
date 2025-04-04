@@ -28,17 +28,27 @@ public class MoveArmToCollect extends SequentialCommandGroup {
     );
 }
 
-  private Command LiftCommand(ArmLift lift) {
-    return lift.LiftToCollect()
-               .withTimeout(3)  
-               .andThen(() -> lift.StopLift()); // Stop lift after completion or interruption
-  }
+private Command LiftCommand(ArmLift lift) {
+  return lift.LiftToCollect()
+             .withTimeout(3)
+             .andThen(() -> {
+                 while (!lift.isLiftAtTarget()) {
+                     // Wait until the lift reaches the target
+                 }
+                 lift.StopLift();
+             });
+}
 
-  private Command PivotCommand(ArmPivot pivot) {
-    return pivot.PivotToCollect()
-                .withTimeout(3)               
-                .andThen(() -> pivot.StopPivot());// Stop pivot after completion or interruption
-  } 
+private Command PivotCommand(ArmPivot pivot) {
+  return pivot.PivotToCollect()
+             .withTimeout(3)
+             .andThen(() -> {
+                 while (!pivot.isAtTarget()) {
+                     // Wait until the lift reaches the target
+                 }
+                 pivot.StopPivot();
+             });
+}
 
   private Command StopCommands(ArmLift lift, ArmPivot pivot) {
     return new InstantCommand(() -> {

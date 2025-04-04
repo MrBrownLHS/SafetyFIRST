@@ -46,6 +46,7 @@ public class RobotContainer {
   private final JoystickButton robotCentric;
   private final JoystickButton slowDriveMode;
   
+  //private final Joystick CoPilotController = new Joystick(1);
   private final XboxController CoPilotController = new XboxController(1);
   private static final CommandXboxController CopilotCommandController = new CommandXboxController(1);
   private final CageClimber cageClimber = new CageClimber();
@@ -156,10 +157,10 @@ public class RobotContainer {
 
   //Algae Controls
 
-    new JoystickButton(CoPilotController, XboxController.Button.kRightBumper.value)
+    new JoystickButton(CoPilotController, Constants.ControllerRawButtons.XboxController.Button.kRightBumper.value)
         .whileTrue(algaeClaw.ClawClose());
 
-    new JoystickButton(CoPilotController, XboxController.Button.kLeftBumper.value)
+    new JoystickButton(CoPilotController, Constants.ControllerRawButtons.XboxController.Button.kLeftBumper.value)
         .whileTrue(algaeClaw.ClawOpen());
 
  
@@ -167,16 +168,16 @@ public class RobotContainer {
     CopilotCommandController.axisMagnitudeGreaterThan(3, 0.5).whileTrue(new RunCoralCollector(coralCollector, -0.25));
 
 
-    new JoystickButton(CoPilotController, XboxController.Button.kA.value)
+    new JoystickButton(CoPilotController, Constants.ControllerRawButtons.XboxController.Button.kA.value)
        .onTrue(armCollect);
     
-    new JoystickButton(CoPilotController, XboxController.Button.kB.value)
+    new JoystickButton(CoPilotController, Constants.ControllerRawButtons.XboxController.Button.kB.value)
        .onTrue(armL1);
     
-    new JoystickButton(CoPilotController, XboxController.Button.kX.value)
+    new JoystickButton(CoPilotController, Constants.ControllerRawButtons.XboxController.Button.kX.value)
        .onTrue(armL2);
 
-    new JoystickButton(CoPilotController, XboxController.Button.kY.value)
+    new JoystickButton(CoPilotController, Constants.ControllerRawButtons.XboxController.Button.kY.value)
        .onTrue(armL3);
     
          
@@ -216,8 +217,7 @@ public class RobotContainer {
     coralCollector.CollectCoralStop();
     }));
 
-    new JoystickButton(CoPilotController, XboxController.Button.kA.value)
-    .onTrue(new InstantCommand(() -> System.out.println("A button pressed")));
+   
 }
     
 

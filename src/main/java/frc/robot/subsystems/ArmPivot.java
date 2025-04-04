@@ -90,7 +90,7 @@ public class ArmPivot extends SubsystemBase {
         pivotPID.setP(kP);
         pivotPID.setI(kI);
         pivotPID.setD(kD);
-        pivotPID.setTolerance(0.1);
+        pivotPID.setTolerance(1.0);
     }
 
     private double encoderToDegrees(double encoderPosition) {
@@ -102,25 +102,28 @@ public class ArmPivot extends SubsystemBase {
     }
      
     public double getPivotAngle() {
-        return encoderToDegrees(pivotEncoder.getPosition());
+        double angle = encoderToDegrees(pivotEncoder.getPosition());
+        return angle;
     }
 
     public void setPivotPosition(double targetDegrees) {
-        pivotGoal = new TrapezoidProfile.State(
-            MathUtil.clamp(targetDegrees, PIVOT_START, PIVOT_MAX), 0);
+        targetDegrees = MathUtil.clamp(targetDegrees, PIVOT_START, PIVOT_MAX);
+        pivotGoal = new TrapezoidProfile.State(targetDegrees, 0);
         pivotState = pivotProfile.calculate(0.02, pivotState, pivotGoal);
-        double positionRotations = degreesToEncoder(pivotGoal.position);
+        double positionRotations = degreesToEncoder(pivotState.position);
         m_Pivot.getClosedLoopController().setReference(positionRotations, ControlType.kPosition);
         System.out.println("PivotCommand completed");
     }
 
     
     public boolean isAtTarget() {
-        return pivotPID.atSetpoint();
+        return Math.abs(getPivotAngle() - pivotGoal.position) < 1.0;
     }
 
     public Command pivotToPosition(double targetDegrees) {
-        return new InstantCommand(() -> setPivotPosition(targetDegrees), this);
+        return new RunCommand(() -> setPivotPosition(targetDegrees), this)
+        .until(this::isAtTarget)
+        .andThen(StopPivot());
     }
 
     public Command PivotToCollect() {

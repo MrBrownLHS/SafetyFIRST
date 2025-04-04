@@ -103,12 +103,13 @@ public class ArmLift extends SubsystemBase {
     }
 
     public double getLiftHeight() {
-        return encoderToInches(liftEncoder.getPosition());
+        double height = encoderToInches(liftEncoder.getPosition());
+        return height;
     }
 
     public void setLiftPosition(double targetInches) {
-        liftGoal = new TrapezoidProfile.State(
-            MathUtil.clamp(targetInches, LIFT_MIN_HEIGHT, LIFT_MAX_HEIGHT), 0);
+        targetInches = MathUtil.clamp(targetInches, LIFT_MIN_HEIGHT, LIFT_MAX_HEIGHT);
+        liftGoal = new TrapezoidProfile.State(targetInches, 0);
         liftState = liftProfile.calculate(0.02, liftState, liftGoal);
         double distanceRotations = inchesToEncoder(liftGoal.position);
         m_Lift.getClosedLoopController().setReference(distanceRotations, ControlType.kPosition);
@@ -116,11 +117,13 @@ public class ArmLift extends SubsystemBase {
     }
 
     public boolean isLiftAtTarget() {
-        return liftPID.atSetpoint();
+        return Math.abs(getLiftHeight() - liftGoal.position) < 1.0;
     }
 
     public Command setLiftHeight(double targetInches) {
-        return new InstantCommand(() -> setLiftPosition(targetInches), this);
+        return new RunCommand(() -> setLiftPosition(targetInches), this)
+        .until(this::isLiftAtTarget)
+        .andThen(StopLift());
     }
 
     public Command LiftToCollect() {
