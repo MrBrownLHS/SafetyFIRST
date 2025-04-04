@@ -51,13 +51,13 @@ public class ArmLift extends SubsystemBase {
     private static final double LIFT_MAX_ACCELERATION = 20.0;
 
     private static final double LIFT_MAX_HEIGHT = -18.0;
-    private static final double LIFT_MIN_HEIGHT = -1.0;
+    private static final double LIFT_MIN_HEIGHT = 0.0;
 
     private static final double LIFT_GEAR_RATIO = 64.0;
     private static final double COG_DIAMETER_INCHES = 2.0;
     private static final double LIFT_ENCODER_TO_INCHES = (Math.PI * COG_DIAMETER_INCHES) / LIFT_GEAR_RATIO;
 
-    private static double kP = 0.025;
+    private static double kP = 0.1;
     private static double kI = 0.0;
     private static double kD = 0.0;
   
@@ -92,6 +92,8 @@ public class ArmLift extends SubsystemBase {
         liftPID.setP(kP);
         liftPID.setI(kI);
         liftPID.setD(kD);
+        liftPID.setTolerance(1.0);
+        liftPID.setIntegratorRange(-1.0, 1.0);
     }
 
     private double encoderToInches(double encoderValue) {
@@ -112,8 +114,7 @@ public class ArmLift extends SubsystemBase {
         liftGoal = new TrapezoidProfile.State(targetInches, 0);
         liftState = liftProfile.calculate(0.02, liftState, liftGoal);
         double distanceRotations = inchesToEncoder(liftGoal.position);
-        m_Lift.getClosedLoopController().setReference(distanceRotations, ControlType.kPosition);
-        System.out.println("LiftCommand completed");  
+        m_Lift.getClosedLoopController().setReference(distanceRotations, ControlType.kPosition); 
     }
 
     public boolean isLiftAtTarget() {

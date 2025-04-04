@@ -55,7 +55,7 @@ public class ArmPivot extends SubsystemBase {
     private static final double PIVOT_GEAR_RATIO = 100.0; //double check and update
     public static double PIVOT_ENCODER_TO_DEGREES = 360.0 / PIVOT_GEAR_RATIO;
     
-    private static double kP = 0.05;
+    private static double kP = 0.1;
     private static double kI = 0.0;
     private static double kD = 0.0;
 
@@ -91,6 +91,7 @@ public class ArmPivot extends SubsystemBase {
         pivotPID.setI(kI);
         pivotPID.setD(kD);
         pivotPID.setTolerance(1.0);
+        pivotPID.setIntegratorRange(-1.0, 1.0);
     }
 
     private double encoderToDegrees(double encoderPosition) {
@@ -112,7 +113,6 @@ public class ArmPivot extends SubsystemBase {
         pivotState = pivotProfile.calculate(0.02, pivotState, pivotGoal);
         double positionRotations = degreesToEncoder(pivotState.position);
         m_Pivot.getClosedLoopController().setReference(positionRotations, ControlType.kPosition);
-        System.out.println("PivotCommand completed");
     }
 
     
