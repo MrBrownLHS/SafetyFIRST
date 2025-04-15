@@ -17,169 +17,155 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.RelativeEncoder;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import com.revrobotics.spark.SparkClosedLoopController.ArbFFUnits;
 
 
-
+//https://github.com/Little-Apple-Cyborgs-5968/FRC2025/blob/main/src/main/java/frc/robot/subsystems/Elevator.java
 
 public class ArmLift extends SubsystemBase {
-    private final SparkMax m_Lift 
-    = new SparkMax(Constants.CollectorArmConstants.LIFT_MOTOR_ID, MotorType.kBrushless);
-    private final RelativeEncoder liftEncoder
-    = m_Lift.getEncoder();
-    private final SparkMaxConfig motorConfig 
-    = new SparkMaxConfig();
-    private final PIDController liftPID 
-    = new PIDController(kP, kI, kD);
-    private final TrapezoidProfile.Constraints liftConstraints 
-    = new TrapezoidProfile.Constraints(LIFT_MAX_VELOCITY, LIFT_MAX_ACCELERATION);
-    private TrapezoidProfile.State liftGoal 
-    = new TrapezoidProfile.State(LIFT_MAX_HEIGHT, 0);
-    private TrapezoidProfile.State liftState 
-    = new TrapezoidProfile.State(0.0, 0);
-    private final TrapezoidProfile liftProfile 
-    = new TrapezoidProfile(liftConstraints);
- 
-    private static final double LIFT_COLLECT = -5.0;
-    private static final double LIFT_L1 = -10.0;
-    private static final double LIFT_L2 = -15.0;
-    private static final double LIFT_L3 = -18.0;
-    
+    private PeriodicIO liftPeriodicIO;
+    private static ArmLift liftInstance;
+    public static ArmLift getInstance() {
+        if (liftInstance == null) {
+            liftInstance = new ArmLift();
+        }
+        return liftInstance;
+    }
 
-   
+    private SparkMax m_LiftMotor;
+    private RelativeEncoder liftEncoder;.
+    private SparkClosedLoopController liftPIDController;
+
+    private TrapezoidProfile liftProfile;
+    private TrapezoidProfile.State liftCurrentState = new TrapezoidProfile.State();
+    private TrapezoidProfile.State liftGoalState = new TrapezoidProfile.State();
+    private double prevUpdateTime = Timer.getFPGATimestamp();
 
     private static final double LIFT_MAX_VELOCITY = 5.0;
     private static final double LIFT_MAX_ACCELERATION = 20.0;
 
-    private static final double LIFT_MAX_HEIGHT = -18.0;
-    private static final double LIFT_MIN_HEIGHT = 0.0;
+    // private static final double LIFT_MAX_HEIGHT = -18.0;
+    // private static final double LIFT_MIN_HEIGHT = 0.0;
 
-    private static final double LIFT_GEAR_RATIO = 64.0;
-    private static final double COG_DIAMETER_INCHES = 2.0;
-    private static final double LIFT_ENCODER_TO_INCHES = (Math.PI * COG_DIAMETER_INCHES) / LIFT_GEAR_RATIO;
+    // private static final double LIFT_GEAR_RATIO = 64.0;
+    // private static final double COG_DIAMETER_INCHES = 2.0;
+    // private static final double LIFT_ENCODER_TO_INCHES = (Math.PI * COG_DIAMETER_INCHES) / LIFT_GEAR_RATIO;
 
-    private static double kP = 0.1;
-    private static double kI = 0.0;
-    private static double kD = 0.0;
+    // private static double kP = 0.1;
+    // private static double kI = 0.0;
+    // private static double kD = 0.0;
   
-    public ArmLift() {
-      configureMotors(m_Lift, motorConfig, Constants.CollectorArmConstants.MAX_CURRENT_LIMIT_NEO);
-      resetEncoder();
-      configurePID();
-      updateSmartDashboard();
+    private ArmLift() {
+        super("ArmLift");
+
+        liftPeriodicIO = new PeriodicIO();
+        SparkMaxConfig liftMotorConfig = new SparkMaxConfig();
+
+        liftMotorConfig.getClosedLoopController
+        .pid(Constants.Lift.LIFT_kP, Constants.Lift.LIFT_kI, Constants.Lift.LIFT_kD) //Add these constants to Constants
+        .iZone(Constants.Lift.Lift_kIZone);
+
+        liftMotorConfig.idleMode(IdleMode.kBrake);
+        liftMotorConfig.smartCurrentLimit(Constants.ConfigureConstants.CURRENT_LIMIT_NEO); //Reorganize Constants
+       
+        m_LiftMotor = new SparkMax(Constants.Lift.LIFT_MOTOR_ID, MotorType.kBrushless); //Reorganize Constants
+        liftEncoder = m_LiftMotor.getEncoder();
+        liftPIDController = m_LiftMotor.getClosedLoopController();
+        m_LiftMotor.configure(
+            liftMotorConfig, 
+            ResetMode.kResetSafeParameters,
+            PersistMode.kPersistParameters
+        );
+
+        liftProfile = new TrapezoidProfile(
+            new TrapezoidProfile.Constraints(LIFT_MAX_VELOCITY, LIFT_MAX_ACCELERATION)
+        );
     }
 
-    private void updateSmartDashboard() {
-        SmartDashboard.putNumber("Lift Height", getLiftHeight());
-        SmartDashboard.putBoolean("Lift Tuning", false);
-        SmartDashboard.putNumber("Lift kP", SmartDashboard.getNumber("Lift kP", kP));
-        SmartDashboard.putNumber("Lift kI", SmartDashboard.getNumber("Lift kI", kI));
-        SmartDashboard.putNumber("Lift kD", SmartDashboard.getNumber("Lift kD", kD));    
-    }
-    
-    private void configureMotors(SparkMax motor, SparkMaxConfig config, int currentLimit) {
-        config.idleMode(IdleMode.kBrake);
-        config.smartCurrentLimit(currentLimit);
-        config.secondaryCurrentLimit(Constants.CollectorArmConstants.MAX_CURRENT_LIMIT_NEO);
-        config.voltageCompensation(Constants.CollectorArmConstants.VOLTAGE_COMPENSATION);
-        motor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+    public enum LiftState {
+        START,
+        COLLECT,
+        L1,
+        L2,
+        L3
     }
 
-    public void resetEncoder(){
-        liftEncoder.setPosition(0.0);
+    public static LiftState publicLiftState;
+
+    public static class PeriodicIO {
+        double lift_target;
+        double lift_power;
+
+        double is_lift_positional_control = false;
+        LiftState state = LiftState.START;
     }
 
-    private void configurePID() {
-        liftPID.setP(kP);
-        liftPID.setI(kI);
-        liftPID.setD(kD);
-        liftPID.setTolerance(1.0);
-        liftPID.setIntegratorRange(-1.0, 1.0);
-    }
-
-    private double encoderToInches(double encoderValue) {
-        return encoderValue * LIFT_ENCODER_TO_INCHES;
-    }
-
-    private double inchesToEncoder(double inches) {
-        return inches / LIFT_ENCODER_TO_INCHES;
-    }
-
-    public double getLiftHeight() {
-        double height = encoderToInches(liftEncoder.getPosition());
-        return height;
-    }
-
-    public void setLiftPosition(double targetInches) {
-        targetInches = MathUtil.clamp(targetInches, LIFT_MIN_HEIGHT, LIFT_MAX_HEIGHT);
-        liftGoal = new TrapezoidProfile.State(targetInches, 0);
-        liftState = liftProfile.calculate(0.02, liftState, liftGoal);
-        double distanceRotations = inchesToEncoder(liftGoal.position);
-        m_Lift.getClosedLoopController().setReference(distanceRotations, ControlType.kPosition); 
-    }
-
-    public boolean isLiftAtTarget() {
-        return Math.abs(getLiftHeight() - liftGoal.position) < 1.0;
-    }
-
-    public Command setLiftHeight(double targetInches) {
-        return new RunCommand(() -> setLiftPosition(targetInches), this)
-        .until(this::isLiftAtTarget)
-        .andThen(StopLift());
-    }
-
-    public Command LiftToCollect() {
-        return setLiftHeight(LIFT_COLLECT);
-    }
-
-    public Command LiftToL1() {
-        return setLiftHeight(LIFT_L1);
-    }
-
-    public Command LiftToL2() {
-        return setLiftHeight(LIFT_L2);
-    }
-
-    public Command LiftToL3() {
-        return setLiftHeight(LIFT_L3);
-    }
-
-    public RunCommand SimpleLiftUp() {
-        return new RunCommand(() -> {
-            m_Lift.set(-0.5);
-        }, this);
-    }
-
-    public RunCommand SimpleLiftDown() {
-        return new RunCommand(() -> {
-            m_Lift.set(0.5);
-        }, this);
-    }
-
-    public Command StopLift() {
-        return new InstantCommand(() -> m_Lift.set(0.0), this);
-    }
-      
     @Override
 
     public void periodic() {
-        updateSmartDashboard();
-                      
-        SmartDashboard.putNumber("Lift Height", getLiftHeight());
+        double currentTime = Timer.getFPGATimestamp();
+        double deltaTime = currentTime - prevUpdateTime;
+        prevUpdateTime = currentTime;
+        if (liftPeriodicIO.is_lift_positional_control) {
+            liftGoalState.position = liftPeriodicIO.lift_target;
+            prevUpdateTime = currentTime;
+            liftCurrentState = liftProfile.calculate(deltaTime, liftCurrentState, liftGoalState);
 
-        if (SmartDashboard.getBoolean("Lift Tuning", false)) {
-            double newKP = SmartDashboard.getNumber("Lift kP", kP);
-            double newKI = SmartDashboard.getNumber("Lift kI", kI);
-            double newKD = SmartDashboard.getNumber("Lift kD", kD);
-           
-            if (newKP != kP || newKI != kI || newKD != kD) {
-                kP = newKP;
-                kI = newKI;
-                kD = newKD;
-                configurePID();
-                System.out.println("Updated PID values: kP=" + kP + ", kI=" + kI + ", kD=" + kD);
-            }
+            liftPIDController.setReference(
+                liftCurrentState.position,
+                SparkBase.ControlType.kPosition,
+                ClosedLoopSlot.liftSlot0,
+                Constants.Lift.LIFT_kG,
+                ArbFFUnits.kVoltage);
+        } else {
+            liftCurrentState.position = liftEncoder.getPosition();
+            liftCurrentState.velocity = 0.0;
+            liftMotor.set(liftPeriodicIO.lift_power
+            );
         }
-         
+
+        publicLiftState = liftPeriodicIO.state;
+
+        }
+
+    public void writePeriodicOutputs() {
+
     }
+
+    public void stopLift() {
+        liftPeriodicIO.is_lift_positional_control = false;
+        liftPeriodicIO.lift_power = 0.0;
+        
+        m_LiftMotor.set(0.0);
+    }
+
+    public Command liftReset() {
+        return run(() -> getstate());
+    }
+
+    private LiftState getstate() {
+        return liftPeriodicIO.state;
+    }
+
+    public Command setLiftPower(double power) {
+        liftPeriodicIO.is_lift_positional_control = false;
+        liftPeriodicIO.lift_power = power;
+    }
+
+    private void liftToStart() {
+        return run(() -> lifttostart());
+    }
+
+    private void lifttostart() {
+        liftPeriodicIO.is_lift_positional_control = true;
+        liftPeriodicIO.lift_target = Constants.Lift.LIFT_START_POS;
+        liftPeriodicIO.state = LiftState.START;
+    }
+
+
+
+         
+                      
+        
 }
 
