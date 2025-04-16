@@ -41,20 +41,7 @@ public class ArmLift extends SubsystemBase {
     private TrapezoidProfile.State liftGoalState = new TrapezoidProfile.State();
     private double prevUpdateTime = Timer.getFPGATimestamp();
 
-    private static final double LIFT_MAX_VELOCITY = 5.0;
-    private static final double LIFT_MAX_ACCELERATION = 20.0;
-
-    // private static final double LIFT_MAX_HEIGHT = -18.0;
-    // private static final double LIFT_MIN_HEIGHT = 0.0;
-
-    // private static final double LIFT_GEAR_RATIO = 64.0;
-    // private static final double COG_DIAMETER_INCHES = 2.0;
-    // private static final double LIFT_ENCODER_TO_INCHES = (Math.PI * COG_DIAMETER_INCHES) / LIFT_GEAR_RATIO;
-
-    // private static double kP = 0.1;
-    // private static double kI = 0.0;
-    // private static double kD = 0.0;
-  
+     
     private ArmLift() {
         super("ArmLift");
 
@@ -78,7 +65,7 @@ public class ArmLift extends SubsystemBase {
         );
 
         liftProfile = new TrapezoidProfile(
-            new TrapezoidProfile.Constraints(LIFT_MAX_VELOCITY, LIFT_MAX_ACCELERATION)
+            new TrapezoidProfile.Constraints(Constants.Lift.LIFT_MAX_VELOCITY, Constants.Lift.LIFT_MAX_ACCELERATION)
         );
     }
 
@@ -140,19 +127,23 @@ public class ArmLift extends SubsystemBase {
     }
 
     public Command liftReset() {
-        return run(() -> getstate());
+        return run(() -> m_LiftMotor.setPosition(0.0));
     }
 
-    private LiftState getstate() {
+    private LiftState getState() {
         return liftPeriodicIO.state;
     }
 
     public Command setLiftPower(double power) {
+        return run(() -> setliftpower(power));
+    }
+
+    private void setliftpower(double power) {
         liftPeriodicIO.is_lift_positional_control = false;
         liftPeriodicIO.lift_power = power;
     }
 
-    private void liftToStart() {
+    public Command liftToStart() {
         return run(() -> lifttostart());
     }
 
@@ -161,6 +152,47 @@ public class ArmLift extends SubsystemBase {
         liftPeriodicIO.lift_target = Constants.Lift.LIFT_START_POS;
         liftPeriodicIO.state = LiftState.START;
     }
+
+    public Command liftToCollect() {
+        return run(() -> lifttocollect());
+    }
+
+    private void lifttocollect() {
+        liftPeriodicIO.is_lift_positional_control = true;
+        liftPeriodicIO.lift_target = Constants.Lift.LIFT_COLLECT_POS;
+        liftPeriodicIO.state = LiftState.COLLECT;
+    }
+
+    public Command liftToL1() {
+        return run(() -> lifttol1());
+    }
+
+    private void lifttol1() {
+        liftPeriodicIO.is_lift_positional_control = true;
+        liftPeriodicIO.lift_target = Constants.Lift.LIFT_L1_POS;
+        liftPeriodicIO.state = LiftState.L1;
+    }
+
+    public Command liftToL2() {
+        return run(() -> lifttol2());
+    }
+
+    private void lifttol2() {
+        liftPeriodicIO.is_lift_positional_control = true;
+        liftPeriodicIO.lift_target = Constants.Lift.LIFT_L2_POS;
+        liftPeriodicIO.state = LiftState.L2;
+    }
+
+    public Command liftToL3() {
+        return run(() -> lifttol3());
+    }
+
+    private void lifttol3() {
+        liftPeriodicIO.is_lift_positional_control = true;
+        liftPeriodicIO.lift_target = Constants.Lift.LIFT_L3_POS;
+        liftPeriodicIO.state = LiftState.L3;
+    }
+
 
 
 

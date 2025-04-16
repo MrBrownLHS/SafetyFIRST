@@ -12,9 +12,26 @@ import frc.robot.utilities.SwerveModuleGearing;
 public class Constants {
     public static final int gyroID = 0;
 
+    public static final class Lift {
+        public static final int LIFT_MOTOR_ID = 13;
+        public static final double LIFT_kP = 0.0;
+        public static final double LIFT_kI = 0.0;
+        public static final double LIFT_kD = 0.0;
+        public static final double LIFT_kIZone = 0.0;
+
+        public static final double LIFT_MAX_VELOCITY = 5.0; // inches per second
+        public static final double LIFT_MAX_ACCELERATION = 20.0; // inches per second squared
+
+        public static final double LIFT_START_POS = 0.0; 
+        public static final double LIFT_COLLECT_POS = 5.0;
+        public static final double LIFT_L1_POS = 10.0;
+        public static final double LIFT_L2_POS = 15.0;
+        public static final double LIFT_L3_POS = 18.0;
+    }
+
     public static final class CollectorArmConstants {
         // CAN IDs
-        public static final int LIFT_MOTOR_ID = 13;
+        
         
         public static final int PIVOT_MOTOR_ID = 15;
         
@@ -22,9 +39,7 @@ public class Constants {
         public static final int CORAL_ARTICULATE_MOTOR_ID = 18;
         
         // PID Constants - NEEDS TUNING
-        public static final double LIFT_kP = 0.0;
-        public static final double LIFT_kI = 0.0;
-        public static final double LIFT_kD = 0.0;
+        
         
         public static final double PIVOT_kP = 0.0;
         public static final double PIVOT_kI = 0.0;
