@@ -61,6 +61,7 @@ public class Constants {
         public static final double CORAL_ARTICULATE_DEADBAND = 0.05; 
         public static final double CORAL_ARTICULATE_RATE_LIMIT = 2.9; 
         public static final double CORAL_AUTO_RELEASE_SPEED = 0.25; 
+        public static final int CORAL_LIMIT_SWITCH_PORT = 1;
     }
              
     public static final class MotorConstants {

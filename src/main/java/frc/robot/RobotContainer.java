@@ -117,21 +117,6 @@ public class RobotContainer {
       botCam.InitializeBotCam()
     );
 
-   
-    
-
-    
-
-    // armLift.setDefaultCommand(
-    //   new InstantCommand(() -> {}));
-
-    // armPivot.setDefaultCommand(
-    //   new InstantCommand(() -> {}));
-    
-    
-        
-    
-
  
   configureBindings(); 
   }
@@ -164,11 +149,11 @@ public class RobotContainer {
               algaeClaw.StopClaw()
       );
 
-    //Arm Controls 
-      CopilotCommandController.axisMagnitudeGreaterThan(2, 0.5).whileTrue(new RunCoralCollector(coralCollector, 0.25)
+  //Arm Controls 
+      CopilotCommandController.axisMagnitudeGreaterThan(2, 0.5).whileTrue(coralCollector.CoralIn()
       );
-
-      CopilotCommandController.axisMagnitudeGreaterThan(3, 0.5).whileTrue(new RunCoralCollector(coralCollector, -0.25)
+      
+      CopilotCommandController.axisMagnitudeGreaterThan(3, 0.5).whileTrue(coralCollector.CoralOut()
       );
 
       CopilotCommandController.a().onTrue(armCollect
@@ -189,11 +174,7 @@ public class RobotContainer {
       collectorHead.setDefaultCommand(collectorHead.ArticulateCoralCollector(() -> CopilotCommandController.getRightY())
       );
 
-
-
-
-    
-         
+  
   //Manual Arm Controls
     // new JoystickButton(CoPilotController, Constants.ControllerRawButtons.XboxController.Button.kX.value)
     //     .whileTrue(armPivot.SimplePivotBack());
@@ -216,8 +197,7 @@ public class RobotContainer {
     CopilotCommandController.pov(270).whileTrue(cageClimber.CageClimb());
 
     
-
-    //Stop All Subsystems
+  //Stop All Subsystems
     CopilotCommandController.start()
       .onTrue(new InstantCommand(() -> {
       cageClimber.CageClimbStop();
