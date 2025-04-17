@@ -29,15 +29,15 @@ public class AlgaeClaw extends SubsystemBase {
     m_Claw = new SparkMax(Constants.AlgaeCollectorConstants.ALGAE_CLAW_MOTOR_ID, MotorType.kBrushless);
     motorConfig = new SparkMaxConfig();
     
-    configureMotors(m_Claw, motorConfig, Constants.CollectorArmConstants.CURRENT_LIMIT_NEO);
+    configureMotors(m_Claw, motorConfig, Constants.MotorConstants.CURRENT_LIMIT_NEO);
     
   }
 
   private void configureMotors(SparkMax motor, SparkMaxConfig config, int currentLimit) {
     config.idleMode(IdleMode.kBrake);
     config.smartCurrentLimit(currentLimit);
-    config.secondaryCurrentLimit(Constants.CollectorArmConstants.MAX_CURRENT_LIMIT_NEO);
-    config.voltageCompensation(Constants.CollectorArmConstants.VOLTAGE_COMPENSATION);
+    config.secondaryCurrentLimit(Constants.MotorConstants.MAX_CURRENT_LIMIT_NEO);
+    config.voltageCompensation(Constants.MotorConstants.VOLTAGE_COMPENSATION);
     motor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
   }
 

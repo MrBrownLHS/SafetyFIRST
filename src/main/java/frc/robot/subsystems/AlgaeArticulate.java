@@ -28,22 +28,22 @@ public class AlgaeArticulate extends SubsystemBase {
     public AlgaeArticulate() {
         m_AlgaeArticulate = new SparkMax(Constants.AlgaeCollectorConstants.ALGAE_ARTICULATE_MOTOR_ID, MotorType.kBrushless); 
         motorConfig = new SparkMaxConfig();
-        algaeArticulateRateLimiter = new SlewRateLimiter(Constants.CollectorArmConstants.ARTICULATE_RATE_LIMIT);
-        configureMotors(m_AlgaeArticulate, motorConfig, Constants.CollectorArmConstants.CURRENT_LIMIT_NEO);
+        algaeArticulateRateLimiter = new SlewRateLimiter(Constants.AlgaeCollectorConstants.ALGAE_ARTICULATE_RATE_LIMIT);
+        configureMotors(m_AlgaeArticulate, motorConfig, Constants.MotorConstants.CURRENT_LIMIT_NEO);
     }
 
     private void configureMotors(SparkMax motor, SparkMaxConfig config, int currentLimit) {
       config.idleMode(IdleMode.kBrake);
       config.smartCurrentLimit(currentLimit);
-      config.secondaryCurrentLimit(Constants.CollectorArmConstants.MAX_CURRENT_LIMIT_NEO);
-      config.voltageCompensation(Constants.CollectorArmConstants.VOLTAGE_COMPENSATION);
+      config.secondaryCurrentLimit(Constants.MotorConstants.MAX_CURRENT_LIMIT_NEO);
+      config.voltageCompensation(Constants.MotorConstants.VOLTAGE_COMPENSATION);
       motor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
     }
 
     public Command AlgaeUpDown (DoubleSupplier joystickInput) {
         return new RunCommand(() -> {
           double rawInput = joystickInput.getAsDouble();
-          double adjustedInput = (Math.abs(rawInput) > Constants.CollectorArmConstants.DEADBAND) ? rawInput : 0.0;
+          double adjustedInput = (Math.abs(rawInput) > Constants.AlgaeCollectorConstants.ALGAE_ARTICULATE_DEADBAND) ? rawInput : 0.0;
           double limitedInput = algaeArticulateRateLimiter.calculate(adjustedInput * 0.15);
           m_AlgaeArticulate.set(limitedInput);
         }, this);

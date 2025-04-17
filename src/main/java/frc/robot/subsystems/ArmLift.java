@@ -2,23 +2,21 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.RunCommand;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkMax;
 import frc.robot.utilities.constants.Constants;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.math.MathUtil;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.RelativeEncoder;
-import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import com.revrobotics.spark.SparkClosedLoopController.ArbFFUnits;
 import com.revrobotics.spark.SparkClosedLoopController;
+import com.revrobotics.spark.ClosedLoopSlot;
+import com.revrobotics.spark.SparkBase;
+
 
 
 //https://github.com/Little-Apple-Cyborgs-5968/FRC2025/blob/main/src/main/java/frc/robot/subsystems/Elevator.java
@@ -34,7 +32,7 @@ public class ArmLift extends SubsystemBase {
     }
 
     private SparkMax m_LiftMotor;
-    private RelativeEncoder liftEncoder;.
+    private RelativeEncoder liftEncoder;
     private SparkClosedLoopController liftPIDController;
 
     private TrapezoidProfile liftProfile;
@@ -47,14 +45,15 @@ public class ArmLift extends SubsystemBase {
         super("ArmLift");
 
         liftPeriodicIO = new PeriodicIO();
+
         SparkMaxConfig liftMotorConfig = new SparkMaxConfig();
 
-        liftMotorConfig.getClosedLoopController
-        .pid(Constants.Lift.LIFT_kP, Constants.Lift.LIFT_kI, Constants.Lift.LIFT_kD) //Add these constants to Constants
-        .iZone(Constants.Lift.Lift_kIZone);
+        liftMotorConfig.closedLoop
+            .pid(Constants.Lift.LIFT_kP, Constants.Lift.LIFT_kI, Constants.Lift.LIFT_kD)
+            .iZone(Constants.Lift.LIFT_kIZone);
 
         liftMotorConfig.idleMode(IdleMode.kBrake);
-        liftMotorConfig.smartCurrentLimit(Constants.ConfigureConstants.CURRENT_LIMIT_NEO); //Reorganize Constants
+        liftMotorConfig.smartCurrentLimit(Constants.MotorConstants.CURRENT_LIMIT_NEO); //Reorganize Constants
        
         m_LiftMotor = new SparkMax(Constants.Lift.LIFT_MOTOR_ID, MotorType.kBrushless); //Reorganize Constants
         liftEncoder = m_LiftMotor.getEncoder();
@@ -66,7 +65,10 @@ public class ArmLift extends SubsystemBase {
         );
 
         liftProfile = new TrapezoidProfile(
-            new TrapezoidProfile.Constraints(Constants.Lift.LIFT_MAX_VELOCITY, Constants.Lift.LIFT_MAX_ACCELERATION)
+            new TrapezoidProfile.Constraints(
+                Constants.Lift.LIFT_MAX_VELOCITY, 
+                Constants.Lift.LIFT_MAX_ACCELERATION
+                )
         );
     }
 
@@ -81,10 +83,11 @@ public class ArmLift extends SubsystemBase {
     public static LiftState publicLiftState;
 
     public static class PeriodicIO {
-        double lift_target;
-        double lift_power;
+        double lift_target = 0.0;
+        double lift_power = 0.0;
 
-        double is_lift_positional_control = false;
+        boolean is_lift_positional_control = false;
+        
         LiftState state = LiftState.START;
     }
 
@@ -96,25 +99,25 @@ public class ArmLift extends SubsystemBase {
         prevUpdateTime = currentTime;
         if (liftPeriodicIO.is_lift_positional_control) {
             liftGoalState.position = liftPeriodicIO.lift_target;
+            
             prevUpdateTime = currentTime;
             liftCurrentState = liftProfile.calculate(deltaTime, liftCurrentState, liftGoalState);
 
             liftPIDController.setReference(
                 liftCurrentState.position,
                 SparkBase.ControlType.kPosition,
-                ClosedLoopSlot.liftSlot0,
+               ClosedLoopSlot.kSlot0,
                 Constants.Lift.LIFT_kG,
                 ArbFFUnits.kVoltage);
         } else {
             liftCurrentState.position = liftEncoder.getPosition();
             liftCurrentState.velocity = 0.0;
-            liftMotor.set(liftPeriodicIO.lift_power
-            );
+            m_LiftMotor.set(liftPeriodicIO.lift_power);
         }
 
         publicLiftState = liftPeriodicIO.state;
 
-        }
+    }
 
     public void writePeriodicOutputs() {
 
@@ -128,10 +131,14 @@ public class ArmLift extends SubsystemBase {
     }
 
     public Command liftReset() {
-        return run(() -> m_LiftMotor.setPosition(0.0));
+        return run(() -> liftEncoder.setPosition(0.0));
     }
 
-    private LiftState getState() {
+    public Command getLiftState() {
+        return run(() -> getliftstate());
+    }
+
+    private LiftState getliftstate() {
         return liftPeriodicIO.state;
     }
 

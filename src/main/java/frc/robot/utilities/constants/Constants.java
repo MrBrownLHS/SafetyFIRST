@@ -14,57 +14,56 @@ public class Constants {
 
     public static final class Lift {
         public static final int LIFT_MOTOR_ID = 13;
-        public static final double LIFT_kP = 0.0;
+        public static final double LIFT_kP = 0.15;
         public static final double LIFT_kI = 0.0;
         public static final double LIFT_kD = 0.0;
-        public static final double LIFT_kIZone = 0.0;
+        public static final double LIFT_kIZone = 5.0;
+        public static final double LIFT_kG = 0.5;
 
         public static final double LIFT_MAX_VELOCITY = 5.0; // inches per second
         public static final double LIFT_MAX_ACCELERATION = 20.0; // inches per second squared
 
         public static final double LIFT_START_POS = 0.0; 
-        public static final double LIFT_COLLECT_POS = 5.0;
-        public static final double LIFT_L1_POS = 10.0;
-        public static final double LIFT_L2_POS = 15.0;
-        public static final double LIFT_L3_POS = 18.0;
+        public static final double LIFT_COLLECT_POS = -5.0;
+        public static final double LIFT_L1_POS = -10.0;
+        public static final double LIFT_L2_POS = -15.0;
+        public static final double LIFT_L3_POS = -18.0;
+        public static final double LIFT_GEAR_RATIO = 1.0;
+        public static final double LIFT_COG_DIAMETER_INCHES = 2.0;
+        public static final double LIFT_ENCODER_TO_INCHES = (Math.PI * LIFT_COG_DIAMETER_INCHES) / 360.0 / LIFT_GEAR_RATIO;
     }
 
-    public static final class CollectorArmConstants {
-        // CAN IDs
-        
-        
+    public static final class Pivot {            
         public static final int PIVOT_MOTOR_ID = 15;
-        
-        public static final int CORAL_COLLECT_MOTOR_ID = 17;
-        public static final int CORAL_ARTICULATE_MOTOR_ID = 18;
-        
-        // PID Constants - NEEDS TUNING
-        
-        
-        public static final double PIVOT_kP = 0.0;
+        public static final double PIVOT_kP = 0.15;
         public static final double PIVOT_kI = 0.0;
         public static final double PIVOT_kD = 0.0;
-       
-             
+        public static final double PIVOT_kIZone = 5.0;
+        public static final double PIVOT_kG = 0.5;
+
+        public static final double PIVOT_MAX_VELOCITY = 5.0; 
+        public static final double PIVOT_MAX_ACCELERATION = 20.0;
+
+        public static final double PIVOT_START_POS = 0.0;
+        public static final double PIVOT_COLLECT_POS = -63.0;
+        public static final double PIVOT_L1_POS = -117.0;
+        public static final double PIVOT_L2_POS = -142.0;
+        public static final double PIVOT_L3_POS = -297.0;
         public static final double ENCODER_TO_DEGREES = 360.0 / 4096.0; 
-        public static final double COG_DIAMETER_INCHES = 2.0; // Diameter of the center of gravity pulley in inches - NEEDS TUNING
-        public static final double LIFT_GEAR_RATIO = 1.0; // Gear ratio of the lift mechanism - NEEDS TUNING
-        public static final double ENCODER_TO_INCHES = (Math.PI * COG_DIAMETER_INCHES) / 360.0 / LIFT_GEAR_RATIO; 
-        public static final double DEADBAND = 0.1;
-        
+    }
 
-        //Intake Motor Speeds - NEEDS TUNING
-        public static final double INTAKE_SPEED = 0.25; //Intake Speed - NEEDS TUNING
-        public static final double OUTTAKE_SPEED = 0.25; //Outtake Speed - NEEDS TUNING, may need to be negative
-        public static final double ARTICULATE_SPEED = 0.25; //Articulate Speed - NEEDS TUNING
-        public static final double ARTICULATE_DEADBAND = 0.05; //Articulate Deadband - NEEDS TUNING
-        public static final double ARTICULATE_RATE_LIMIT = 2.9; //Articulate Rate Limit - NEEDS TUNING
-
-        public static final double AUTO_CORAL_RELEASE_SPEED = 0.25; //Coral Collect Speed - NEEDS TUNING
-
-        
-        
-        //Motor Configuration
+    public static final class CoralIntakeConstants {
+        public static final int CORAL_COLLECT_MOTOR_ID = 17;
+        public static final int CORAL_ARTICULATE_MOTOR_ID = 18;
+        public static final double CORAL_INTAKE_SPEED = 0.25; 
+        public static final double CORAL_OUTTAKE_SPEED = 0.25; 
+        public static final double CORAL_ARTICULATE_SPEED = 0.25; 
+        public static final double CORAL_ARTICULATE_DEADBAND = 0.05; 
+        public static final double CORAL_ARTICULATE_RATE_LIMIT = 2.9; 
+        public static final double CORAL_AUTO_RELEASE_SPEED = 0.25; 
+    }
+             
+    public static final class MotorConstants {
         public static final double VOLTAGE_COMPENSATION = 12.0;
         public static final int CURRENT_LIMIT_NEO = 25;
         public static final int CURRENT_THRESHOLD_NEO = 40;
@@ -79,18 +78,18 @@ public class Constants {
         public static final boolean ENABLE_CURRENT_LIMIT_550 = true;
         public static final boolean ACTIVE_NEUTRAL_MODE = true; 
         public static final boolean DISABLE_NEUTRAL_MODE = false;
-
-
-    };
+    }
 
     public static final class CageClimberConstants {
         public static final int WINCH_MOTOR_ID = 19;
-                
+        public static final double WINCH_MOTOR_SPEED = 0.5;
     }
 
     public static final class AlgaeCollectorConstants {
         public static final int ALGAE_ARTICULATE_MOTOR_ID = 20;
         public static final int ALGAE_CLAW_MOTOR_ID= 21;
+        public static final double ALGAE_ARTICULATE_DEADBAND = 0.05;
+        public static final double ALGAE_ARTICULATE_RATE_LIMIT = 2.9; 
     }
 
     public static final class ModuleConstants {
@@ -289,3 +288,4 @@ public class Constants {
         public static final double kDeadband = 0.1;
     }
 }
+

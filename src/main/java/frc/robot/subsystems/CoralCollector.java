@@ -36,9 +36,9 @@ public class CoralCollector extends SubsystemBase {
 
  
     public CoralCollector() {
-      coralCollectorRateLimiter = new SlewRateLimiter(Constants.CollectorArmConstants.ARTICULATE_RATE_LIMIT);
-      m_CoralCollect = new SparkMax(Constants.CollectorArmConstants.CORAL_COLLECT_MOTOR_ID, MotorType.kBrushless);
-      coralCollectorRateLimiter = new SlewRateLimiter(Constants.CollectorArmConstants.ARTICULATE_RATE_LIMIT);
+      coralCollectorRateLimiter = new SlewRateLimiter(Constants.CoralIntakeConstants.CORAL_ARTICULATE_RATE_LIMIT);
+      m_CoralCollect = new SparkMax(Constants.CoralIntakeConstants.CORAL_COLLECT_MOTOR_ID, MotorType.kBrushless);
+      coralCollectorRateLimiter = new SlewRateLimiter(Constants.CoralIntakeConstants.CORAL_ARTICULATE_RATE_LIMIT);
       coralCollectorMotorConfig = new SparkMaxConfig();
 
       configureCoralCollectorMotor(m_CoralCollect, coralCollectorMotorConfig);
@@ -46,9 +46,9 @@ public class CoralCollector extends SubsystemBase {
 
     private void configureCoralCollectorMotor(SparkMax motor, SparkMaxConfig config){
       config.idleMode(IdleMode.kBrake);
-      config.smartCurrentLimit(Constants.CollectorArmConstants.CURRENT_LIMIT_550);
-      config.secondaryCurrentLimit(Constants.CollectorArmConstants.MAX_CURRENT_LIMIT_550);
-      config.voltageCompensation(Constants.CollectorArmConstants.VOLTAGE_COMPENSATION);
+      config.smartCurrentLimit(Constants.MotorConstants.CURRENT_LIMIT_550);
+      config.secondaryCurrentLimit(Constants.MotorConstants.MAX_CURRENT_LIMIT_550);
+      config.voltageCompensation(Constants.MotorConstants.VOLTAGE_COMPENSATION);
       motor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
     }
 
@@ -71,7 +71,7 @@ public class CoralCollector extends SubsystemBase {
   
     public RunCommand AutoCollectCoral() {
       return new RunCommand(() -> {
-       m_CoralCollect.set(Constants.CollectorArmConstants.AUTO_CORAL_RELEASE_SPEED);
+       m_CoralCollect.set(Constants.CoralIntakeConstants.CORAL_AUTO_RELEASE_SPEED);
       }, this);
     }
 

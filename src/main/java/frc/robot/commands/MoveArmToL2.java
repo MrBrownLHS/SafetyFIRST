@@ -27,21 +27,19 @@ public class MoveArmToL2 extends SequentialCommandGroup {
   }
 
   private Command LiftCommand(ArmLift lift) {
-    return lift.LiftToL2()
-               .withTimeout(3) 
-               .andThen(() -> lift.StopLift()); 
+    return lift.liftToL2()
+               .andThen(() -> lift.stopLift()); 
   }
 
   private Command PivotCommand(ArmPivot pivot) {
-    return pivot.PivotToL2()
-                .withTimeout(2) 
-                .andThen(() -> pivot.StopPivot());
+    return pivot.pivotToL2()
+               .andThen(() -> pivot.stopPivot());
   }
 
   private Command StopCommands(ArmLift lift, ArmPivot pivot) {
     return new InstantCommand(() -> {
-      pivot.StopPivot();
-      lift.StopLift();
+      pivot.stopPivot();
+      lift.stopLift();
     });
   }
 }
