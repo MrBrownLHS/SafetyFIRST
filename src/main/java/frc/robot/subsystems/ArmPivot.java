@@ -6,6 +6,8 @@ import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
+
+import frc.robot.subsystems.ArmLift.LiftState;
 import frc.robot.utilities.constants.Constants;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
@@ -16,6 +18,7 @@ import com.revrobotics.spark.SparkClosedLoopController.ArbFFUnits;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.SparkBase;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class ArmPivot extends SubsystemBase {
     private PeriodicIO pivotPeriodicIO;
@@ -88,6 +91,10 @@ public class ArmPivot extends SubsystemBase {
 
     @Override
     public void periodic() {
+        SmartDashboard.putNumber("Arm Pivot Position", pivotEncoder.getPosition());
+        SmartDashboard.putBoolean("Pivot Positional Control", pivotPeriodicIO.is_pivot_positional_control);
+        SmartDashboard.putNumber("Pivot Target Position", pivotPeriodicIO.pivot_target);
+
         double currentTime = Timer.getFPGATimestamp();
         double deltatime = currentTime - prevUpdateTime;
         prevUpdateTime = currentTime;
@@ -157,14 +164,39 @@ public class ArmPivot extends SubsystemBase {
     }
 
     public Command pivotToCollect() {
-        return run(() -> pivottocollect());
+        return new Command() {
+            @Override
+            public void initialize() {
+                pivotPeriodicIO.is_pivot_positional_control = true;
+                pivotPeriodicIO.pivot_target = Constants.Pivot.PIVOT_COLLECT_POS;
+                pivotPeriodicIO.state = PivotState.COLLECT;
+            }
+
+            @Override
+            public boolean isFinished() {
+                return Math.abs(pivotEncoder.getPosition() - Constants.Pivot.PIVOT_COLLECT_POS)
+                        < Constants.Lift.LIFT_POSITION_TOLERANCE;
+            }
+
+            @Override
+            public void end(boolean interrupted) {
+                pivotPeriodicIO.is_pivot_positional_control = false;
+                m_PivotMotor.set(0.0);
+            }
+        };
     }
 
-    private void pivottocollect() {
-        pivotPeriodicIO.is_pivot_positional_control = true;
-        pivotPeriodicIO.pivot_target = Constants.Pivot.PIVOT_COLLECT_POS;
-        pivotPeriodicIO.state = PivotState.COLLECT;
-    }
+
+
+    // public Command pivotToCollect() {
+    //     return run(() -> pivottocollect());
+    // }
+
+    // private void pivottocollect() {
+    //     pivotPeriodicIO.is_pivot_positional_control = true;
+    //     pivotPeriodicIO.pivot_target = Constants.Pivot.PIVOT_COLLECT_POS;
+    //     pivotPeriodicIO.state = PivotState.COLLECT;
+    // }
 
     public Command pivotToL1() {
         return run(() -> pivottol1());
@@ -196,8 +228,5 @@ public class ArmPivot extends SubsystemBase {
         pivotPeriodicIO.state = PivotState.L3;
     }
 
-
-
-       
 }
 

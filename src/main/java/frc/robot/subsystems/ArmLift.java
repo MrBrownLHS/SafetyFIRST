@@ -16,6 +16,7 @@ import com.revrobotics.spark.SparkClosedLoopController.ArbFFUnits;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.SparkBase;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 
 
@@ -94,6 +95,10 @@ public class ArmLift extends SubsystemBase {
     @Override
 
     public void periodic() {
+        SmartDashboard.putNumber("Arm Lift Position", liftEncoder.getPosition());
+        SmartDashboard.putBoolean("Lift Positional Control", liftPeriodicIO.is_lift_positional_control);
+        SmartDashboard.putNumber("Lift Target Position", liftPeriodicIO.lift_target);
+
         double currentTime = Timer.getFPGATimestamp();
         double deltaTime = currentTime - prevUpdateTime;
         prevUpdateTime = currentTime;
@@ -162,14 +167,37 @@ public class ArmLift extends SubsystemBase {
     }
 
     public Command liftToCollect() {
-        return run(() -> lifttocollect());
+        return new Command() {
+            @Override
+            public void initialize() {
+                liftPeriodicIO.is_lift_positional_control = true;
+                liftPeriodicIO.lift_target = Constants.Lift.LIFT_COLLECT_POS;
+                liftPeriodicIO.state = LiftState.COLLECT;
+            }
+
+            @Override
+            public boolean isFinished() {
+                return Math.abs(liftEncoder.getPosition() - Constants.Lift.LIFT_COLLECT_POS)
+                        < Constants.Lift.LIFT_POSITION_TOLERANCE;
+            }
+
+            @Override
+            public void end(boolean interrupted) {
+                liftPeriodicIO.is_lift_positional_control = false;
+                m_LiftMotor.set(0.0);
+            }
+        };
     }
 
-    private void lifttocollect() {
-        liftPeriodicIO.is_lift_positional_control = true;
-        liftPeriodicIO.lift_target = Constants.Lift.LIFT_COLLECT_POS;
-        liftPeriodicIO.state = LiftState.COLLECT;
-    }
+    // public Command liftToCollect() {
+    //     return run(() -> lifttocollect());
+    // }
+
+    // private void lifttocollect() {
+    //     liftPeriodicIO.is_lift_positional_control = true;
+    //     liftPeriodicIO.lift_target = Constants.Lift.LIFT_COLLECT_POS;
+    //     liftPeriodicIO.state = LiftState.COLLECT;
+    // }
 
     public Command liftToL1() {
         return run(() -> lifttol1());

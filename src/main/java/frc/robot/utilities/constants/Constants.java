@@ -22,6 +22,7 @@ public class Constants {
 
         public static final double LIFT_MAX_VELOCITY = 5.0; // inches per second
         public static final double LIFT_MAX_ACCELERATION = 20.0; // inches per second squared
+        public static final double LIFT_POSITION_TOLERANCE = 0.5; // inches
 
         public static final double LIFT_START_POS = 0.0; 
         public static final double LIFT_COLLECT_POS = -5.0;

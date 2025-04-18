@@ -176,6 +176,7 @@ public class RobotContainer {
 
   
   //Manual Arm Controls
+    new RunCommand(() -> armLift.setLiftPower(CopilotCommandController.getRightX()), armLift);
     // new JoystickButton(CoPilotController, Constants.ControllerRawButtons.XboxController.Button.kX.value)
     //     .whileTrue(armPivot.SimplePivotBack());
         

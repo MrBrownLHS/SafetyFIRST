@@ -14,18 +14,13 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 
 
 public class MoveArmToCollect extends SequentialCommandGroup {
-  private final ArmLift lift;
-  private final ArmPivot pivot;
-
+  
   public MoveArmToCollect(ArmLift lift, ArmPivot pivot) {
-    this.lift = lift;
-    this.pivot = pivot;
-    addRequirements(lift, pivot);
     addCommands(
         LiftCommand(lift),
-        PivotCommand(pivot),
-        StopCommands(lift, pivot)
+        PivotCommand(pivot)
     );
+        
   }
 
   private Command LiftCommand(ArmLift lift) {
@@ -42,10 +37,5 @@ public class MoveArmToCollect extends SequentialCommandGroup {
               });
   }
 
-  private Command StopCommands(ArmLift lift, ArmPivot pivot) {
-    return new InstantCommand(() -> {
-        pivot.stopPivot();
-        lift.stopLift();
-      });
-  }
+  
 }
