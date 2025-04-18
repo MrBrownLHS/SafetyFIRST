@@ -25,7 +25,7 @@ public class Constants {
         public static final double LIFT_POSITION_TOLERANCE = 0.5; // inches
 
         public static final double LIFT_START_POS = 0.0; 
-        public static final double LIFT_COLLECT_POS = -5.0;
+        public static final double LIFT_COLLECT_POS = -15.0;
         public static final double LIFT_L1_POS = -10.0;
         public static final double LIFT_L2_POS = -15.0;
         public static final double LIFT_L3_POS = -18.0;
@@ -46,7 +46,7 @@ public class Constants {
         public static final double PIVOT_MAX_ACCELERATION = 20.0;
 
         public static final double PIVOT_START_POS = 0.0;
-        public static final double PIVOT_COLLECT_POS = -63.0;
+        public static final double PIVOT_COLLECT_POS = -45.0;
         public static final double PIVOT_L1_POS = -117.0;
         public static final double PIVOT_L2_POS = -142.0;
         public static final double PIVOT_L3_POS = -297.0;

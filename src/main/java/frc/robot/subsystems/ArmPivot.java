@@ -84,7 +84,7 @@ public class ArmPivot extends SubsystemBase {
         double pivot_target = 0.0;
         double pivot_power = 0.0;
 
-        boolean is_pivot_positional_control = false;
+        boolean is_pivot_positional_control = true;
 
         PivotState state = PivotState.START;
     }
@@ -180,7 +180,7 @@ public class ArmPivot extends SubsystemBase {
 
             @Override
             public void end(boolean interrupted) {
-                pivotPeriodicIO.is_pivot_positional_control = false;
+                pivotPeriodicIO.is_pivot_positional_control = true;
                 m_PivotMotor.set(0.0);
             }
         };

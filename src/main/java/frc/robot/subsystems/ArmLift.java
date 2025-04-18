@@ -87,7 +87,7 @@ public class ArmLift extends SubsystemBase {
         double lift_target = 0.0;
         double lift_power = 0.0;
 
-        boolean is_lift_positional_control = false;
+        boolean is_lift_positional_control = true;
         
         LiftState state = LiftState.START;
     }
@@ -183,7 +183,7 @@ public class ArmLift extends SubsystemBase {
 
             @Override
             public void end(boolean interrupted) {
-                liftPeriodicIO.is_lift_positional_control = false;
+                liftPeriodicIO.is_lift_positional_control = true;
                 m_LiftMotor.set(0.0);
             }
         };
