@@ -98,6 +98,7 @@ public class ArmLift extends SubsystemBase {
         SmartDashboard.putNumber("Arm Lift Position", liftEncoder.getPosition());
         SmartDashboard.putBoolean("Lift Positional Control", liftPeriodicIO.is_lift_positional_control);
         SmartDashboard.putNumber("Lift Target Position", liftPeriodicIO.lift_target);
+        SmartDashboard.putString("Lift State", liftPeriodicIO.state.toString());
 
         double currentTime = Timer.getFPGATimestamp();
         double deltaTime = currentTime - prevUpdateTime;
@@ -166,38 +167,38 @@ public class ArmLift extends SubsystemBase {
         liftPeriodicIO.state = LiftState.START;
     }
 
+    // public Command liftToCollect() {
+    //     return new Command() {
+    //         @Override
+    //         public void initialize() {
+    //             liftPeriodicIO.is_lift_positional_control = true;
+    //             liftPeriodicIO.lift_target = Constants.Lift.LIFT_COLLECT_POS;
+    //             liftPeriodicIO.state = LiftState.COLLECT;
+    //         }
+
+    //         @Override
+    //         public boolean isFinished() {
+    //             return Math.abs(liftEncoder.getPosition() - Constants.Lift.LIFT_COLLECT_POS)
+    //                     < Constants.Lift.LIFT_POSITION_TOLERANCE;
+    //         }
+
+    //         @Override
+    //         public void end(boolean interrupted) {
+    //             liftPeriodicIO.is_lift_positional_control = false;
+    //             m_LiftMotor.set(0.0);
+    //         }
+    //     };
+    // }
+
     public Command liftToCollect() {
-        return new Command() {
-            @Override
-            public void initialize() {
-                liftPeriodicIO.is_lift_positional_control = true;
-                liftPeriodicIO.lift_target = Constants.Lift.LIFT_COLLECT_POS;
-                liftPeriodicIO.state = LiftState.COLLECT;
-            }
-
-            @Override
-            public boolean isFinished() {
-                return Math.abs(liftEncoder.getPosition() - Constants.Lift.LIFT_COLLECT_POS)
-                        < Constants.Lift.LIFT_POSITION_TOLERANCE;
-            }
-
-            @Override
-            public void end(boolean interrupted) {
-                liftPeriodicIO.is_lift_positional_control = true;
-                m_LiftMotor.set(0.0);
-            }
-        };
+        return run(() -> lifttocollect());
     }
 
-    // public Command liftToCollect() {
-    //     return run(() -> lifttocollect());
-    // }
-
-    // private void lifttocollect() {
-    //     liftPeriodicIO.is_lift_positional_control = true;
-    //     liftPeriodicIO.lift_target = Constants.Lift.LIFT_COLLECT_POS;
-    //     liftPeriodicIO.state = LiftState.COLLECT;
-    // }
+    private void lifttocollect() {
+        liftPeriodicIO.is_lift_positional_control = true;
+        liftPeriodicIO.lift_target = Constants.Lift.LIFT_COLLECT_POS;
+        liftPeriodicIO.state = LiftState.COLLECT;
+    }
 
     public Command liftToL1() {
         return run(() -> lifttol1());

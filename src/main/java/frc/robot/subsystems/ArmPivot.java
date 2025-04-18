@@ -6,8 +6,6 @@ import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
-
-import frc.robot.subsystems.ArmLift.LiftState;
 import frc.robot.utilities.constants.Constants;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
@@ -94,6 +92,7 @@ public class ArmPivot extends SubsystemBase {
         SmartDashboard.putNumber("Arm Pivot Position", pivotEncoder.getPosition());
         SmartDashboard.putBoolean("Pivot Positional Control", pivotPeriodicIO.is_pivot_positional_control);
         SmartDashboard.putNumber("Pivot Target Position", pivotPeriodicIO.pivot_target);
+        SmartDashboard.putString("Pivot State", pivotPeriodicIO.state.toString());
 
         double currentTime = Timer.getFPGATimestamp();
         double deltatime = currentTime - prevUpdateTime;
@@ -163,40 +162,40 @@ public class ArmPivot extends SubsystemBase {
         pivotPeriodicIO.state = PivotState.START;
     }
 
+    // public Command pivotToCollect() {
+    //     return new Command() {
+    //         @Override
+    //         public void initialize() {
+    //             pivotPeriodicIO.is_pivot_positional_control = true;
+    //             pivotPeriodicIO.pivot_target = Constants.Pivot.PIVOT_COLLECT_POS;
+    //             pivotPeriodicIO.state = PivotState.COLLECT;
+    //         }
+
+    //         @Override
+    //         public boolean isFinished() {
+    //             return Math.abs(pivotEncoder.getPosition() - Constants.Pivot.PIVOT_COLLECT_POS)
+    //                     < Constants.Lift.LIFT_POSITION_TOLERANCE;
+    //         }
+
+    //         @Override
+    //         public void end(boolean interrupted) {
+    //             pivotPeriodicIO.is_pivot_positional_control = true;
+    //             m_PivotMotor.set(0.0);
+    //         }
+    //     };
+    // }
+
+
+
     public Command pivotToCollect() {
-        return new Command() {
-            @Override
-            public void initialize() {
-                pivotPeriodicIO.is_pivot_positional_control = true;
-                pivotPeriodicIO.pivot_target = Constants.Pivot.PIVOT_COLLECT_POS;
-                pivotPeriodicIO.state = PivotState.COLLECT;
-            }
-
-            @Override
-            public boolean isFinished() {
-                return Math.abs(pivotEncoder.getPosition() - Constants.Pivot.PIVOT_COLLECT_POS)
-                        < Constants.Lift.LIFT_POSITION_TOLERANCE;
-            }
-
-            @Override
-            public void end(boolean interrupted) {
-                pivotPeriodicIO.is_pivot_positional_control = true;
-                m_PivotMotor.set(0.0);
-            }
-        };
+        return run(() -> pivottocollect());
     }
 
-
-
-    // public Command pivotToCollect() {
-    //     return run(() -> pivottocollect());
-    // }
-
-    // private void pivottocollect() {
-    //     pivotPeriodicIO.is_pivot_positional_control = true;
-    //     pivotPeriodicIO.pivot_target = Constants.Pivot.PIVOT_COLLECT_POS;
-    //     pivotPeriodicIO.state = PivotState.COLLECT;
-    // }
+    private void pivottocollect() {
+        pivotPeriodicIO.is_pivot_positional_control = true;
+        pivotPeriodicIO.pivot_target = Constants.Pivot.PIVOT_COLLECT_POS;
+        pivotPeriodicIO.state = PivotState.COLLECT;
+    }
 
     public Command pivotToL1() {
         return run(() -> pivottol1());

@@ -7,39 +7,13 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.subsystems.ArmLift;
 import frc.robot.subsystems.ArmPivot;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-
 
 public class MoveArmToL2 extends SequentialCommandGroup {
-  private final ArmLift lift;
-  private final ArmPivot pivot;
   
   public MoveArmToL2(ArmLift lift, ArmPivot pivot) {
-    this.lift = lift;
-    this.pivot = pivot;
-    addRequirements(lift, pivot);
     addCommands(
-      LiftCommand(lift),
-      PivotCommand(pivot),
-      StopCommands(lift, pivot)
+        lift.liftToL2(),
+        pivot.pivotToL2()
     );
-  }
-
-  private Command LiftCommand(ArmLift lift) {
-    return lift.liftToL2()
-               .andThen(() -> lift.stopLift()); 
-  }
-
-  private Command PivotCommand(ArmPivot pivot) {
-    return pivot.pivotToL2()
-               .andThen(() -> pivot.stopPivot());
-  }
-
-  private Command StopCommands(ArmLift lift, ArmPivot pivot) {
-    return new InstantCommand(() -> {
-      pivot.stopPivot();
-      lift.stopLift();
-    });
-  }
+  }       
 }

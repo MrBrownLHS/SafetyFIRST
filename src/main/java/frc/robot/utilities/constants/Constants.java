@@ -59,7 +59,7 @@ public class Constants {
         public static final double CORAL_INTAKE_SPEED = 0.25; 
         public static final double CORAL_OUTTAKE_SPEED = 0.25; 
         public static final double CORAL_ARTICULATE_SPEED = 0.25; 
-        public static final double CORAL_ARTICULATE_DEADBAND = 0.05; 
+        public static final double CORAL_ARTICULATE_DEADBAND = 0.1; 
         public static final double CORAL_ARTICULATE_RATE_LIMIT = 2.9; 
         public static final double CORAL_AUTO_RELEASE_SPEED = 0.25; 
         public static final int CORAL_LIMIT_SWITCH_PORT = 1;
@@ -90,7 +90,7 @@ public class Constants {
     public static final class AlgaeCollectorConstants {
         public static final int ALGAE_ARTICULATE_MOTOR_ID = 20;
         public static final int ALGAE_CLAW_MOTOR_ID= 21;
-        public static final double ALGAE_ARTICULATE_DEADBAND = 0.05;
+        public static final double ALGAE_ARTICULATE_DEADBAND = 0.1;
         public static final double ALGAE_ARTICULATE_RATE_LIMIT = 2.9; 
     }
 
