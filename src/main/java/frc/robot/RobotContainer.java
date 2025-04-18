@@ -20,8 +20,8 @@ import edu.wpi.first.wpilibj2.command.button.POVButton;
 import frc.robot.commands.SwerveController;
 import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.utilities.constants.Constants;
-import frc.robot.subsystems.CollectorHead;
-import frc.robot.subsystems.CoralCollector;
+import frc.robot.subsystems.ArmRotate;
+import frc.robot.subsystems.ArmIntake;
 import frc.robot.subsystems.AlgaeClaw;
 import frc.robot.subsystems.CageClimber;
 import frc.robot.subsystems.AlgaeArticulate;
@@ -53,8 +53,8 @@ public class RobotContainer {
   private final CageClimber cageClimber = new CageClimber();
   private final AlgaeArticulate algaeArticulate = new AlgaeArticulate();
   private final AlgaeClaw algaeClaw = new AlgaeClaw();
-  private final CollectorHead collectorHead = new CollectorHead();
-  private final CoralCollector coralCollector = new CoralCollector();
+  private final ArmRotate collectorHead = new ArmRotate();
+  private final ArmIntake coralCollector = new ArmIntake();
   private final ArmLift armLift = ArmLift.getInstance();
   private final ArmPivot armPivot = ArmPivot.getInstance();
   

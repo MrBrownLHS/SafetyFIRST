@@ -5,14 +5,14 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.CoralCollector;
+import frc.robot.subsystems.ArmIntake;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class RunCoralCollector extends Command {
-  private CoralCollector mCoralCollector;
+  private ArmIntake mCoralCollector;
   private double speed;
   /** Creates a new RunCoralCollector. */
-  public RunCoralCollector(CoralCollector mCoralCollector, double speed) {
+  public RunCoralCollector(ArmIntake mCoralCollector, double speed) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.speed = speed;
     this.mCoralCollector = mCoralCollector;

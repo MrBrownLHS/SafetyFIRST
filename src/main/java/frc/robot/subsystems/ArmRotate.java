@@ -10,29 +10,59 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.revrobotics.spark.SparkMax;
 import edu.wpi.first.math.filter.SlewRateLimiter;
-
-
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-
 import frc.robot.utilities.constants.Constants;
-
 import java.util.function.DoubleSupplier;
-
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.Command;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.SparkMax;
+import frc.robot.utilities.constants.Constants;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.RelativeEncoder;
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import com.revrobotics.spark.SparkClosedLoopController.ArbFFUnits;
+import com.revrobotics.spark.SparkClosedLoopController;
+import com.revrobotics.spark.ClosedLoopSlot;
+import com.revrobotics.spark.SparkBase;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
+public class ArmRotate extends SubsystemBase {
+  private PeriodicIO rotatePeriodicIO;
+  private static ArmRotate rotateInstance;
+  private static ArmRotate getInstance() {
+    if (rotateInstance == null) {
+      rotateInstance = new ArmRotate();
+    }
+    return rotateInstance;
 
-public class CollectorHead extends SubsystemBase {
-  private final SparkMax m_CoralArticulate;
-  private final SparkMaxConfig articulateCollectorMotorConfig;
-  public SlewRateLimiter articulateCollectorRateLimiter;
+  }
+  private SparkMax m_RotateMotor;
+  private RelativeEncoder rotateEncoder;
+  private SparkClosedLoopController rotateController;
+
+  private TrapezoidProfile rotateProfile;
+  private TrapezoidProfile.State rotateCurrentState = new TrapezoidProfile.State();
+  private TrapezoidProfile.State rotateGoalState = new TrapezoidProfile.State();
   
-  public CollectorHead() {
-    m_CoralArticulate = new SparkMax(Constants.CoralIntakeConstants.CORAL_ARTICULATE_MOTOR_ID, MotorType.kBrushless);
-    articulateCollectorRateLimiter = new SlewRateLimiter(Constants.CoralIntakeConstants.CORAL_ARTICULATE_RATE_LIMIT);
-    articulateCollectorMotorConfig = new SparkMaxConfig();
+  
+  private ArmRotate() {
+    super("ArmRotate");
+    rotatePeriodicIO = new PeriodicIO();
+
+    SparkMaxConfig rotateMotorConfig = new SparkMaxConfig();
+
+    rotateMotorConfig.closedLoop
+        .pid(Constants.Rotate.ROTATE_kP, Constants.Rotate.ROTATE_kI, Constants.Rotate.ROTATE_kD)
+        .iZone(Constants.Rotate.ROTATE_kIZone);
 
     configureArticulateCollectorMotor(m_CoralArticulate, articulateCollectorMotorConfig);
   }

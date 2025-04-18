@@ -30,7 +30,7 @@ import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 
-public class CoralCollector extends SubsystemBase {
+public class ArmIntake extends SubsystemBase {
   private final SparkMax m_CoralCollect;
   private final SparkMaxConfig coralCollectorMotorConfig;
   public SlewRateLimiter coralCollectorRateLimiter;
@@ -38,7 +38,7 @@ public class CoralCollector extends SubsystemBase {
   
 
  
-    public CoralCollector() {
+    public ArmIntake() {
       coralCollectorRateLimiter = new SlewRateLimiter(Constants.CoralIntakeConstants.CORAL_ARTICULATE_RATE_LIMIT);
       m_CoralCollect = new SparkMax(Constants.CoralIntakeConstants.CORAL_COLLECT_MOTOR_ID, MotorType.kBrushless);
       coralCollectorRateLimiter = new SlewRateLimiter(Constants.CoralIntakeConstants.CORAL_ARTICULATE_RATE_LIMIT);

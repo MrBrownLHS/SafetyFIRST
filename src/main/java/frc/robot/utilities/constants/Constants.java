@@ -53,16 +53,34 @@ public class Constants {
         public static final double ENCODER_TO_DEGREES = 360.0 / 4096.0; 
     }
 
-    public static final class CoralIntakeConstants {
-        public static final int CORAL_COLLECT_MOTOR_ID = 17;
-        public static final int CORAL_ARTICULATE_MOTOR_ID = 18;
-        public static final double CORAL_INTAKE_SPEED = 0.25; 
-        public static final double CORAL_OUTTAKE_SPEED = 0.25; 
-        public static final double CORAL_ARTICULATE_SPEED = 0.25; 
-        public static final double CORAL_ARTICULATE_DEADBAND = 0.1; 
-        public static final double CORAL_ARTICULATE_RATE_LIMIT = 2.9; 
-        public static final double CORAL_AUTO_RELEASE_SPEED = 0.25; 
+    public static final class Rotate {
+        public static final int ROTATE_MOTOR_ID = 18;
+        public static final double ROTATE_kP = 0.15;
+        public static final double ROTATE_kI = 0.0;
+        public static final double ROTATE_kD = 0.0;
+        public static final double ROTATE_kIZone = 5.0;
+        public static final double ROTATE_kG = 0.5;
+
+        public static final double ROTATE_MAX_VELOCITY = 5.0;
+        public static final double ROTATE_MAX_ACCELERATION = 20.0;
+
+        public static final double ROTATE_POSITION_TOLERANCE = 0.5; 
+        public static final double ROTATE_SPEED = 0.25;
+        public static final double ROTATE_START_POS = 0.0;
+        public static final double ROTATE_COLLECT_POS = -45.0;
+        public static final double ROTATE_L1_POS = -117.0;
+        public static final double ROTATE_L2_POS = -142.0;
+        public static final double ROTATE_L3_POS = -297.0;
+        public static final double ROTATE_DEADBAND = 0.1; 
+        public static final double ROTATE_RATE_LIMIT = 2.9; 
+    }
+
+    public static final class Intake {
+        public static final int CORAL_INTAKE_MOTOR_ID = 17;
         public static final int CORAL_LIMIT_SWITCH_PORT = 1;
+        public static final double CORAL_INTAKE_SPEED = 0.25; 
+        public static final double CORAL_OUTTAKE_SPEED = -0.25; 
+        public static final double CORAL_AUTO_RELEASE_SPEED = -0.25; 
     }
              
     public static final class MotorConstants {
