@@ -47,7 +47,7 @@ public class ArmRotate extends SubsystemBase {
   }
   private SparkMax m_RotateMotor;
   private RelativeEncoder rotateEncoder;
-  private SparkClosedLoopController rotateController;
+  private SparkClosedLoopController rotatePIDController;
 
   private TrapezoidProfile rotateProfile;
   private TrapezoidProfile.State rotateCurrentState = new TrapezoidProfile.State();
@@ -64,17 +64,44 @@ public class ArmRotate extends SubsystemBase {
         .pid(Constants.Rotate.ROTATE_kP, Constants.Rotate.ROTATE_kI, Constants.Rotate.ROTATE_kD)
         .iZone(Constants.Rotate.ROTATE_kIZone);
 
-    configureArticulateCollectorMotor(m_CoralArticulate, articulateCollectorMotorConfig);
+    rotateMotorConfig.idleMode(IdleMode.kBrake);
+    rotateMotorConfig.smartCurrentLimit(Constants.MotorConstants.CURRENT_LIMIT_NEO);
+
+    m_RotateMotor = new SparkMax(Constants.Rotate.ROTATE_MOTOR_ID, MotorType.kBrushless);
+    rotateEncoder = m_RotateMotor.getEncoder();
+    rotatePIDController = m_RotateMotor.getClosedLoopController();
+    m_RotateMotor.configure(
+        rotateMotorConfig,
+        ResetMode.kResetSafeParameters,
+        PersistMode.kPersistParameters
+    );
+
+    rotateProfile = new TrapezoidProfile(
+        new TrapezoidProfile.Constraints(
+            Constants.Rotate.ROTATE_MAX_VELOCITY,
+            Constants.Rotate.ROTATE_MAX_ACCELERATION
+        )
+    );
   }
 
-  private void configureArticulateCollectorMotor(SparkMax motor, SparkMaxConfig config){
-    config.idleMode(IdleMode.kBrake);
-    config.smartCurrentLimit(Constants.MotorConstants.CURRENT_LIMIT_NEO);
-    config.secondaryCurrentLimit(Constants.MotorConstants.MAX_CURRENT_LIMIT_NEO);
-    config.voltageCompensation(Constants.MotorConstants.VOLTAGE_COMPENSATION);
-    motor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+  public enum RotateState {
+    COLLECT,
+    L1,
+    L2,
+    L3,
+    CLIMB
   }
 
+  public static class PeriodicIO {
+    double rotate_target = 0.0;
+    double rotate_power = 0.0;
+
+    boolean is_rotate_positional_control = true;
+
+    RotateState state = RotateState.COLLECT;
+  }
+
+    
   // public RunCommand ArticulateCoralCollector(DoubleSupplier joystickInput) {
   //     return new RunCommand(() -> {
   //       double rawInput = joystickInput.getAsDouble();
@@ -84,30 +111,34 @@ public class ArmRotate extends SubsystemBase {
   //     }, this);
   //   }
   
-  public RunCommand ArticulateCoralCollector(DoubleSupplier joystickInput) {
-    return new RunCommand(() -> {
-        double rawInput = joystickInput.getAsDouble();
-        double adjustedInput = (Math.abs(rawInput) > 0.1)? rawInput : 0.0;
+  // public RunCommand ArticulateCoralCollector(DoubleSupplier joystickInput) {
+  //   return new RunCommand(() -> {
+  //       double rawInput = joystickInput.getAsDouble();
+  //       double adjustedInput = (Math.abs(rawInput) > 0.1)? rawInput : 0.0;
 
-        // If adjusted input is 0.0, explicitly stop the motor
-        if (adjustedInput == 0.0) {
-            m_CoralArticulate.set(0.0);
-        } else {
-            double limitedInput = articulateCollectorRateLimiter.calculate(adjustedInput);
-            m_CoralArticulate.set(limitedInput);
-        }
-    }, this);
-  }
+  //       // If adjusted input is 0.0, explicitly stop the motor
+  //       if (adjustedInput == 0.0) {
+  //           m_CoralArticulate.set(0.0);
+  //       } else {
+  //           double limitedInput = articulateCollectorRateLimiter.calculate(adjustedInput);
+  //           m_CoralArticulate.set(limitedInput);
+  //       }
+  //   }, this);
+  // }
 
-  public Command CollectorHeadStop() {
-    return new InstantCommand(() -> {
-      m_CoralArticulate.set(0.0);
-    }, this);
-    }
+  // public Command CollectorHeadStop() {
+  //   return new InstantCommand(() -> {
+  //     m_CoralArticulate.set(0.0);
+  //   }, this);
+  //   }
   
 
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
+    SmartDashboard.putNumber("Arm Rotate Position", rotateEncoder.getPosition());
+    SmartDashboard.putBoolean("Rotate Positional Control", rotatePeriodicIO.is_rotate_positional_control);
+    SmartDashboard.putNumber("Rotate Target Position", rotatePeriodicIO.rotate_target);
+    SmartDashboard.putString("Rotate State", rotatePeriodicIO.state.toString());
+    
   }
 }

@@ -75,11 +75,11 @@ public class ArmLift extends SubsystemBase {
     }
 
     public enum LiftState {
-        START,
         COLLECT,
         L1,
         L2,
-        L3
+        L3, 
+        CLIMB
     }
 
     public static LiftState publicLiftState;
@@ -90,7 +90,7 @@ public class ArmLift extends SubsystemBase {
 
         boolean is_lift_positional_control = true;
         
-        LiftState state = LiftState.START;
+        LiftState state = LiftState.COLLECT;
     }
 
     @Override
@@ -158,16 +158,6 @@ public class ArmLift extends SubsystemBase {
         liftPeriodicIO.lift_power = power;
     }
 
-    public Command liftToStart() {
-        return run(() -> lifttostart());
-    }
-
-    private void lifttostart() {
-        liftPeriodicIO.is_lift_positional_control = true;
-        liftPeriodicIO.lift_target = Constants.Lift.LIFT_START_POS;
-        liftPeriodicIO.state = LiftState.START;
-    }
-
     // public Command liftToCollect() {
     //     return new Command() {
     //         @Override
@@ -229,6 +219,16 @@ public class ArmLift extends SubsystemBase {
         liftPeriodicIO.is_lift_positional_control = true;
         liftPeriodicIO.lift_target = Constants.Lift.LIFT_L3_POS;
         liftPeriodicIO.state = LiftState.L3;
+    }
+
+    public Command liftToClimb() {
+        return run(() -> lifttoclimb());
+    }
+
+    private void lifttoclimb() {
+        liftPeriodicIO.is_lift_positional_control = true;
+        liftPeriodicIO.lift_target = Constants.Lift.LIFT_CLIMB_POS;
+        liftPeriodicIO.state = LiftState.CLIMB;
     }
 
 

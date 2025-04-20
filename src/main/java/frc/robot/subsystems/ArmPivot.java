@@ -69,11 +69,11 @@ public class ArmPivot extends SubsystemBase {
     }
 
     public enum PivotState {
-        START,
         COLLECT,
         L1, 
         L2,
-        L3
+        L3,
+        CLIMB
     }
 
     public static PivotState publicPivotState;
@@ -84,7 +84,7 @@ public class ArmPivot extends SubsystemBase {
 
         boolean is_pivot_positional_control = true;
 
-        PivotState state = PivotState.START;
+        PivotState state = PivotState.COLLECT;
     }
 
     @Override
@@ -152,15 +152,7 @@ public class ArmPivot extends SubsystemBase {
         pivotPeriodicIO.pivot_power = power;
     }
 
-    public Command pivotToStart() {
-        return run(() -> pivottostart());
-    }
-
-    private void pivottostart() {
-        pivotPeriodicIO.is_pivot_positional_control = true;
-        pivotPeriodicIO.pivot_target = Constants.Pivot.PIVOT_START_POS;
-        pivotPeriodicIO.state = PivotState.START;
-    }
+   
 
     // public Command pivotToCollect() {
     //     return new Command() {
@@ -225,6 +217,16 @@ public class ArmPivot extends SubsystemBase {
         pivotPeriodicIO.is_pivot_positional_control = true;
         pivotPeriodicIO.pivot_target = Constants.Pivot.PIVOT_L3_POS;
         pivotPeriodicIO.state = PivotState.L3;
+    }
+
+    public Command pivotToClimb() {
+        return run(() -> pivottoclimb());
+    }
+
+    private void pivottoclimb() {
+        pivotPeriodicIO.is_pivot_positional_control = true;
+        pivotPeriodicIO.pivot_target = Constants.Pivot.PIVOT_CLIMB_POS;
+        pivotPeriodicIO.state = PivotState.CLIMB;
     }
 
 }
