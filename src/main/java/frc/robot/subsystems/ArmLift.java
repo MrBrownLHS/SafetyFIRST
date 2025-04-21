@@ -47,9 +47,14 @@ public class ArmLift extends SubsystemBase {
     private TrapezoidProfile.State liftGoalState = new TrapezoidProfile.State();
     private double prevUpdateTime = Timer.getFPGATimestamp();
 
-     
+    public void resetEncoder() {
+        liftEncoder.setPosition(0.0);
+    }
+
+    
     private ArmLift() {
         super("ArmLift");
+        resetEncoder();
 
         liftPeriodicIO = new PeriodicIO();
 
@@ -98,6 +103,8 @@ public class ArmLift extends SubsystemBase {
         
         LiftState state = LiftState.COLLECT;
     }
+
+    
 
     @Override
 

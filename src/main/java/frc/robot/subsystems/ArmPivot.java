@@ -40,9 +40,15 @@ public class ArmPivot extends SubsystemBase {
     private TrapezoidProfile.State pivotGoalState = new TrapezoidProfile.State();
     private double prevUpdateTime = Timer.getFPGATimestamp();
 
+    public void resetEncoder() {
+        pivotEncoder.setPosition(0.0);
+    }
+
 
     private ArmPivot() {
         super("ArmPivot");
+
+        resetEncoder();
         pivotPeriodicIO = new PeriodicIO();
 
         SparkMaxConfig pivotMotorConfig = new SparkMaxConfig();
@@ -89,6 +95,8 @@ public class ArmPivot extends SubsystemBase {
 
         PivotState state = PivotState.COLLECT;
     }
+
+    
 
     @Override
     public void periodic() {
