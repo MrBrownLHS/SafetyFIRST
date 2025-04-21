@@ -10,7 +10,7 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import frc.robot.utilities.constants.Constants;
-import java.util.function.DoubleSupplier;
+//import java.util.function.DoubleSupplier;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
@@ -172,7 +172,7 @@ public class ArmRotate extends SubsystemBase {
   }
 
   public Command getRotateState() {
-    return run(() -> getRotateState());
+    return run(() -> getrotatestate());
   }
 
   private RotateState getrotatestate() {

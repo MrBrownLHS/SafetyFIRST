@@ -67,11 +67,11 @@ public class RobotContainer {
 
   private final SendableChooser<Command> autoChooser;
   private final Camera botCam = new Camera();
-  private final MoveArmToCollect armCollect = new MoveArmToCollect(armLift, armPivot);
-  private final MoveArmToL1 armL1 = new MoveArmToL1(armLift, armPivot);
-  private final MoveArmToL2 armL2 = new MoveArmToL2(armLift, armPivot);
-  private final MoveArmToL3 armL3 = new MoveArmToL3(armLift, armPivot);
-  private final MoveArmToClimb armStart = new MoveArmToClimb(armLift, armPivot);
+  private final MoveArmToCollect armCollect = new MoveArmToCollect(armLift, armPivot, armRotate);
+  private final MoveArmToL1 armL1 = new MoveArmToL1(armLift, armPivot, armRotate);
+  private final MoveArmToL2 armL2 = new MoveArmToL2(armLift, armPivot, armRotate);
+  private final MoveArmToL3 armL3 = new MoveArmToL3(armLift, armPivot, armRotate);
+  private final MoveArmToClimb armStart = new MoveArmToClimb(armLift, armPivot, armRotate);
   
 
     private final SlewRateLimiter translationLimiter = new SlewRateLimiter(2.9);

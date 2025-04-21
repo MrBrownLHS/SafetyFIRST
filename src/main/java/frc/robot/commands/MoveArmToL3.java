@@ -7,13 +7,15 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.subsystems.ArmLift;
 import frc.robot.subsystems.ArmPivot;
+import frc.robot.subsystems.ArmRotate;
 
 public class MoveArmToL3 extends SequentialCommandGroup {
   
-  public MoveArmToL3(ArmLift lift, ArmPivot pivot) {
+  public MoveArmToL3(ArmLift lift, ArmPivot pivot, ArmRotate rotate) {
     addCommands(
       lift.liftToL3(),
-      pivot.pivotToL3()
+      pivot.pivotToL3(),
+      rotate.rotateToL3()
     );
   }       
 }

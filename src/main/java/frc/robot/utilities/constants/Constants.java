@@ -20,15 +20,15 @@ public class Constants {
         public static final double LIFT_kIZone = 5.0;
         public static final double LIFT_kG = 0.5;
 
-        public static final double LIFT_MAX_VELOCITY = 5.0; // inches per second
-        public static final double LIFT_MAX_ACCELERATION = 20.0; // inches per second squared
-        public static final double LIFT_POSITION_TOLERANCE = 0.5; // inches
+        public static final double LIFT_MAX_VELOCITY = 10.0; 
+        public static final double LIFT_MAX_ACCELERATION = 20.0; 
+        public static final double LIFT_POSITION_TOLERANCE = 0.5; 
 
         public static final double LIFT_COLLECT_POS = 0.0;
         public static final double LIFT_L1_POS = -10.0;
         public static final double LIFT_L2_POS = -15.0;
         public static final double LIFT_L3_POS = -18.0;
-        public static final double LIFT_CLIMB_POS = -20.0;
+        public static final double LIFT_CLIMB_POS = -5.0;
         public static final double LIFT_GEAR_RATIO = 1.0;
         public static final double LIFT_COG_DIAMETER_INCHES = 2.0;
         public static final double LIFT_ENCODER_TO_INCHES = (Math.PI * LIFT_COG_DIAMETER_INCHES) / 360.0 / LIFT_GEAR_RATIO;
@@ -42,14 +42,14 @@ public class Constants {
         public static final double PIVOT_kIZone = 5.0;
         public static final double PIVOT_kG = 0.5;
 
-        public static final double PIVOT_MAX_VELOCITY = 5.0; 
+        public static final double PIVOT_MAX_VELOCITY = 10.0; 
         public static final double PIVOT_MAX_ACCELERATION = 20.0;
 
         public static final double PIVOT_COLLECT_POS = 0.0;
-        public static final double PIVOT_L1_POS = -117.0;
-        public static final double PIVOT_L2_POS = -142.0;
-        public static final double PIVOT_L3_POS = -297.0;
-        public static final double PIVOT_CLIMB_POS = -270.0;
+        public static final double PIVOT_L1_POS = -60.0;
+        public static final double PIVOT_L2_POS = -80.0;
+        public static final double PIVOT_L3_POS = -100.0;
+        public static final double PIVOT_CLIMB_POS = -120.0;
         public static final double ENCODER_TO_DEGREES = 360.0 / 4096.0; 
     }
 
@@ -61,16 +61,16 @@ public class Constants {
         public static final double ROTATE_kIZone = 5.0;
         public static final double ROTATE_kG = 0.5;
 
-        public static final double ROTATE_MAX_VELOCITY = 5.0;
+        public static final double ROTATE_MAX_VELOCITY = 10.0;
         public static final double ROTATE_MAX_ACCELERATION = 20.0;
 
         public static final double ROTATE_POSITION_TOLERANCE = 0.5; 
         public static final double ROTATE_SPEED = 0.25;
         public static final double ROTATE_COLLECT_POS = 0.0;
-        public static final double ROTATE_L1_POS = -117.0;
-        public static final double ROTATE_L2_POS = -142.0;
-        public static final double ROTATE_L3_POS = -297.0;
-        public static final double ROTATE_CLIMB_POS = -270.0;
+        public static final double ROTATE_L1_POS = -50.0;
+        public static final double ROTATE_L2_POS = -80.0;
+        public static final double ROTATE_L3_POS = -100.0;
+        public static final double ROTATE_CLIMB_POS = -120.0;
         public static final double ROTATE_DEADBAND = 0.1; 
         public static final double ROTATE_RATE_LIMIT = 2.9; 
     }
