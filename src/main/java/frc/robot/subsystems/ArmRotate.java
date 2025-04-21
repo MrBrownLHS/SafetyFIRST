@@ -5,7 +5,11 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
+
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
@@ -188,55 +192,138 @@ public class ArmRotate extends SubsystemBase {
     rotatePeriodicIO.rotate_power = power;
   }
 
-  public Command rotateToCollect() {
-    return run(() -> rotatetocollect());
+    public Command rotateToCollect() {
+        return new SequentialCommandGroup(
+            new InstantCommand(() -> {
+                rotatePeriodicIO.is_rotate_positional_control = true;
+                rotatePeriodicIO.rotate_target = Constants.Rotate.ROTATE_COLLECT_POS;
+            }, this),
+            new WaitUntilCommand(() -> 
+                Math.abs(rotateEncoder.getPosition() - Constants.Rotate.ROTATE_COLLECT_POS) < Constants.Rotate.ROTATE_POSITION_TOLERANCE
+            ),
+            new InstantCommand(() -> {
+                rotatePeriodicIO.is_rotate_positional_control = false;
+                m_RotateMotor.set(0.0);
+            }, this)
+        );
+    }
+
+    public Command rotateToL1() {
+      return new SequentialCommandGroup(
+          new InstantCommand(() -> {
+              rotatePeriodicIO.is_rotate_positional_control = true;
+              rotatePeriodicIO.rotate_target = Constants.Rotate.ROTATE_L1_POS;
+          }, this),
+          new WaitUntilCommand(() -> 
+              Math.abs(rotateEncoder.getPosition() - Constants.Rotate.ROTATE_L1_POS) < Constants.Rotate.ROTATE_POSITION_TOLERANCE
+          ),
+          new InstantCommand(() -> {
+              rotatePeriodicIO.is_rotate_positional_control = false;
+              m_RotateMotor.set(0.0);
+          }, this)
+      );
+    }
+
+    public Command rotateToL2() {
+      return new SequentialCommandGroup(
+          new InstantCommand(() -> {
+              rotatePeriodicIO.is_rotate_positional_control = true;
+              rotatePeriodicIO.rotate_target = Constants.Rotate.ROTATE_L2_POS;
+          }, this),
+          new WaitUntilCommand(() -> 
+              Math.abs(rotateEncoder.getPosition() - Constants.Rotate.ROTATE_L2_POS) < Constants.Rotate.ROTATE_POSITION_TOLERANCE
+          ),
+          new InstantCommand(() -> {
+              rotatePeriodicIO.is_rotate_positional_control = false;
+              m_RotateMotor.set(0.0);
+          }, this)
+      );
+    }
+
+    public Command rotateToL3() {
+      return new SequentialCommandGroup(
+          new InstantCommand(() -> {
+              rotatePeriodicIO.is_rotate_positional_control = true;
+              rotatePeriodicIO.rotate_target = Constants.Rotate.ROTATE_L3_POS;
+          }, this),
+          new WaitUntilCommand(() -> 
+              Math.abs(rotateEncoder.getPosition() - Constants.Rotate.ROTATE_L3_POS) < Constants.Rotate.ROTATE_POSITION_TOLERANCE
+          ),
+          new InstantCommand(() -> {
+              rotatePeriodicIO.is_rotate_positional_control = false;
+              m_RotateMotor.set(0.0);
+          }, this)
+      );
+    }
+
+    public Command rotateToClimb() {
+      return new SequentialCommandGroup(
+          new InstantCommand(() -> {
+              rotatePeriodicIO.is_rotate_positional_control = true;
+              rotatePeriodicIO.rotate_target = Constants.Rotate.ROTATE_CLIMB_POS;
+          }, this),
+          new WaitUntilCommand(() -> 
+              Math.abs(rotateEncoder.getPosition() - Constants.Rotate.ROTATE_CLIMB_POS) < Constants.Rotate.ROTATE_POSITION_TOLERANCE
+          ),
+          new InstantCommand(() -> {
+              rotatePeriodicIO.is_rotate_positional_control = false;
+              m_RotateMotor.set(0.0);
+          }, this)
+      );
   }
 
-  private void rotatetocollect() {
-    rotatePeriodicIO.is_rotate_positional_control = true;
-    rotatePeriodicIO.rotate_target = Constants.Rotate.ROTATE_COLLECT_POS;
-    rotatePeriodicIO.state = RotateState.COLLECT;
-  }
 
-  public Command rotateToL1() {
-    return run(() -> rotatetol1());
-  }
 
-  private void rotatetol1() {
-    rotatePeriodicIO.is_rotate_positional_control = true;
-    rotatePeriodicIO.rotate_target = Constants.Rotate.ROTATE_L1_POS;
-    rotatePeriodicIO.state = RotateState.L1;
-  }
 
-  public Command rotateToL2() {
-    return run(() -> rotatetol2());
-  }
+  // public Command rotateToCollect() {
+  //   return run(() -> rotatetocollect());
+  // }
 
-  private void rotatetol2() {
-    rotatePeriodicIO.is_rotate_positional_control = true;
-    rotatePeriodicIO.rotate_target = Constants.Rotate.ROTATE_L2_POS;
-    rotatePeriodicIO.state = RotateState.L2;
-  }
+  // private void rotatetocollect() {
+  //   rotatePeriodicIO.is_rotate_positional_control = true;
+  //   rotatePeriodicIO.rotate_target = Constants.Rotate.ROTATE_COLLECT_POS;
+  //   rotatePeriodicIO.state = RotateState.COLLECT;
+  // }
 
-  public Command rotateToL3() {
-    return run(() -> rotatetol3());
-  }
+  // public Command rotateToL1() {
+  //   return run(() -> rotatetol1());
+  // }
 
-  private void rotatetol3() {
-    rotatePeriodicIO.is_rotate_positional_control = true;
-    rotatePeriodicIO.rotate_target = Constants.Rotate.ROTATE_L3_POS;
-    rotatePeriodicIO.state = RotateState.L3;
-  }
+  // private void rotatetol1() {
+  //   rotatePeriodicIO.is_rotate_positional_control = true;
+  //   rotatePeriodicIO.rotate_target = Constants.Rotate.ROTATE_L1_POS;
+  //   rotatePeriodicIO.state = RotateState.L1;
+  // }
 
-  public Command rotateToClimb() {
-    return run(() -> rotatetoclimb());
-  }
+  // public Command rotateToL2() {
+  //   return run(() -> rotatetol2());
+  // }
 
-  private void rotatetoclimb() {
-    rotatePeriodicIO.is_rotate_positional_control = true;
-    rotatePeriodicIO.rotate_target = Constants.Rotate.ROTATE_CLIMB_POS;
-    rotatePeriodicIO.state = RotateState.CLIMB;
-  }
+  // private void rotatetol2() {
+  //   rotatePeriodicIO.is_rotate_positional_control = true;
+  //   rotatePeriodicIO.rotate_target = Constants.Rotate.ROTATE_L2_POS;
+  //   rotatePeriodicIO.state = RotateState.L2;
+  // }
+
+  // public Command rotateToL3() {
+  //   return run(() -> rotatetol3());
+  // }
+
+  // private void rotatetol3() {
+  //   rotatePeriodicIO.is_rotate_positional_control = true;
+  //   rotatePeriodicIO.rotate_target = Constants.Rotate.ROTATE_L3_POS;
+  //   rotatePeriodicIO.state = RotateState.L3;
+  // }
+
+  // public Command rotateToClimb() {
+  //   return run(() -> rotatetoclimb());
+  // }
+
+  // private void rotatetoclimb() {
+  //   rotatePeriodicIO.is_rotate_positional_control = true;
+  //   rotatePeriodicIO.rotate_target = Constants.Rotate.ROTATE_CLIMB_POS;
+  //   rotatePeriodicIO.state = RotateState.CLIMB;
+  // }
        
   
 }
