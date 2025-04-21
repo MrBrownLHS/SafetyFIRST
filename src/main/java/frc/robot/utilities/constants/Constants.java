@@ -18,7 +18,7 @@ public class Constants {
         public static final double LIFT_kI = 0.0;
         public static final double LIFT_kD = 0.0;
         public static final double LIFT_kIZone = 5.0;
-        public static final double LIFT_kG = 0.5;
+        public static final double LIFT_kG = 0.0;
 
         public static final double LIFT_MAX_VELOCITY = 20.0; 
         public static final double LIFT_MAX_ACCELERATION = 20.0; 
