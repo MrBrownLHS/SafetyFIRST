@@ -71,7 +71,7 @@ public class RobotContainer {
   private final MoveArmToL1 armL1 = new MoveArmToL1(armLift, armPivot, armRotate);
   private final MoveArmToL2 armL2 = new MoveArmToL2(armLift, armPivot, armRotate);
   private final MoveArmToL3 armL3 = new MoveArmToL3(armLift, armPivot, armRotate);
-  private final MoveArmToClimb armStart = new MoveArmToClimb(armLift, armPivot, armRotate);
+  private final MoveArmToClimb armClimb = new MoveArmToClimb(armLift, armPivot, armRotate);
   
 
     private final SlewRateLimiter translationLimiter = new SlewRateLimiter(2.9);
@@ -156,19 +156,19 @@ public class RobotContainer {
       CopilotCommandController.axisMagnitudeGreaterThan(3, 0.5).whileTrue(coralCollector.CoralOut()
       );
 
-      CopilotCommandController.a().onTrue(armCollect
+      CopilotCommandController.a().onTrue(armL1
       );
 
-      CopilotCommandController.b().onTrue(armL1
+      CopilotCommandController.b().onTrue(armL2
       );
 
-      CopilotCommandController.x().onTrue(armL2
+      CopilotCommandController.x().onTrue(armL3
       );
 
-      CopilotCommandController.y().onTrue(armL3
+      CopilotCommandController.y().onTrue(armClimb
       );
 
-      CopilotCommandController.pov(0).onTrue(armStart
+      CopilotCommandController.pov(0).onTrue(armCollect
       );
 
       // collectorHead.setDefaultCommand(collectorHead.ArticulateCoralCollector(() -> CopilotCommandController.getRightY())

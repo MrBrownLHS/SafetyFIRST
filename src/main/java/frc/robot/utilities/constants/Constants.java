@@ -14,21 +14,21 @@ public class Constants {
 
     public static final class Lift {
         public static final int LIFT_MOTOR_ID = 13;
-        public static final double LIFT_kP = 0.15;
+        public static final double LIFT_kP = 0.2;
         public static final double LIFT_kI = 0.0;
         public static final double LIFT_kD = 0.0;
         public static final double LIFT_kIZone = 5.0;
-        public static final double LIFT_kG = 0.5;
+        public static final double LIFT_kG = 1.5;
 
         public static final double LIFT_MAX_VELOCITY = 10.0; 
         public static final double LIFT_MAX_ACCELERATION = 20.0; 
         public static final double LIFT_POSITION_TOLERANCE = 0.5; 
 
         public static final double LIFT_COLLECT_POS = 0.0;
-        public static final double LIFT_L1_POS = -10.0;
-        public static final double LIFT_L2_POS = -15.0;
-        public static final double LIFT_L3_POS = -18.0;
-        public static final double LIFT_CLIMB_POS = -5.0;
+        public static final double LIFT_L1_POS = -20.0;
+        public static final double LIFT_L2_POS = -40.0;
+        public static final double LIFT_L3_POS = -65.0;
+        public static final double LIFT_CLIMB_POS = -75.0;
         public static final double LIFT_GEAR_RATIO = 1.0;
         public static final double LIFT_COG_DIAMETER_INCHES = 2.0;
         public static final double LIFT_ENCODER_TO_INCHES = (Math.PI * LIFT_COG_DIAMETER_INCHES) / 360.0 / LIFT_GEAR_RATIO;
@@ -86,8 +86,8 @@ public class Constants {
              
     public static final class MotorConstants {
         public static final double VOLTAGE_COMPENSATION = 12.0;
-        public static final int CURRENT_LIMIT_NEO = 25;
-        public static final int CURRENT_THRESHOLD_NEO = 40;
+        public static final int CURRENT_LIMIT_NEO = 40;
+        public static final int CURRENT_THRESHOLD_NEO = 60;
         public static final double CURRENT_THRESHOLD_TIME_NEO = 0.1;
         public static final int MAX_CURRENT_LIMIT_NEO = 60;
         public static final boolean ENABLE_CURRENT_LIMIT_NEO = true;
