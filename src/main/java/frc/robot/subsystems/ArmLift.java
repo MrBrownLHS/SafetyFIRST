@@ -135,7 +135,7 @@ public class ArmLift extends SubsystemBase {
     }
 
     public void stopLift() {
-        liftPeriodicIO.is_lift_positional_control = false;
+        liftPeriodicIO.is_lift_positional_control = true;
         liftPeriodicIO.lift_power = 0.0;
         
         m_LiftMotor.set(0.0);
