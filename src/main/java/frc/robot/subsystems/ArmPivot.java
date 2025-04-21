@@ -5,7 +5,6 @@ import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
@@ -156,85 +155,124 @@ public class ArmPivot extends SubsystemBase {
         pivotPeriodicIO.pivot_power = power;
     }
 
-    public Command pivotToCollect() {
+    private Command pivotToPosition(double targetPosition, PivotState state) {
         return new SequentialCommandGroup(
             new InstantCommand(() -> {
                 pivotPeriodicIO.is_pivot_positional_control = true;
-                pivotPeriodicIO.pivot_target = Constants.Pivot.PIVOT_COLLECT_POS;
+                pivotPeriodicIO.pivot_target = targetPosition;
+                pivotPeriodicIO.state = state;
             }, this),
             new WaitUntilCommand(() -> 
-                Math.abs(pivotEncoder.getPosition() - Constants.Pivot.PIVOT_COLLECT_POS) < Constants.Pivot.PIVOT_POSITION_TOLERANCE
-            ),
-            new InstantCommand(() -> {
-                pivotPeriodicIO.is_pivot_positional_control = false;
-                m_PivotMotor.set(0.0);
-            }, this)
+                Math.abs(pivotEncoder.getPosition() - targetPosition) < Constants.Pivot.PIVOT_POSITION_TOLERANCE
+            ).withTimeout(5.0),
+            new InstantCommand(this::stopPivot, this)
         );
     }
 
-    public Command pivotToL1() {
-        return new SequentialCommandGroup(
-            new InstantCommand(() -> {
-                pivotPeriodicIO.is_pivot_positional_control = true;
-                pivotPeriodicIO.pivot_target = Constants.Pivot.PIVOT_L1_POS;
-            }, this),
-            new WaitUntilCommand(() -> 
-                Math.abs(pivotEncoder.getPosition() - Constants.Pivot.PIVOT_L1_POS) < Constants.Pivot.PIVOT_POSITION_TOLERANCE
-            ),
-            new InstantCommand(() -> {
-                pivotPeriodicIO.is_pivot_positional_control = false;
-                m_PivotMotor.set(0.0);
-            }, this)
-        );
+    public Command pivotToCollect() {
+        return pivotToPosition(Constants.Pivot.PIVOT_COLLECT_POS, PivotState.COLLECT);
     }
     
+    public Command pivotToL1() {
+        return pivotToPosition(Constants.Pivot.PIVOT_L1_POS, PivotState.L1);
+    }
+
     public Command pivotToL2() {
-        return new SequentialCommandGroup(
-            new InstantCommand(() -> {
-                pivotPeriodicIO.is_pivot_positional_control = true;
-                pivotPeriodicIO.pivot_target = Constants.Pivot.PIVOT_L2_POS;
-            }, this),
-            new WaitUntilCommand(() -> 
-                Math.abs(pivotEncoder.getPosition() - Constants.Pivot.PIVOT_L2_POS) < Constants.Pivot.PIVOT_POSITION_TOLERANCE
-            ),
-            new InstantCommand(() -> {
-                pivotPeriodicIO.is_pivot_positional_control = false;
-                m_PivotMotor.set(0.0);
-            }, this)
-        );
+        return pivotToPosition(Constants.Pivot.PIVOT_L2_POS, PivotState.L2);
     }
 
     public Command pivotToL3() {
-        return new SequentialCommandGroup(
-            new InstantCommand(() -> {
-                pivotPeriodicIO.is_pivot_positional_control = true;
-                pivotPeriodicIO.pivot_target = Constants.Pivot.PIVOT_L3_POS;
-            }, this),
-            new WaitUntilCommand(() -> 
-                Math.abs(pivotEncoder.getPosition() - Constants.Pivot.PIVOT_L3_POS) < Constants.Pivot.PIVOT_POSITION_TOLERANCE
-            ),
-            new InstantCommand(() -> {
-                pivotPeriodicIO.is_pivot_positional_control = false;
-                m_PivotMotor.set(0.0);
-            }, this)
-        );
+        return pivotToPosition(Constants.Pivot.PIVOT_L3_POS, PivotState.L3);
     }
 
     public Command pivotToClimb() {
-        return new SequentialCommandGroup(
-            new InstantCommand(() -> {
-                pivotPeriodicIO.is_pivot_positional_control = true;
-                pivotPeriodicIO.pivot_target = Constants.Pivot.PIVOT_CLIMB_POS;
-            }, this),
-            new WaitUntilCommand(() -> 
-                Math.abs(pivotEncoder.getPosition() - Constants.Pivot.PIVOT_CLIMB_POS) < Constants.Pivot.PIVOT_POSITION_TOLERANCE
-            ),
-            new InstantCommand(() -> {
-                pivotPeriodicIO.is_pivot_positional_control = false;
-                m_PivotMotor.set(0.0);
-            }, this)
-        );
+        return pivotToPosition(Constants.Pivot.PIVOT_CLIMB_POS, PivotState.CLIMB);
     }
+
+    // public Command pivotToCollect() {
+    //     return new SequentialCommandGroup(
+    //         new InstantCommand(() -> {
+    //             pivotPeriodicIO.is_pivot_positional_control = true;
+    //             pivotPeriodicIO.pivot_target = Constants.Pivot.PIVOT_COLLECT_POS;
+    //             pivotPeriodicIO.state = PivotState.COLLECT;
+    //         }, this),
+    //         new WaitUntilCommand(() -> 
+    //             Math.abs(pivotEncoder.getPosition() - Constants.Pivot.PIVOT_COLLECT_POS) < Constants.Pivot.PIVOT_POSITION_TOLERANCE
+    //         ),
+    //         new InstantCommand(() -> {
+    //             pivotPeriodicIO.is_pivot_positional_control = false;
+    //             m_PivotMotor.set(0.0);
+    //         }, this)
+    //     );
+    // }
+
+    // public Command pivotToL1() {
+    //     return new SequentialCommandGroup(
+    //         new InstantCommand(() -> {
+    //             pivotPeriodicIO.is_pivot_positional_control = true;
+    //             pivotPeriodicIO.pivot_target = Constants.Pivot.PIVOT_L1_POS;
+    //             pivotPeriodicIO.state = PivotState.L1;
+    //         }, this),
+    //         new WaitUntilCommand(() -> 
+    //             Math.abs(pivotEncoder.getPosition() - Constants.Pivot.PIVOT_L1_POS) < Constants.Pivot.PIVOT_POSITION_TOLERANCE
+    //         ),
+    //         new InstantCommand(() -> {
+    //             pivotPeriodicIO.is_pivot_positional_control = false;
+    //             m_PivotMotor.set(0.0);
+    //         }, this)
+    //     );
+    // }
+    
+    // public Command pivotToL2() {
+    //     return new SequentialCommandGroup(
+    //         new InstantCommand(() -> {
+    //             pivotPeriodicIO.is_pivot_positional_control = true;
+    //             pivotPeriodicIO.pivot_target = Constants.Pivot.PIVOT_L2_POS;
+    //             pivotPeriodicIO.state = PivotState.L2;
+    //         }, this),
+    //         new WaitUntilCommand(() -> 
+    //             Math.abs(pivotEncoder.getPosition() - Constants.Pivot.PIVOT_L2_POS) < Constants.Pivot.PIVOT_POSITION_TOLERANCE
+    //         ),
+    //         new InstantCommand(() -> {
+    //             pivotPeriodicIO.is_pivot_positional_control = false;
+    //             m_PivotMotor.set(0.0);
+    //         }, this)
+    //     );
+    // }
+
+    // public Command pivotToL3() {
+    //     return new SequentialCommandGroup(
+    //         new InstantCommand(() -> {
+    //             pivotPeriodicIO.is_pivot_positional_control = true;
+    //             pivotPeriodicIO.pivot_target = Constants.Pivot.PIVOT_L3_POS;
+    //             pivotPeriodicIO.state = PivotState.L3;
+    //         }, this),
+    //         new WaitUntilCommand(() -> 
+    //             Math.abs(pivotEncoder.getPosition() - Constants.Pivot.PIVOT_L3_POS) < Constants.Pivot.PIVOT_POSITION_TOLERANCE
+    //         ),
+    //         new InstantCommand(() -> {
+    //             pivotPeriodicIO.is_pivot_positional_control = false;
+    //             m_PivotMotor.set(0.0);
+    //         }, this)
+    //     );
+    // }
+
+    // public Command pivotToClimb() {
+    //     return new SequentialCommandGroup(
+    //         new InstantCommand(() -> {
+    //             pivotPeriodicIO.is_pivot_positional_control = true;
+    //             pivotPeriodicIO.pivot_target = Constants.Pivot.PIVOT_CLIMB_POS;
+    //             pivotPeriodicIO.state = PivotState.CLIMB;
+    //         }, this),
+    //         new WaitUntilCommand(() -> 
+    //             Math.abs(pivotEncoder.getPosition() - Constants.Pivot.PIVOT_CLIMB_POS) < Constants.Pivot.PIVOT_POSITION_TOLERANCE
+    //         ),
+    //         new InstantCommand(() -> {
+    //             pivotPeriodicIO.is_pivot_positional_control = false;
+    //             m_PivotMotor.set(0.0);
+    //         }, this)
+    //     );
+    // }
 
    
 

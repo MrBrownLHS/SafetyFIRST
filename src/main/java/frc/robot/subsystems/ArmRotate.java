@@ -94,183 +94,191 @@ public class ArmRotate extends SubsystemBase {
 
     RotateState state = RotateState.COLLECT;
   }
-
-    
-  // public RunCommand ArticulateCoralCollector(DoubleSupplier joystickInput) {
-  //     return new RunCommand(() -> {
-  //       double rawInput = joystickInput.getAsDouble();
-  //       double adjustedInput = (Math.abs(rawInput) > Constants.CollectorArmConstants.DEADBAND) ? rawInput : 0.0;
-  //       double limitedInput = articulateCollectorRateLimiter.calculate(adjustedInput);
-  //       m_CoralArticulate.set(limitedInput);
-  //     }, this);
-  //   }
-  
-  // public RunCommand ArticulateCoralCollector(DoubleSupplier joystickInput) {
-  //   return new RunCommand(() -> {
-  //       double rawInput = joystickInput.getAsDouble();
-  //       double adjustedInput = (Math.abs(rawInput) > 0.1)? rawInput : 0.0;
-
-  //       // If adjusted input is 0.0, explicitly stop the motor
-  //       if (adjustedInput == 0.0) {
-  //           m_CoralArticulate.set(0.0);
-  //       } else {
-  //           double limitedInput = articulateCollectorRateLimiter.calculate(adjustedInput);
-  //           m_CoralArticulate.set(limitedInput);
-  //       }
-  //   }, this);
-  // }
-
-  // public Command CollectorHeadStop() {
-  //   return new InstantCommand(() -> {
-  //     m_CoralArticulate.set(0.0);
-  //   }, this);
-  //   }
-  
+ 
 
   @Override
-  public void periodic() {
-    SmartDashboard.putNumber("Arm Rotate Position", rotateEncoder.getPosition());
-    SmartDashboard.putBoolean("Rotate Positional Control", rotatePeriodicIO.is_rotate_positional_control);
-    SmartDashboard.putNumber("Rotate Target Position", rotatePeriodicIO.rotate_target);
-    SmartDashboard.putString("Rotate State", rotatePeriodicIO.state.toString());
+    public void periodic() {
+      SmartDashboard.putNumber("Arm Rotate Position", rotateEncoder.getPosition());
+      SmartDashboard.putBoolean("Rotate Positional Control", rotatePeriodicIO.is_rotate_positional_control);
+      SmartDashboard.putNumber("Rotate Target Position", rotatePeriodicIO.rotate_target);
+      SmartDashboard.putString("Rotate State", rotatePeriodicIO.state.toString());
 
-    double currentTime = Timer.getFPGATimestamp();
-    double deltaTime = currentTime - prevUpdateTime;
-    prevUpdateTime = currentTime;
-    if(rotatePeriodicIO.is_rotate_positional_control) {
-        rotateGoalState.position = rotatePeriodicIO.rotate_target;
+      double currentTime = Timer.getFPGATimestamp();
+      double deltaTime = currentTime - prevUpdateTime;
+      prevUpdateTime = currentTime;
+      if(rotatePeriodicIO.is_rotate_positional_control) {
+          rotateGoalState.position = rotatePeriodicIO.rotate_target;
 
-        prevUpdateTime = currentTime;
-        rotateCurrentState = rotateProfile.calculate(deltaTime, rotateCurrentState, rotateGoalState);
+          prevUpdateTime = currentTime;
+          rotateCurrentState = rotateProfile.calculate(deltaTime, rotateCurrentState, rotateGoalState);
 
-        rotatePIDController.setReference(
-            rotateCurrentState.position, 
-            SparkBase.ControlType.kPosition,
-            ClosedLoopSlot.kSlot0,
-            Constants.Rotate.ROTATE_kG,
-            ArbFFUnits.kVoltage);
-    } else {
-        rotateCurrentState.position = rotateEncoder.getPosition();
-        rotateCurrentState.velocity = 0.0;
-        m_RotateMotor.set(rotatePeriodicIO.rotate_power
-        );
+          rotatePIDController.setReference(
+              rotateCurrentState.position, 
+              SparkBase.ControlType.kPosition,
+              ClosedLoopSlot.kSlot0,
+              Constants.Rotate.ROTATE_kG,
+              ArbFFUnits.kVoltage);
+      } else {
+          rotateCurrentState.position = rotateEncoder.getPosition();
+          rotateCurrentState.velocity = 0.0;
+          m_RotateMotor.set(rotatePeriodicIO.rotate_power
+          );
+      }
+      publicRotateState = rotatePeriodicIO.state; // Update publicRotateState with the current state
+      publicRotateState = rotatePeriodicIO.state;
+      
     }
-    publicRotateState = rotatePeriodicIO.state; // Update publicRotateState with the current state
-    publicRotateState = rotatePeriodicIO.state;
-    
-  }
 
-  public void writePeriodicOutputs() {
+    public void writePeriodicOutputs() {
 
-  }
+    }
 
-  public void stopRotate() {
-    rotatePeriodicIO.is_rotate_positional_control = false;
-    rotatePeriodicIO.rotate_power = 0.0;
+    public void stopRotate() {
+      rotatePeriodicIO.is_rotate_positional_control = false;
+      rotatePeriodicIO.rotate_power = 0.0;
 
-    m_RotateMotor.set(0.0);
-  }
+      m_RotateMotor.set(0.0);
+    }
 
-  public Command rotateReset() {
-    return run (() -> rotateEncoder.setPosition(0.0));
-  }
+    public Command rotateReset() {
+      return run (() -> rotateEncoder.setPosition(0.0));
+    }
 
-  public Command getRotateState() {
-    return run(() -> getrotatestate());
-  }
+    public Command getRotateState() {
+      return run(() -> getrotatestate());
+    }
 
-  private RotateState getrotatestate() {
-    return rotatePeriodicIO.state;
-  }
+    private RotateState getrotatestate() {
+      return rotatePeriodicIO.state;
+    }
 
-  public Command setRotatePower(double power) {
-    return run (() -> setrotatepower(power));
-  }
+    public Command setRotatePower(double power) {
+      return run (() -> setrotatepower(power));
+    }
 
-  private void setrotatepower(double power) {
-    rotatePeriodicIO.is_rotate_positional_control = false;
-    rotatePeriodicIO.rotate_power = power;
-  }
+    private void setrotatepower(double power) {
+      rotatePeriodicIO.is_rotate_positional_control = false;
+      rotatePeriodicIO.rotate_power = power;
+    }
+
+    private Command rotateToPosition(double tartgetPosition, RotateState state) {
+      return new SequentialCommandGroup(
+          new InstantCommand(() -> {
+              rotatePeriodicIO.is_rotate_positional_control = true;
+              rotatePeriodicIO.rotate_target = tartgetPosition;
+              rotatePeriodicIO.state = state;
+          }, this),
+          new WaitUntilCommand(() -> 
+              Math.abs(rotateEncoder.getPosition() - tartgetPosition) < Constants.Rotate.ROTATE_POSITION_TOLERANCE
+          ).withTimeout(5.0),
+          new InstantCommand(this::stopRotate, this)
+      );
+    }
 
     public Command rotateToCollect() {
-        return new SequentialCommandGroup(
-            new InstantCommand(() -> {
-                rotatePeriodicIO.is_rotate_positional_control = true;
-                rotatePeriodicIO.rotate_target = Constants.Rotate.ROTATE_COLLECT_POS;
-            }, this),
-            new WaitUntilCommand(() -> 
-                Math.abs(rotateEncoder.getPosition() - Constants.Rotate.ROTATE_COLLECT_POS) < Constants.Rotate.ROTATE_POSITION_TOLERANCE
-            ),
-            new InstantCommand(() -> {
-                rotatePeriodicIO.is_rotate_positional_control = false;
-                m_RotateMotor.set(0.0);
-            }, this)
-        );
+      return rotateToPosition(Constants.Rotate.ROTATE_COLLECT_POS, RotateState.COLLECT);
     }
 
     public Command rotateToL1() {
-      return new SequentialCommandGroup(
-          new InstantCommand(() -> {
-              rotatePeriodicIO.is_rotate_positional_control = true;
-              rotatePeriodicIO.rotate_target = Constants.Rotate.ROTATE_L1_POS;
-          }, this),
-          new WaitUntilCommand(() -> 
-              Math.abs(rotateEncoder.getPosition() - Constants.Rotate.ROTATE_L1_POS) < Constants.Rotate.ROTATE_POSITION_TOLERANCE
-          ),
-          new InstantCommand(() -> {
-              rotatePeriodicIO.is_rotate_positional_control = false;
-              m_RotateMotor.set(0.0);
-          }, this)
-      );
+      return rotateToPosition(Constants.Rotate.ROTATE_L1_POS, RotateState.L1);
     }
 
     public Command rotateToL2() {
-      return new SequentialCommandGroup(
-          new InstantCommand(() -> {
-              rotatePeriodicIO.is_rotate_positional_control = true;
-              rotatePeriodicIO.rotate_target = Constants.Rotate.ROTATE_L2_POS;
-          }, this),
-          new WaitUntilCommand(() -> 
-              Math.abs(rotateEncoder.getPosition() - Constants.Rotate.ROTATE_L2_POS) < Constants.Rotate.ROTATE_POSITION_TOLERANCE
-          ),
-          new InstantCommand(() -> {
-              rotatePeriodicIO.is_rotate_positional_control = false;
-              m_RotateMotor.set(0.0);
-          }, this)
-      );
+      return rotateToPosition(Constants.Rotate.ROTATE_L2_POS, RotateState.L2);
     }
 
     public Command rotateToL3() {
-      return new SequentialCommandGroup(
-          new InstantCommand(() -> {
-              rotatePeriodicIO.is_rotate_positional_control = true;
-              rotatePeriodicIO.rotate_target = Constants.Rotate.ROTATE_L3_POS;
-          }, this),
-          new WaitUntilCommand(() -> 
-              Math.abs(rotateEncoder.getPosition() - Constants.Rotate.ROTATE_L3_POS) < Constants.Rotate.ROTATE_POSITION_TOLERANCE
-          ),
-          new InstantCommand(() -> {
-              rotatePeriodicIO.is_rotate_positional_control = false;
-              m_RotateMotor.set(0.0);
-          }, this)
-      );
+      return rotateToPosition(Constants.Rotate.ROTATE_L3_POS, RotateState.L3);
     }
 
     public Command rotateToClimb() {
-      return new SequentialCommandGroup(
-          new InstantCommand(() -> {
-              rotatePeriodicIO.is_rotate_positional_control = true;
-              rotatePeriodicIO.rotate_target = Constants.Rotate.ROTATE_CLIMB_POS;
-          }, this),
-          new WaitUntilCommand(() -> 
-              Math.abs(rotateEncoder.getPosition() - Constants.Rotate.ROTATE_CLIMB_POS) < Constants.Rotate.ROTATE_POSITION_TOLERANCE
-          ),
-          new InstantCommand(() -> {
-              rotatePeriodicIO.is_rotate_positional_control = false;
-              m_RotateMotor.set(0.0);
-          }, this)
-      );
-  }
+      return rotateToPosition(Constants.Rotate.ROTATE_CLIMB_POS, RotateState.CLIMB);
+    }
+
+  //   public Command rotateToCollect() {
+  //       return new SequentialCommandGroup(
+  //           new InstantCommand(() -> {
+  //               rotatePeriodicIO.is_rotate_positional_control = true;
+  //               rotatePeriodicIO.rotate_target = Constants.Rotate.ROTATE_COLLECT_POS;
+  //               rotatePeriodicIO.state = RotateState.COLLECT;
+  //           }, this),
+  //           new WaitUntilCommand(() -> 
+  //               Math.abs(rotateEncoder.getPosition() - Constants.Rotate.ROTATE_COLLECT_POS) < Constants.Rotate.ROTATE_POSITION_TOLERANCE
+  //           ),
+  //           new InstantCommand(() -> {
+  //               rotatePeriodicIO.is_rotate_positional_control = false;
+  //               m_RotateMotor.set(0.0);
+  //           }, this)
+  //       );
+  //   }
+
+  //   public Command rotateToL1() {
+  //     return new SequentialCommandGroup(
+  //         new InstantCommand(() -> {
+  //             rotatePeriodicIO.is_rotate_positional_control = true;
+  //             rotatePeriodicIO.rotate_target = Constants.Rotate.ROTATE_L1_POS;
+  //             rotatePeriodicIO.state = RotateState.L1;
+  //         }, this),
+  //         new WaitUntilCommand(() -> 
+  //             Math.abs(rotateEncoder.getPosition() - Constants.Rotate.ROTATE_L1_POS) < Constants.Rotate.ROTATE_POSITION_TOLERANCE
+  //         ),
+  //         new InstantCommand(() -> {
+  //             rotatePeriodicIO.is_rotate_positional_control = false;
+  //             m_RotateMotor.set(0.0);
+  //         }, this)
+  //     );
+  //   }
+
+  //   public Command rotateToL2() {
+  //     return new SequentialCommandGroup(
+  //         new InstantCommand(() -> {
+  //             rotatePeriodicIO.is_rotate_positional_control = true;
+  //             rotatePeriodicIO.rotate_target = Constants.Rotate.ROTATE_L2_POS;
+  //             rotatePeriodicIO.state = RotateState.L2;
+  //         }, this),
+  //         new WaitUntilCommand(() -> 
+  //             Math.abs(rotateEncoder.getPosition() - Constants.Rotate.ROTATE_L2_POS) < Constants.Rotate.ROTATE_POSITION_TOLERANCE
+  //         ),
+  //         new InstantCommand(() -> {
+  //             rotatePeriodicIO.is_rotate_positional_control = false;
+  //             m_RotateMotor.set(0.0);
+  //         }, this)
+  //     );
+  //   }
+
+  //   public Command rotateToL3() {
+  //     return new SequentialCommandGroup(
+  //         new InstantCommand(() -> {
+  //             rotatePeriodicIO.is_rotate_positional_control = true;
+  //             rotatePeriodicIO.rotate_target = Constants.Rotate.ROTATE_L3_POS;
+  //             rotatePeriodicIO.state = RotateState.L3;
+  //         }, this),
+  //         new WaitUntilCommand(() -> 
+  //             Math.abs(rotateEncoder.getPosition() - Constants.Rotate.ROTATE_L3_POS) < Constants.Rotate.ROTATE_POSITION_TOLERANCE
+  //         ),
+  //         new InstantCommand(() -> {
+  //             rotatePeriodicIO.is_rotate_positional_control = false;
+  //             m_RotateMotor.set(0.0);
+  //         }, this)
+  //     );
+  //   }
+
+  //   public Command rotateToClimb() {
+  //     return new SequentialCommandGroup(
+  //         new InstantCommand(() -> {
+  //             rotatePeriodicIO.is_rotate_positional_control = true;
+  //             rotatePeriodicIO.rotate_target = Constants.Rotate.ROTATE_CLIMB_POS;
+  //             rotatePeriodicIO.state = RotateState.CLIMB;
+  //         }, this),
+  //         new WaitUntilCommand(() -> 
+  //             Math.abs(rotateEncoder.getPosition() - Constants.Rotate.ROTATE_CLIMB_POS) < Constants.Rotate.ROTATE_POSITION_TOLERANCE
+  //         ),
+  //         new InstantCommand(() -> {
+  //             rotatePeriodicIO.is_rotate_positional_control = false;
+  //             m_RotateMotor.set(0.0);
+  //         }, this)
+  //     );
+  // }
 
 
 
