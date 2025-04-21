@@ -159,6 +159,7 @@ public class ArmPivot extends SubsystemBase {
     private void setpivotpower(double power) {
         pivotPeriodicIO.is_pivot_positional_control = false;
         pivotPeriodicIO.pivot_power = power;
+        m_PivotMotor.set(power);
     }
 
     private Command pivotToPosition(double targetPosition, PivotState state) {

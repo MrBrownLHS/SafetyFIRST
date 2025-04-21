@@ -163,6 +163,7 @@ public class ArmRotate extends SubsystemBase {
     private void setrotatepower(double power) {
       rotatePeriodicIO.is_rotate_positional_control = false;
       rotatePeriodicIO.rotate_power = power;
+      m_RotateMotor.set(power);
     }
 
     private Command rotateToPosition(double tartgetPosition, RotateState state) {

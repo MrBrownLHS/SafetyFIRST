@@ -129,7 +129,9 @@ public class ArmLift extends SubsystemBase {
                 SparkBase.ControlType.kPosition,
                ClosedLoopSlot.kSlot0,
                 Constants.Lift.LIFT_kG,
-                ArbFFUnits.kVoltage);
+                ArbFFUnits.kVoltage
+             );
+            }
         } else {
             liftCurrentState.position = liftEncoder.getPosition();
             liftCurrentState.velocity = 0.0;
@@ -170,6 +172,7 @@ public class ArmLift extends SubsystemBase {
     private void setliftpower(double power) {
         liftPeriodicIO.is_lift_positional_control = false;
         liftPeriodicIO.lift_power = power;
+        m_LiftMotor.set(power);
     }
 //refining code with a helper method - needs testing.
     private Command liftToPosition(double targetPosition, LiftState state) {

@@ -72,11 +72,15 @@ public class RobotContainer {
   private final MoveArmToL2 armL2 = new MoveArmToL2(armLift, armPivot, armRotate);
   private final MoveArmToL3 armL3 = new MoveArmToL3(armLift, armPivot, armRotate);
   private final MoveArmToClimb armClimb = new MoveArmToClimb(armLift, armPivot, armRotate);
+
+  private final SlewRateLimiter liftSlewRateLimiter = new SlewRateLimiter(2.0); // 2 units/sec
+  private final SlewRateLimiter rotateSlewRateLimiter = new SlewRateLimiter(2.0); // 2 units/sec
+  private final SlewRateLimiter pivotSlewRateLimiter = new SlewRateLimiter(2.0); // 2 units/sec
   
 
-    private final SlewRateLimiter translationLimiter = new SlewRateLimiter(2.9);
-    private final SlewRateLimiter strafeLimiter = new SlewRateLimiter(2.9);
-    private final SlewRateLimiter rotationLimiter = new SlewRateLimiter(2.9);
+  private final SlewRateLimiter translationLimiter = new SlewRateLimiter(2.9);
+  private final SlewRateLimiter strafeLimiter = new SlewRateLimiter(2.9);
+  private final SlewRateLimiter rotationLimiter = new SlewRateLimiter(2.9);
 
 
   public RobotContainer() {
@@ -93,7 +97,7 @@ public class RobotContainer {
 
         SmartDashboard.putData("Auto Mode", autoChooser);
         
-
+    
     resetHeading = new JoystickButton(DriverController, Constants.ControllerRawButtons.XboxController.Button.kY.value);
     robotCentric = new JoystickButton(DriverController, Constants.ControllerRawButtons.XboxController.Button.kX.value);
     slowDriveMode = new JoystickButton(DriverController, Constants.ControllerRawButtons.XboxController.Button.kRightBumper.value);
@@ -121,6 +125,13 @@ public class RobotContainer {
   configureBindings(); 
   }
 
+  private double applyDeadband(double value, double deadband) {
+    if (Math.abs(value) < deadband) {
+      return 0.0;
+    }
+    return Math.copySign((Math.abs(value) - deadband) / (1.0 - deadband), value);
+    
+  }
   private void configureBindings() {
    
   //Drive Controls
@@ -136,7 +147,7 @@ public class RobotContainer {
 
   //Algae Controls
     
-      algaeArticulate.setDefaultCommand(algaeArticulate.AlgaeUpDown(() -> CopilotCommandController.getLeftY())
+      algaeArticulate.setDefaultCommand(algaeArticulate.AlgaeUpDown(() -> CopilotCommandController.getLeftX())
       );
         
       CopilotCommandController.rightBumper().whileTrue(algaeClaw.ClawClose()
@@ -171,26 +182,26 @@ public class RobotContainer {
       CopilotCommandController.pov(0).onTrue(armCollect
       );
 
-      // collectorHead.setDefaultCommand(collectorHead.ArticulateCoralCollector(() -> CopilotCommandController.getRightY())
-      // );
-
   
   //Manual Arm Controls
-    new RunCommand(() -> armLift.setLiftPower(CopilotCommandController.getRightX()), armLift);
-    new RunCommand(() -> armRotate.setRotatePower(CopilotCommandController.getRightY()), armRotate);
-    new RunCommand(() -> armPivot.setPivotPower(CopilotCommandController.getLeftY()), armPivot);
-    // new JoystickButton(CoPilotController, Constants.ControllerRawButtons.XboxController.Button.kX.value)
-    //     .whileTrue(armPivot.SimplePivotBack());
-        
-    // new JoystickButton(CoPilotController, Constants.ControllerRawButtons.XboxController.Button.kY.value)
-    //     .whileTrue(armPivot.SimplePivotForward());
-    
-    // new JoystickButton(CoPilotController, Constants.ControllerRawButtons.XboxController.Button.kA.value)
-    //     .whileTrue(armLift.SimpleLiftUp());
-    
-    // new JoystickButton(CoPilotController, Constants.ControllerRawButtons.XboxController.Button.kB.value)
-    //     .whileTrue(armLift.SimpleLiftDown());
+    new RunCommand(
+      () -> armLift.setLiftPower(
+        applyDeadband(liftSlewRateLimiter.calculate(CopilotCommandController.getRightY()), 0.1)
+        ), 
+        armLift);
 
+    new RunCommand(
+      () -> armRotate.setRotatePower(
+        applyDeadband(rotateSlewRateLimiter.calculate(CopilotCommandController.getRightX()), 0.1)
+        ), 
+        armRotate);
+
+    new RunCommand(
+      () -> armPivot.setPivotPower(
+        applyDeadband(pivotSlewRateLimiter.calculate(CopilotCommandController.getLeftY()), 0.1)
+        ), 
+        armPivot);
+  
   //Climber Controls
     cageClimber.setDefaultCommand(
         cageClimber.CageClimbStop()
