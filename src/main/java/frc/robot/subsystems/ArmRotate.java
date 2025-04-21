@@ -46,14 +46,12 @@ public class ArmRotate extends SubsystemBase {
   private TrapezoidProfile.State rotateGoalState = new TrapezoidProfile.State();
   private double prevUpdateTime = Timer.getFPGATimestamp();
   
-  public void resetEncoder() {
-    rotateEncoder.setPosition(0.0);
-  }
+ 
 
   private ArmRotate() {
     super("ArmRotate");
 
-    resetEncoder();
+    
     rotatePeriodicIO = new PeriodicIO();
 
     SparkMaxConfig rotateMotorConfig = new SparkMaxConfig();
