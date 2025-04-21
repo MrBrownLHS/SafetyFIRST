@@ -86,7 +86,7 @@ public class ArmPivot extends SubsystemBase {
         double pivot_target = 0.0;
         double pivot_power = 0.0;
 
-        boolean is_pivot_positional_control = true;
+        boolean is_pivot_positional_control = false;
 
         PivotState state = PivotState.COLLECT;
     }

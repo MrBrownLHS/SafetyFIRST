@@ -14,13 +14,13 @@ public class Constants {
 
     public static final class Lift {
         public static final int LIFT_MOTOR_ID = 13;
-        public static final double LIFT_kP = 0.2;
+        public static final double LIFT_kP = 0.15;
         public static final double LIFT_kI = 0.0;
         public static final double LIFT_kD = 0.0;
         public static final double LIFT_kIZone = 5.0;
-        public static final double LIFT_kG = 1.5;
+        public static final double LIFT_kG = 1.0;
 
-        public static final double LIFT_MAX_VELOCITY = 15.0; 
+        public static final double LIFT_MAX_VELOCITY = 20.0; 
         public static final double LIFT_MAX_ACCELERATION = 20.0; 
         public static final double LIFT_POSITION_TOLERANCE = 1.0; 
 

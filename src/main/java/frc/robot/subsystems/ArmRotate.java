@@ -90,7 +90,7 @@ public class ArmRotate extends SubsystemBase {
     double rotate_target = 0.0;
     double rotate_power = 0.0;
 
-    boolean is_rotate_positional_control = true;
+    boolean is_rotate_positional_control = false;
 
     RotateState state = RotateState.COLLECT;
   }

@@ -60,6 +60,7 @@ public class ArmLift extends SubsystemBase {
 
         liftMotorConfig.idleMode(IdleMode.kBrake);
         liftMotorConfig.smartCurrentLimit(Constants.MotorConstants.CURRENT_LIMIT_NEO); //Reorganize Constants
+
        
         m_LiftMotor = new SparkMax(Constants.Lift.LIFT_MOTOR_ID, MotorType.kBrushless); //Reorganize Constants
         liftEncoder = m_LiftMotor.getEncoder();
@@ -135,7 +136,7 @@ public class ArmLift extends SubsystemBase {
     }
 
     public void stopLift() {
-        liftPeriodicIO.is_lift_positional_control = true;
+        liftPeriodicIO.is_lift_positional_control = false;
         liftPeriodicIO.lift_power = 0.0;
         
         m_LiftMotor.set(0.0);
