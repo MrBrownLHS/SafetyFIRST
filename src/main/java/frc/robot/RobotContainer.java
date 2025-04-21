@@ -35,7 +35,7 @@ import frc.robot.commands.MoveArmToL1;
 import frc.robot.commands.MoveArmToL2;
 import frc.robot.commands.MoveArmToL3;
 import frc.robot.commands.RunCoralCollector;
-import frc.robot.commands.MoveArmToStart;
+import frc.robot.commands.MoveArmToClimb;
 import frc.robot.subsystems.Camera;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 
@@ -53,10 +53,10 @@ public class RobotContainer {
   private final CageClimber cageClimber = new CageClimber();
   private final AlgaeArticulate algaeArticulate = new AlgaeArticulate();
   private final AlgaeClaw algaeClaw = new AlgaeClaw();
-  private final ArmRotate collectorHead = new ArmRotate();
   private final ArmIntake coralCollector = new ArmIntake();
   private final ArmLift armLift = ArmLift.getInstance();
   private final ArmPivot armPivot = ArmPivot.getInstance();
+  private final ArmRotate armRotate = ArmRotate.getInstance();
   
   private final int translationAxis;
   private final int strafeAxis;
@@ -71,7 +71,7 @@ public class RobotContainer {
   private final MoveArmToL1 armL1 = new MoveArmToL1(armLift, armPivot);
   private final MoveArmToL2 armL2 = new MoveArmToL2(armLift, armPivot);
   private final MoveArmToL3 armL3 = new MoveArmToL3(armLift, armPivot);
-  private final MoveArmToStart armStart = new MoveArmToStart(armLift, armPivot);
+  private final MoveArmToClimb armStart = new MoveArmToClimb(armLift, armPivot);
   
 
     private final SlewRateLimiter translationLimiter = new SlewRateLimiter(2.9);
@@ -171,12 +171,14 @@ public class RobotContainer {
       CopilotCommandController.pov(0).onTrue(armStart
       );
 
-      collectorHead.setDefaultCommand(collectorHead.ArticulateCoralCollector(() -> CopilotCommandController.getRightY())
-      );
+      // collectorHead.setDefaultCommand(collectorHead.ArticulateCoralCollector(() -> CopilotCommandController.getRightY())
+      // );
 
   
   //Manual Arm Controls
     new RunCommand(() -> armLift.setLiftPower(CopilotCommandController.getRightX()), armLift);
+    new RunCommand(() -> armRotate.setRotatePower(CopilotCommandController.getRightY()), armRotate);
+    new RunCommand(() -> armPivot.setPivotPower(CopilotCommandController.getLeftY()), armPivot);
     // new JoystickButton(CoPilotController, Constants.ControllerRawButtons.XboxController.Button.kX.value)
     //     .whileTrue(armPivot.SimplePivotBack());
         
@@ -206,7 +208,7 @@ public class RobotContainer {
       algaeClaw.StopClaw();
       armLift.stopLift();
       armPivot.stopPivot();
-      collectorHead.CollectorHeadStop();
+      armRotate.stopRotate();
       coralCollector.CollectCoralStop();
       }));
 

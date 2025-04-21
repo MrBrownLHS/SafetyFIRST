@@ -9,12 +9,12 @@ import frc.robot.subsystems.ArmLift;
 import frc.robot.subsystems.ArmPivot;
 
 
-public class MoveArmToStart extends SequentialCommandGroup {
+public class MoveArmToClimb extends SequentialCommandGroup {
   
-  public MoveArmToStart(ArmLift lift, ArmPivot pivot) {
+  public MoveArmToClimb(ArmLift lift, ArmPivot pivot) {
     addCommands(
-      lift.liftToStart(),
-      pivot.pivotToStart()
+      lift.liftToClimb(),
+      pivot.pivotToClimb()
     );
   }       
 }

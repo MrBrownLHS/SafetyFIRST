@@ -80,7 +80,8 @@ public class Constants {
         public static final int CORAL_LIMIT_SWITCH_PORT = 1;
         public static final double CORAL_INTAKE_SPEED = 0.25; 
         public static final double CORAL_OUTTAKE_SPEED = -0.25; 
-        public static final double CORAL_AUTO_RELEASE_SPEED = -0.25; 
+        public static final double CORAL_AUTO_RELEASE_SPEED = -0.25;
+        public static final double CORAL_INTAKE_RATE_LIMIT = 2.9; 
     }
              
     public static final class MotorConstants {

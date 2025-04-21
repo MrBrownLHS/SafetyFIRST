@@ -8,23 +8,12 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.revrobotics.spark.SparkMax;
-
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.DigitalInput;
-
-import java.util.function.DoubleSupplier;
-
-
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-
 import frc.robot.utilities.constants.Constants;
-
-import java.util.function.DoubleSupplier;
-
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
@@ -39,11 +28,10 @@ public class ArmIntake extends SubsystemBase {
 
  
     public ArmIntake() {
-      coralCollectorRateLimiter = new SlewRateLimiter(Constants.CoralIntakeConstants.CORAL_ARTICULATE_RATE_LIMIT);
-      m_CoralCollect = new SparkMax(Constants.CoralIntakeConstants.CORAL_COLLECT_MOTOR_ID, MotorType.kBrushless);
-      coralCollectorRateLimiter = new SlewRateLimiter(Constants.CoralIntakeConstants.CORAL_ARTICULATE_RATE_LIMIT);
+      coralCollectorRateLimiter = new SlewRateLimiter(Constants.Intake.CORAL_INTAKE_RATE_LIMIT);
+      m_CoralCollect = new SparkMax(Constants.Intake.CORAL_INTAKE_MOTOR_ID, MotorType.kBrushless);
       coralCollectorMotorConfig = new SparkMaxConfig();
-      limitSwitch = new DigitalInput(Constants.CoralIntakeConstants.CORAL_LIMIT_SWITCH_PORT); // Initialize the limit switch
+      limitSwitch = new DigitalInput(Constants.Intake.CORAL_LIMIT_SWITCH_PORT); // Initialize the limit switch
 
       configureCoralCollectorMotor(m_CoralCollect, coralCollectorMotorConfig);
     }
@@ -91,7 +79,7 @@ public class ArmIntake extends SubsystemBase {
   
     public RunCommand AutoCollectCoral() {
       return new RunCommand(() -> {
-       m_CoralCollect.set(Constants.CoralIntakeConstants.CORAL_AUTO_RELEASE_SPEED);
+       m_CoralCollect.set(Constants.Intake.CORAL_AUTO_RELEASE_SPEED);
       }, this);
     }
 
