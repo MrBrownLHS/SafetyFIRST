@@ -183,7 +183,7 @@ public class ArmLift extends SubsystemBase {
             }, this),
             new WaitUntilCommand(() -> 
                 Math.abs(liftEncoder.getPosition() - targetPosition) < Constants.Lift.LIFT_POSITION_TOLERANCE
-            ).withTimeout(5.0),
+            ).withTimeout(10.0),
             new InstantCommand(this::stopLift, this)
         );
     }

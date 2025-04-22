@@ -14,7 +14,7 @@ public class Constants {
 
     public static final class Lift {
         public static final int LIFT_MOTOR_ID = 13;
-        public static final double LIFT_kP = 0.15;
+        public static final double LIFT_kP = 0.05;
         public static final double LIFT_kI = 0.0;
         public static final double LIFT_kD = 0.0;
         public static final double LIFT_kIZone = 5.0;
@@ -25,10 +25,10 @@ public class Constants {
         public static final double LIFT_POSITION_TOLERANCE = 1.0; 
 
         public static final double LIFT_COLLECT_POS = 0.0;
-        public static final double LIFT_L1_POS = -20.0;
-        public static final double LIFT_L2_POS = -40.0;
-        public static final double LIFT_L3_POS = -65.0;
-        public static final double LIFT_CLIMB_POS = -75.0;
+        public static final double LIFT_L1_POS = -30.0;
+        public static final double LIFT_L2_POS = -75.0;
+        public static final double LIFT_L3_POS = -280.0;
+        public static final double LIFT_CLIMB_POS = -10.0;
         public static final double LIFT_GEAR_RATIO = 1.0;
         public static final double LIFT_COG_DIAMETER_INCHES = 2.0;
         public static final double LIFT_ENCODER_TO_INCHES = (Math.PI * LIFT_COG_DIAMETER_INCHES) / 360.0 / LIFT_GEAR_RATIO;
@@ -50,7 +50,7 @@ public class Constants {
         public static final double PIVOT_L1_POS = -20.0;
         public static final double PIVOT_L2_POS = -30.0;
         public static final double PIVOT_L3_POS = -50.0;
-        public static final double PIVOT_CLIMB_POS = -100.0;
+        public static final double PIVOT_CLIMB_POS = -175.0;
         public static final double ENCODER_TO_DEGREES = 360.0 / 4096.0; 
     }
 
