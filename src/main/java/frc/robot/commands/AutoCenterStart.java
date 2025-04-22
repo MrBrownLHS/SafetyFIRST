@@ -18,7 +18,7 @@ public class AutoCenterStart extends SequentialCommandGroup {
     SwerveSubsystem swerve, ArmLift lift, ArmPivot pivot, ArmRotate rotate, ArmIntake intake){ // CollectorArm collectorArm, CoralCollector coralCollector) {
     addCommands(
       swerve.swerveAuto(-2.0, 0.0, 0.5, 0.0),  // Move forward 2m
-      swerve.swerveAuto(0.0, 0, 0, 0.25),   // Move right 1.5m and rotate slowly
+      swerve.swerveAuto(0.0, 0, 0, 0.25).withTimeout(2.0),   // Move right 1.5m and rotate slowly
       swerve.stopSwerveCommand(),
       new MoveArmToL1(lift, pivot, rotate, intake),
       intake.CoralOut()

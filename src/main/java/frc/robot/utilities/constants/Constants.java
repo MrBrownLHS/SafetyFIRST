@@ -87,7 +87,7 @@ public class Constants {
              
     public static final class MotorConstants {
         public static final double VOLTAGE_COMPENSATION = 12.0;
-        public static final int CURRENT_LIMIT_NEO = 40;
+        public static final int CURRENT_LIMIT_NEO = 60;
         public static final int CURRENT_THRESHOLD_NEO = 60;
         public static final double CURRENT_THRESHOLD_TIME_NEO = 0.1;
         public static final int MAX_CURRENT_LIMIT_NEO = 60;
