@@ -53,7 +53,7 @@ public class RobotContainer {
   private final CageClimber cageClimber = new CageClimber();
   private final AlgaeArticulate algaeArticulate = new AlgaeArticulate();
   private final AlgaeClaw algaeClaw = new AlgaeClaw();
-  private final ArmIntake coralCollector = new ArmIntake();
+  private final ArmIntake armIntake = new ArmIntake();
   private final ArmLift armLift = ArmLift.getInstance();
   private final ArmPivot armPivot = ArmPivot.getInstance();
   private final ArmRotate armRotate = ArmRotate.getInstance();
@@ -68,7 +68,7 @@ public class RobotContainer {
   private final SendableChooser<Command> autoChooser;
   private final Camera botCam = new Camera();
   private final MoveArmToCollect armCollect = new MoveArmToCollect(armLift, armPivot, armRotate);
-  private final MoveArmToL1 armL1 = new MoveArmToL1(armLift, armPivot, armRotate);
+  private final MoveArmToL1 armL1 = new MoveArmToL1(armLift, armPivot, armRotate, armIntake);
   private final MoveArmToL2 armL2 = new MoveArmToL2(armLift, armPivot, armRotate);
   private final MoveArmToL3 armL3 = new MoveArmToL3(armLift, armPivot, armRotate);
   private final MoveArmToClimb armClimb = new MoveArmToClimb(armLift, armPivot, armRotate);
@@ -91,7 +91,9 @@ public class RobotContainer {
         
      
     autoChooser = new SendableChooser<>();
-        autoChooser.setDefaultOption("Center Start", new AutoCenterStart(swerveSubsystem));
+        autoChooser.setDefaultOption("Center Start", new AutoCenterStart(
+          swerveSubsystem, armLift, armPivot, armRotate, armIntake));
+
         autoChooser.addOption("Left Start", new AutoLeftStart(swerveSubsystem));
         autoChooser.addOption("Right Start", new AutoRightStart(swerveSubsystem));
 
@@ -161,10 +163,10 @@ public class RobotContainer {
       );
 
   //Arm Controls 
-      CopilotCommandController.axisMagnitudeGreaterThan(2, 0.5).whileTrue(coralCollector.CoralIn()
+      CopilotCommandController.axisMagnitudeGreaterThan(2, 0.5).whileTrue(armIntake.CoralIn()
       );
       
-      CopilotCommandController.axisMagnitudeGreaterThan(3, 0.5).whileTrue(coralCollector.CoralOut()
+      CopilotCommandController.axisMagnitudeGreaterThan(3, 0.5).whileTrue(armIntake.CoralOut()
       );
 
       CopilotCommandController.a().onTrue(armL1
@@ -220,7 +222,7 @@ public class RobotContainer {
       armLift.stopLift();
       armPivot.stopPivot();
       armRotate.stopRotate();
-      coralCollector.CollectCoralStop();
+      armIntake.CollectCoralStop();
       }));
 
    

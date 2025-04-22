@@ -8,14 +8,17 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.subsystems.ArmLift;
 import frc.robot.subsystems.ArmPivot;
 import frc.robot.subsystems.ArmRotate;
+import frc.robot.subsystems.ArmIntake;
 
 
 public class MoveArmToL1 extends SequentialCommandGroup {
-  public MoveArmToL1(ArmLift lift, ArmPivot pivot, ArmRotate rotate) {
+  public MoveArmToL1(ArmLift lift, ArmPivot pivot, ArmRotate rotate, ArmIntake intake) {
     addCommands(
         lift.liftToL1(),
         pivot.pivotToL1(),
-        rotate.rotateToL1()
+        rotate.rotateToL1(),
+        intake.CoralOut()
+
     );
   }       
 }
