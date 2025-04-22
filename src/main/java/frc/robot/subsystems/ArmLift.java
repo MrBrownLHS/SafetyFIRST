@@ -62,9 +62,8 @@ public class ArmLift extends SubsystemBase {
             .iZone(Constants.Lift.LIFT_kIZone);
 
         liftMotorConfig.idleMode(IdleMode.kBrake);
-        liftMotorConfig.smartCurrentLimit(Constants.MotorConstants.CURRENT_LIMIT_NEO); //Reorganize Constants
-
-       
+        liftMotorConfig.smartCurrentLimit(Constants.MotorConstants.CURRENT_LIMIT_NEO); 
+             
         m_LiftMotor = new SparkMax(Constants.Lift.LIFT_MOTOR_ID, MotorType.kBrushless); //Reorganize Constants
         liftEncoder = m_LiftMotor.getEncoder();
         liftPIDController = m_LiftMotor.getClosedLoopController();
@@ -127,7 +126,7 @@ public class ArmLift extends SubsystemBase {
             liftPIDController.setReference(
                 liftCurrentState.position,
                 SparkBase.ControlType.kPosition,
-               ClosedLoopSlot.kSlot0,
+                ClosedLoopSlot.kSlot0,
                 Constants.Lift.LIFT_kG,
                 ArbFFUnits.kVoltage
              );
