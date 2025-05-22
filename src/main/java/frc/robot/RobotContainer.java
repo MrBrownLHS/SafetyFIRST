@@ -113,9 +113,9 @@ public class RobotContainer {
       
     swerveSubsystem.setDefaultCommand(new SwerveController(
             swerveSubsystem,
-            () -> -translationLimiter.calculate(DriverController.getRawAxis(translationAxis) * 0.75),
-            () -> -strafeLimiter.calculate(DriverController.getRawAxis(strafeAxis) * 0.75),
-            () -> rotationLimiter.calculate(DriverController.getRawAxis(rotationAxis) * 0.75),
+            () -> -translationLimiter.calculate(DriverController.getRawAxis(translationAxis) * 0.5),
+            () -> -strafeLimiter.calculate(DriverController.getRawAxis(strafeAxis) * 0.5),
+            () -> rotationLimiter.calculate(DriverController.getRawAxis(rotationAxis) * 0.5),
             () -> robotCentric.getAsBoolean()) // lambda probably not needed but why not
     );
 

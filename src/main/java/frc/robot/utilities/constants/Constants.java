@@ -20,14 +20,14 @@ public class Constants {
         public static final double LIFT_kIZone = 5.0;
         public static final double LIFT_kG = 0.0;
 
-        public static final double LIFT_MAX_VELOCITY = 25.0; 
+        public static final double LIFT_MAX_VELOCITY = 35.0; 
         public static final double LIFT_MAX_ACCELERATION = 20.0; 
         public static final double LIFT_POSITION_TOLERANCE = 1.0; 
 
         public static final double LIFT_COLLECT_POS = 0.0;
         public static final double LIFT_L1_POS = -30.0;
         public static final double LIFT_L2_POS = -75.0;
-        public static final double LIFT_L3_POS = -280.0;
+        public static final double LIFT_L3_POS = -260.0;
         public static final double LIFT_CLIMB_POS = -10.0;
         public static final double LIFT_GEAR_RATIO = 1.0;
         public static final double LIFT_COG_DIAMETER_INCHES = 2.0;
@@ -60,7 +60,7 @@ public class Constants {
         public static final double ROTATE_kI = 0.0;
         public static final double ROTATE_kD = 0.0;
         public static final double ROTATE_kIZone = 5.0;
-        public static final double ROTATE_kG = 0.5;
+        public static final double ROTATE_kG = 1.0;
 
         public static final double ROTATE_MAX_VELOCITY = 20.0;
         public static final double ROTATE_MAX_ACCELERATION = 20.0;
@@ -69,8 +69,8 @@ public class Constants {
         public static final double ROTATE_SPEED = 0.25;
         public static final double ROTATE_COLLECT_POS = 0.0;
         public static final double ROTATE_L1_POS = -5.0;
-        public static final double ROTATE_L2_POS = -8.0;
-        public static final double ROTATE_L3_POS = -10.0;
+        public static final double ROTATE_L2_POS = -10.0;
+        public static final double ROTATE_L3_POS = -30.0;
         public static final double ROTATE_CLIMB_POS = -20.0;
         public static final double ROTATE_DEADBAND = 0.1; 
         public static final double ROTATE_RATE_LIMIT = 2.9; 
