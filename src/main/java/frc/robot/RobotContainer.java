@@ -163,6 +163,9 @@ public class RobotContainer {
       );
 
   //Arm Controls 
+      armIntake.setDefaultCommand(armIntake.CollectCoralStop()
+      );
+
       CopilotCommandController.axisMagnitudeGreaterThan(2, 0.5).whileTrue(armIntake.CoralIn()
       );
       
