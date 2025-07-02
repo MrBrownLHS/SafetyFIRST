@@ -25,8 +25,8 @@ public class Constants {
         public static final double LIFT_POSITION_TOLERANCE = 1.0; 
 
         public static final double LIFT_COLLECT_POS = 0.0;
-        public static final double LIFT_L1_POS = -30.0;
-        public static final double LIFT_L2_POS = -75.0;
+        public static final double LIFT_L1_POS = -0.0;
+        public static final double LIFT_L2_POS = -149.0;
         public static final double LIFT_L3_POS = -260.0;
         public static final double LIFT_CLIMB_POS = -10.0;
         public static final double LIFT_GEAR_RATIO = 1.0;
@@ -36,20 +36,20 @@ public class Constants {
 
     public static final class Pivot {            
         public static final int PIVOT_MOTOR_ID = 15;
-        public static final double PIVOT_kP = 0.2;
+        public static final double PIVOT_kP = 0.1;
         public static final double PIVOT_kI = 0.0;
         public static final double PIVOT_kD = 0.0;
         public static final double PIVOT_kIZone = 5.0;
-        public static final double PIVOT_kG = 1.5;
+        public static final double PIVOT_kG = 2.0;
 
         public static final double PIVOT_MAX_VELOCITY = 25.0; 
         public static final double PIVOT_MAX_ACCELERATION = 20.0;
         public static final double PIVOT_POSITION_TOLERANCE = 1.0; 
 
         public static final double PIVOT_COLLECT_POS = 0.0;
-        public static final double PIVOT_L1_POS = -20.0;
-        public static final double PIVOT_L2_POS = -30.0;
-        public static final double PIVOT_L3_POS = -50.0;
+        public static final double PIVOT_L1_POS = -35.0;
+        public static final double PIVOT_L2_POS = -45.0;
+        public static final double PIVOT_L3_POS = -60.0;
         public static final double PIVOT_CLIMB_POS = -175.0;
         public static final double ENCODER_TO_DEGREES = 360.0 / 4096.0; 
     }
@@ -60,12 +60,12 @@ public class Constants {
         public static final double ROTATE_kI = 0.0;
         public static final double ROTATE_kD = 0.0;
         public static final double ROTATE_kIZone = 5.0;
-        public static final double ROTATE_kG = 1.0;
+        public static final double ROTATE_kG = 2.0;
 
         public static final double ROTATE_MAX_VELOCITY = 20.0;
         public static final double ROTATE_MAX_ACCELERATION = 20.0;
 
-        public static final double ROTATE_POSITION_TOLERANCE = 0.5; 
+        public static final double ROTATE_POSITION_TOLERANCE = 1.0; 
         public static final double ROTATE_SPEED = 0.25;
         public static final double ROTATE_COLLECT_POS = 0.0;
         public static final double ROTATE_L1_POS = -5.0;

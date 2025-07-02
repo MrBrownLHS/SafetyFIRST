@@ -162,6 +162,10 @@ public class RobotContainer {
               algaeClaw.StopClaw()
       );
 
+      armIntake.setDefaultCommand(
+        armIntake.CollectCoralStop()
+      );
+
   //Arm Controls 
       CopilotCommandController.axisMagnitudeGreaterThan(2, 0.5).whileTrue(armIntake.CoralIn()
       );

@@ -16,8 +16,7 @@ public class MoveArmToL1 extends SequentialCommandGroup {
     addCommands(
         lift.liftToL1(),
         pivot.pivotToL1(),
-        rotate.rotateToL1(),
-        intake.CoralOut()
+        rotate.rotateToL1()
 
     );
   }       
