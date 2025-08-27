@@ -113,9 +113,9 @@ public class RobotContainer {
       
     swerveSubsystem.setDefaultCommand(new SwerveController(
             swerveSubsystem,
-            () -> -translationLimiter.calculate(DriverController.getRawAxis(translationAxis) * 0.25),
-            () -> -strafeLimiter.calculate(DriverController.getRawAxis(strafeAxis) * 0.25),
-            () -> rotationLimiter.calculate(DriverController.getRawAxis(rotationAxis) * 0.25),
+            () -> -translationLimiter.calculate(DriverController.getRawAxis(translationAxis) * 0.75),
+            () -> -strafeLimiter.calculate(DriverController.getRawAxis(strafeAxis) * 0.75),
+            () -> rotationLimiter.calculate(DriverController.getRawAxis(rotationAxis) * 0.75),
             () -> robotCentric.getAsBoolean()) // lambda probably not needed but why not
     );
 
@@ -141,9 +141,9 @@ public class RobotContainer {
 
     slowDriveMode.whileTrue(new SwerveController(
         swerveSubsystem,
-          () -> -translationLimiter.calculate(DriverController.getRawAxis(translationAxis) * 0.75),
-          () -> -strafeLimiter.calculate(DriverController.getRawAxis(strafeAxis) * 0.75),
-          () -> rotationLimiter.calculate(DriverController.getRawAxis(rotationAxis) * 0.75),
+          () -> -translationLimiter.calculate(DriverController.getRawAxis(translationAxis) * 0.25),
+          () -> -strafeLimiter.calculate(DriverController.getRawAxis(strafeAxis) * 0.25),
+          () -> rotationLimiter.calculate(DriverController.getRawAxis(rotationAxis) * 0.25),
           () -> robotCentric.getAsBoolean())
     );
 
