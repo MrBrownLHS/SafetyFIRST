@@ -11,11 +11,11 @@ import frc.robot.subsystems.ArmRotate;
 
 public class MoveArmToL3 extends SequentialCommandGroup {
   
-  public MoveArmToL3(ArmLift lift, ArmPivot pivot, ArmRotate rotate) {
+  public MoveArmToL3(ArmLift lift, ArmPivot pivot) {
     addCommands(
       lift.liftToL3(),
-      pivot.pivotToL3(),
-      rotate.rotateToL3()
+      pivot.pivotToL3()
+      //rotate.rotateToL3()
     );
   }       
 }

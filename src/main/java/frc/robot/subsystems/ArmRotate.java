@@ -56,7 +56,7 @@ public class ArmRotate extends SubsystemBase {
   
  
 
-  private ArmRotate() {
+  public ArmRotate() {
     rotateRateLimiter = new SlewRateLimiter(Constants.Rotate.ROTATE_RATE_LIMIT);
     m_RotateMotor = new SparkMax(Constants.Rotate.ROTATE_MOTOR_ID, MotorType.kBrushless);
     rotateMotorConfig = new SparkMaxConfig();

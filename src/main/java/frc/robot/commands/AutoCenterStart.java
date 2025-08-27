@@ -20,7 +20,7 @@ public class AutoCenterStart extends SequentialCommandGroup {
       swerve.swerveAuto(-2.0, 0.0, 0.5, 0.0),  // Move forward 2m
       swerve.swerveAuto(0.0, 0, 0, 0.25).withTimeout(2.0),   // Move right 1.5m and rotate slowly
       swerve.stopSwerveCommand(),
-      new MoveArmToL1(lift, pivot, rotate, intake),
+      new MoveArmToL1(lift, pivot),
       intake.CoralOut()
       );
   }

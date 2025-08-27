@@ -56,7 +56,7 @@ public class RobotContainer {
   private final ArmIntake armIntake = new ArmIntake();
   private final ArmLift armLift = ArmLift.getInstance();
   private final ArmPivot armPivot = ArmPivot.getInstance();
-  private final ArmRotate armRotate = ArmRotate.getInstance();
+  private final ArmRotate armRotate = new ArmRotate();
   
   private final int translationAxis;
   private final int strafeAxis;
@@ -67,11 +67,11 @@ public class RobotContainer {
 
   private final SendableChooser<Command> autoChooser;
   private final Camera botCam = new Camera();
-  private final MoveArmToCollect armCollect = new MoveArmToCollect(armLift, armPivot, armRotate);
-  private final MoveArmToL1 armL1 = new MoveArmToL1(armLift, armPivot, armRotate, armIntake);
-  private final MoveArmToL2 armL2 = new MoveArmToL2(armLift, armPivot, armRotate);
-  private final MoveArmToL3 armL3 = new MoveArmToL3(armLift, armPivot, armRotate);
-  private final MoveArmToClimb armClimb = new MoveArmToClimb(armLift, armPivot, armRotate);
+  private final MoveArmToCollect armCollect = new MoveArmToCollect(armLift, armPivot);
+  private final MoveArmToL1 armL1 = new MoveArmToL1(armLift, armPivot);
+  private final MoveArmToL2 armL2 = new MoveArmToL2(armLift, armPivot);
+  private final MoveArmToL3 armL3 = new MoveArmToL3(armLift, armPivot);
+  private final MoveArmToClimb armClimb = new MoveArmToClimb(armLift, armPivot);
 
   private final SlewRateLimiter liftSlewRateLimiter = new SlewRateLimiter(2.0); // 2 units/sec
   private final SlewRateLimiter rotateSlewRateLimiter = new SlewRateLimiter(2.0); // 2 units/sec
@@ -149,10 +149,11 @@ public class RobotContainer {
 
   //Algae Controls
     
-      algaeArticulate.setDefaultCommand(algaeArticulate.AlgaeUpDown(() -> CopilotCommandController.getLeftX())
+      algaeArticulate.setDefaultCommand(algaeArticulate.AlgaeUpDown(() -> CopilotCommandController.getLeftY())
       );
 
-      coralRotate.setDefaultCommand(coralRotate.CoralRotate
+      armRotate.setDefaultCommand(armRotate.CoralRotate(() -> CopilotCommandController.getLeftX())
+      );
 
     
         
@@ -203,11 +204,11 @@ public class RobotContainer {
         ), 
         armLift);
 
-    new RunCommand(
-      () -> armRotate.setRotatePower(
-        applyDeadband(rotateSlewRateLimiter.calculate(CopilotCommandController.getRightX()), 0.1)
-        ), 
-        armRotate);
+    // new RunCommand(
+    //   () -> armRotate.setRotatePower(
+    //     applyDeadband(rotateSlewRateLimiter.calculate(CopilotCommandController.getRightX()), 0.1)
+    //     ), 
+    //     armRotate);
 
     new RunCommand(
       () -> armPivot.setPivotPower(
@@ -232,7 +233,7 @@ public class RobotContainer {
       algaeClaw.StopClaw();
       armLift.stopLift();
       armPivot.stopPivot();
-      armRotate.stopRotate();
+      armRotate.CoralRotateStop();
       armIntake.CollectCoralStop();
       }));
 

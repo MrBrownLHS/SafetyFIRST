@@ -12,11 +12,11 @@ import frc.robot.subsystems.ArmRotate;
 
 public class MoveArmToClimb extends SequentialCommandGroup {
   
-  public MoveArmToClimb(ArmLift lift, ArmPivot pivot, ArmRotate rotate) {
+  public MoveArmToClimb(ArmLift lift, ArmPivot pivot) {
     addCommands(
       lift.liftToClimb(),
-      pivot.pivotToClimb(),
-      rotate.rotateToClimb()
+      pivot.pivotToClimb()
+      //rotate.rotateToClimb()
     );
   }       
 }
