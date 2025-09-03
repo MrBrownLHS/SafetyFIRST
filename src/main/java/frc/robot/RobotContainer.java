@@ -149,10 +149,10 @@ public class RobotContainer {
 
   //Algae Controls
     
-      algaeArticulate.setDefaultCommand(algaeArticulate.AlgaeUpDown(() -> CopilotCommandController.getLeftY())
+      algaeArticulate.setDefaultCommand(algaeArticulate.AlgaeUpDown(() -> CopilotCommandController.getLeftX())
       );
 
-      armRotate.setDefaultCommand(armRotate.CoralRotate(() -> CopilotCommandController.getLeftX())
+      armRotate.setDefaultCommand(armRotate.CoralRotate(() -> CopilotCommandController.getRightX())
       );
 
     
