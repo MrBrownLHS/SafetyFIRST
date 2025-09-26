@@ -113,9 +113,9 @@ public class RobotContainer {
       
     swerveSubsystem.setDefaultCommand(new SwerveController(
             swerveSubsystem,
-            () -> -translationLimiter.calculate(DriverController.getRawAxis(translationAxis) * 0.75),
-            () -> -strafeLimiter.calculate(DriverController.getRawAxis(strafeAxis) * 0.75),
-            () -> rotationLimiter.calculate(DriverController.getRawAxis(rotationAxis) * 0.75),
+            () -> -translationLimiter.calculate(DriverController.getRawAxis(translationAxis) * 0.50),
+            () -> -strafeLimiter.calculate(DriverController.getRawAxis(strafeAxis) * 0.50),
+            () -> rotationLimiter.calculate(DriverController.getRawAxis(rotationAxis) * 0.50),
             () -> robotCentric.getAsBoolean()) // lambda probably not needed but why not
     );
 
@@ -198,23 +198,23 @@ public class RobotContainer {
 
   
   //Manual Arm Controls
-    new RunCommand(
-      () -> armLift.setLiftPower(
-        applyDeadband(liftSlewRateLimiter.calculate(CopilotCommandController.getRightY()), 0.1)
-        ), 
-        armLift);
+    // new RunCommand(
+    //   () -> armLift.setLiftPower(
+    //     applyDeadband(liftSlewRateLimiter.calculate(CopilotCommandController.getRightY()), 0.1)
+    //     ), 
+    //     armLift);
+
+    // // new RunCommand(
+    // //   () -> armRotate.setRotatePower(
+    // //     applyDeadband(rotateSlewRateLimiter.calculate(CopilotCommandController.getRightX()), 0.1)
+    // //     ), 
+    // //     armRotate);
 
     // new RunCommand(
-    //   () -> armRotate.setRotatePower(
-    //     applyDeadband(rotateSlewRateLimiter.calculate(CopilotCommandController.getRightX()), 0.1)
+    //   () -> armPivot.setPivotPower(
+    //     applyDeadband(pivotSlewRateLimiter.calculate(CopilotCommandController.getLeftY()), 0.1)
     //     ), 
-    //     armRotate);
-
-    new RunCommand(
-      () -> armPivot.setPivotPower(
-        applyDeadband(pivotSlewRateLimiter.calculate(CopilotCommandController.getLeftY()), 0.1)
-        ), 
-        armPivot);
+    //     armPivot);
   
   //Climber Controls
     cageClimber.setDefaultCommand(

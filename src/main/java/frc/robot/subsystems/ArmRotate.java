@@ -76,7 +76,7 @@ public class ArmRotate extends SubsystemBase {
     return new RunCommand(() -> {
       double rawInput = joystickInput.getAsDouble();
       double adjustedInput = (Math.abs(rawInput) > Constants.Rotate.ROTATE_DEADBAND) ? rawInput : 0.0;
-      double limitedInput = rotateRateLimiter.calculate(adjustedInput * 0.15);
+      double limitedInput = rotateRateLimiter.calculate(adjustedInput * 0.30); //increased from 0.25
       m_RotateMotor.set(limitedInput);
     }, this);
   }

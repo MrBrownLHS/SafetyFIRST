@@ -7,8 +7,8 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.subsystems.ArmLift;
 import frc.robot.subsystems.ArmPivot;
-import frc.robot.subsystems.ArmRotate;
-import frc.robot.subsystems.ArmIntake;
+//import frc.robot.subsystems.ArmRotate;
+//import frc.robot.subsystems.ArmIntake;
 
 
 public class MoveArmToL1 extends SequentialCommandGroup {
