@@ -150,12 +150,7 @@ public class RobotContainer {
   //Algae Controls
     
       algaeArticulate.setDefaultCommand(algaeArticulate.AlgaeUpDown(() -> CopilotCommandController.getLeftX())
-      );
-
-      armRotate.setDefaultCommand(armRotate.CoralRotate(() -> CopilotCommandController.getRightX())
-      );
-
-    
+      );    
         
       CopilotCommandController.rightBumper().whileTrue(algaeClaw.ClawClose()
       );
@@ -163,16 +158,17 @@ public class RobotContainer {
       CopilotCommandController.leftBumper().whileTrue(algaeClaw.ClawOpen()
       );
 
-      algaeClaw.setDefaultCommand(
-              algaeClaw.StopClaw()
+      algaeClaw.setDefaultCommand(algaeClaw.StopClaw()
       );
 
-      armIntake.setDefaultCommand(
-        armIntake.CollectCoralStop()
-      );
+      
 
-  //Arm Controls 
+  //Arm Controls
+  
       armIntake.setDefaultCommand(armIntake.CollectCoralStop()
+      );
+
+      armRotate.setDefaultCommand(armRotate.CoralRotate(() -> CopilotCommandController.getRightX())
       );
 
       CopilotCommandController.axisMagnitudeGreaterThan(2, 0.5).whileTrue(armIntake.CoralIn()
@@ -204,11 +200,11 @@ public class RobotContainer {
     //     ), 
     //     armLift);
 
-    // // new RunCommand(
-    // //   () -> armRotate.setRotatePower(
-    // //     applyDeadband(rotateSlewRateLimiter.calculate(CopilotCommandController.getRightX()), 0.1)
-    // //     ), 
-    // //     armRotate);
+    // new RunCommand(
+    //   () -> armPivot.setPivotPower(
+    //     applyDeadband(pivotSlewRateLimiter.calculate(CopilotCommandController.getLeftY()), 0.1)
+    //     ), 
+    //     armRotate);
 
     // new RunCommand(
     //   () -> armPivot.setPivotPower(

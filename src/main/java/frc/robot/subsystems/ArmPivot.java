@@ -106,18 +106,28 @@ public class ArmPivot extends SubsystemBase {
         double currentTime = Timer.getFPGATimestamp();
         double deltatime = currentTime - prevUpdateTime;
         prevUpdateTime = currentTime;
+
         if(pivotPeriodicIO.is_pivot_positional_control) {
-            pivotGoalState.position = pivotPeriodicIO.pivot_target;
+            double currentPosition = pivotEncoder.getPosition();//added
+            double error = Math.abs(currentPosition - pivotPeriodicIO.pivot_target);//added
+            
+            //pivotGoalState.position = pivotPeriodicIO.pivot_target;
+            if (error > Constants.Pivot.PIVOT_POSITION_TOLERANCE) {
 
-            prevUpdateTime = currentTime;
-            pivotCurrentState = pivotProfile.calculate(deltatime, pivotCurrentState, pivotGoalState);
+                pivotGoalState.position = pivotPeriodicIO.pivot_target;//added
+                pivotCurrentState = pivotProfile.calculate(deltatime, pivotCurrentState, pivotGoalState);//added
+            
+            //prevUpdateTime = currentTime;
+            //pivotCurrentState = pivotProfile.calculate(deltatime, pivotCurrentState, pivotGoalState);
 
-            pivotPIDController.setReference(
-                pivotCurrentState.position, 
-                SparkBase.ControlType.kPosition,
-                ClosedLoopSlot.kSlot0,
-                Constants.Pivot.PIVOT_kG,
-                ArbFFUnits.kVoltage);
+                pivotPIDController.setReference(
+                    pivotCurrentState.position, 
+                    SparkBase.ControlType.kPosition,
+                    ClosedLoopSlot.kSlot0,
+                    Constants.Pivot.PIVOT_kG,
+                    ArbFFUnits.kVoltage
+                );
+            }
         } else {
             pivotCurrentState.position = pivotEncoder.getPosition();
             pivotCurrentState.velocity = 0.0;

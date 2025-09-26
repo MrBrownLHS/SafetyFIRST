@@ -73,7 +73,7 @@ public class Constants {
         public static final double ROTATE_L3_POS = -30.0;
         public static final double ROTATE_CLIMB_POS = -20.0;
         public static final double ROTATE_DEADBAND = 0.1; 
-        public static final double ROTATE_RATE_LIMIT = 2.9; 
+        public static final double ROTATE_RATE_LIMIT = 1.0; 
     }
 
     public static final class Intake {

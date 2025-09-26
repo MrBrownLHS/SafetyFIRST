@@ -81,7 +81,13 @@ public class ArmRotate extends SubsystemBase {
     }, this);
   }
 
-
+  public Command CoralRotateAuto(double speed) {
+    return new RunCommand(() -> {
+            m_RotateMotor.set(speed);
+        }, this).withTimeout(5.0
+        
+    );
+  }
 
   public Command CoralRotateStop() {
     return new InstantCommand(() -> {
