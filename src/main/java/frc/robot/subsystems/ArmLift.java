@@ -117,7 +117,7 @@ public class ArmLift extends SubsystemBase {
             liftGoalState.position = liftPeriodicIO.lift_target;
 
             if (liftGoalState.position > liftCurrentState.position) {
-                m_LiftMotor.set(0.25);
+                m_LiftMotor.set(0.5);
             } else {
             
             prevUpdateTime = currentTime;

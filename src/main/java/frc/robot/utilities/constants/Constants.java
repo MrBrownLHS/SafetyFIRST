@@ -20,7 +20,7 @@ public class Constants {
         public static final double LIFT_kIZone = 5.0;
         public static final double LIFT_kG = 0.0;
 
-        public static final double LIFT_MAX_VELOCITY = 40.0; //increased from 0.25
+        public static final double LIFT_MAX_VELOCITY = 75.0; //increased from 0.25
         public static final double LIFT_MAX_ACCELERATION = 20.0; 
         public static final double LIFT_POSITION_TOLERANCE = 1.0; 
 
@@ -42,7 +42,7 @@ public class Constants {
         public static final double PIVOT_kIZone = 5.0;
         public static final double PIVOT_kG = 3.0; //increased from 2.0
 
-        public static final double PIVOT_MAX_VELOCITY = 50.0; //increased fromn 0.25
+        public static final double PIVOT_MAX_VELOCITY = 75.0; //increased fromn 0.25
         public static final double PIVOT_MAX_ACCELERATION = 50.0; //increased from 0.20
         public static final double PIVOT_POSITION_TOLERANCE = 1.0; 
 
