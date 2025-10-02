@@ -1,7 +1,5 @@
 package frc.robot.utilities.constants;
 
-import com.ctre.phoenix6.signals.SensorDirectionValue;
-
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -22,7 +20,7 @@ public class Constants {
 
         public static final double LIFT_MAX_VELOCITY = 75.0; //increased from 0.25
         public static final double LIFT_MAX_ACCELERATION = 20.0; 
-        public static final double LIFT_POSITION_TOLERANCE = 1.0; 
+        public static final double LIFT_POSITION_TOLERANCE = 5.0; 
 
         public static final double LIFT_COLLECT_POS = 0.0;
         public static final double LIFT_L1_POS = -0.0;
@@ -36,15 +34,15 @@ public class Constants {
 
     public static final class Pivot {            
         public static final int PIVOT_MOTOR_ID = 15;
-        public static final double PIVOT_kP = 0.15; //increased from 0.1
+        public static final double PIVOT_kP = 0.2; //increased from 0.15
         public static final double PIVOT_kI = 0.001; //increased from 0.0
         public static final double PIVOT_kD = 0.0;
         public static final double PIVOT_kIZone = 5.0;
         public static final double PIVOT_kG = 3.0; //increased from 2.0
 
-        public static final double PIVOT_MAX_VELOCITY = 75.0; //increased fromn 0.25
+        public static final double PIVOT_MAX_VELOCITY = 85.0; //increased fromn 0.75
         public static final double PIVOT_MAX_ACCELERATION = 50.0; //increased from 0.20
-        public static final double PIVOT_POSITION_TOLERANCE = 1.0; 
+        public static final double PIVOT_POSITION_TOLERANCE = 10.0; 
 
         public static final double PIVOT_COLLECT_POS = 0.0;
         public static final double PIVOT_L1_POS = -35.0;
@@ -72,8 +70,8 @@ public class Constants {
         public static final double ROTATE_L2_POS = -10.0;
         public static final double ROTATE_L3_POS = -30.0;
         public static final double ROTATE_CLIMB_POS = -20.0;
-        public static final double ROTATE_DEADBAND = 0.1; 
-        public static final double ROTATE_RATE_LIMIT = 1.0; 
+        public static final double ROTATE_DEADBAND = 0.01; 
+        public static final double ROTATE_RATE_LIMIT = 0.0; 
     }
 
     public static final class Intake {

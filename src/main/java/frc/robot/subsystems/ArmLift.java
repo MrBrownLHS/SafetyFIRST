@@ -100,14 +100,13 @@ public class ArmLift extends SubsystemBase {
         LiftState state = LiftState.COLLECT;
     }
 
+
+
     
 
     @Override
 
     public void periodic() {
-        SmartDashboard.putNumber("Arm Lift Position", liftEncoder.getPosition());
-        SmartDashboard.putBoolean("Lift Positional Control", liftPeriodicIO.is_lift_positional_control);
-        SmartDashboard.putNumber("Lift Target Position", liftPeriodicIO.lift_target);
         SmartDashboard.putString("Lift State", liftPeriodicIO.state.toString());
 
         double currentTime = Timer.getFPGATimestamp();
@@ -206,151 +205,7 @@ public class ArmLift extends SubsystemBase {
 
     public Command liftToClimb() {
         return liftToPosition(Constants.Lift.LIFT_CLIMB_POS, LiftState.CLIMB);
-    }
-
-
-
-
-
-    // public Command liftToCollect() {
-    //     return new SequentialCommandGroup(
-    //         new InstantCommand(() -> { //changed from instant to run
-    //             liftPeriodicIO.is_lift_positional_control = true;
-    //             liftPeriodicIO.lift_target = Constants.Lift.LIFT_COLLECT_POS;
-    //             liftPeriodicIO.state = LiftState.COLLECT; //added
-    //         }, this),
-    //         new WaitUntilCommand(() -> 
-    //             Math.abs(liftEncoder.getPosition() - Constants.Lift.LIFT_COLLECT_POS) < Constants.Lift.LIFT_POSITION_TOLERANCE
-    //         ),
-    //         new InstantCommand(() -> {
-    //             liftPeriodicIO.is_lift_positional_control = false;
-    //             m_LiftMotor.set(0.0);
-    //         }, this)
-    //     );
-    // }
-
-    // public Command liftToL1() {
-    //     return new SequentialCommandGroup(
-    //         new InstantCommand(() -> {
-    //             liftPeriodicIO.is_lift_positional_control = true;
-    //             liftPeriodicIO.lift_target = Constants.Lift.LIFT_L1_POS;
-    //             liftPeriodicIO.state = LiftState.L1;
-    //         }, this),
-    //         new WaitUntilCommand(() -> 
-    //             Math.abs(liftEncoder.getPosition() - Constants.Lift.LIFT_L1_POS) < Constants.Lift.LIFT_POSITION_TOLERANCE
-    //         ),
-    //         new InstantCommand(() -> {
-    //             liftPeriodicIO.is_lift_positional_control = false;
-    //             m_LiftMotor.set(0.0);
-    //         }, this)
-    //     );
-    // }
-
-    // public Command liftToL2() {
-    //     return new SequentialCommandGroup(
-    //         new InstantCommand(() -> {
-    //             liftPeriodicIO.is_lift_positional_control = true;
-    //             liftPeriodicIO.lift_target = Constants.Lift.LIFT_L2_POS;
-    //             liftPeriodicIO.state = LiftState.L2;
-    //         }, this),
-    //         new WaitUntilCommand(() -> 
-    //             Math.abs(liftEncoder.getPosition() - Constants.Lift.LIFT_L2_POS) < Constants.Lift.LIFT_POSITION_TOLERANCE
-    //         ),
-    //         new InstantCommand(() -> {
-    //             liftPeriodicIO.is_lift_positional_control = false;
-    //             m_LiftMotor.set(0.0);
-    //         }, this)
-    //     );
-    // }
-
-    // public Command liftToL3() {
-    //     return new SequentialCommandGroup(
-    //         new InstantCommand(() -> {
-    //             liftPeriodicIO.is_lift_positional_control = true;
-    //             liftPeriodicIO.lift_target = Constants.Lift.LIFT_L3_POS;
-    //             liftPeriodicIO.state = LiftState.L3;
-    //         }, this),
-    //         new WaitUntilCommand(() -> 
-    //             Math.abs(liftEncoder.getPosition() - Constants.Lift.LIFT_L3_POS) < Constants.Lift.LIFT_POSITION_TOLERANCE
-    //         ),
-    //         new InstantCommand(() -> {
-    //             liftPeriodicIO.is_lift_positional_control = false;
-    //             m_LiftMotor.set(0.0);
-    //         }, this)
-    //     );
-    // }
-
-    // public Command liftToClimb() {
-    //     return new SequentialCommandGroup(
-    //         new InstantCommand(() -> {
-    //             liftPeriodicIO.is_lift_positional_control = true;
-    //             liftPeriodicIO.lift_target = Constants.Lift.LIFT_CLIMB_POS;
-    //             liftPeriodicIO.state = LiftState.CLIMB;
-    //         }, this),
-    //         new WaitUntilCommand(() -> 
-    //             Math.abs(liftEncoder.getPosition() - Constants.Lift.LIFT_CLIMB_POS) < Constants.Lift.LIFT_POSITION_TOLERANCE
-    //         ),
-    //         new InstantCommand(() -> {
-    //             liftPeriodicIO.is_lift_positional_control = false;
-    //             m_LiftMotor.set(0.0);
-    //         }, this)
-    //     );
-    
-
-    // public Command liftToCollect() {
-    //     return run(() -> lifttocollect());
-    // }
-
-    // private void lifttocollect() {
-    //     liftPeriodicIO.is_lift_positional_control = true;
-    //     liftPeriodicIO.lift_target = Constants.Lift.LIFT_COLLECT_POS;
-    //     liftPeriodicIO.state = LiftState.COLLECT;
-    //}
-
-    // public Command liftToL1() {
-    //     return run(() -> lifttol1());
-    // }
-
-    // private void lifttol1() {
-    //     liftPeriodicIO.is_lift_positional_control = true;
-    //     liftPeriodicIO.lift_target = Constants.Lift.LIFT_L1_POS;
-    //     liftPeriodicIO.state = LiftState.L1;
-    // }
-
-    // public Command liftToL2() {
-    //     return run(() -> lifttol2());
-    // }
-
-    // private void lifttol2() {
-    //     liftPeriodicIO.is_lift_positional_control = true;
-    //     liftPeriodicIO.lift_target = Constants.Lift.LIFT_L2_POS;
-    //     liftPeriodicIO.state = LiftState.L2;
-    // }
-
-    // public Command liftToL3() {
-    //     return run(() -> lifttol3());
-    // }
-
-    // private void lifttol3() {
-    //     liftPeriodicIO.is_lift_positional_control = true;
-    //     liftPeriodicIO.lift_target = Constants.Lift.LIFT_L3_POS;
-    //     liftPeriodicIO.state = LiftState.L3;
-    // }
-
-    // public Command liftToClimb() {
-    //     return run(() -> lifttoclimb());
-    // }
-
-    // private void lifttoclimb() {
-    //     liftPeriodicIO.is_lift_positional_control = true;
-    //     liftPeriodicIO.lift_target = Constants.Lift.LIFT_CLIMB_POS;
-    //     liftPeriodicIO.state = LiftState.CLIMB;
-    // }
-
-
-
-
-         
+    }        
                       
         
 }

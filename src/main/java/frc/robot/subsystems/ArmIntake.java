@@ -10,7 +10,6 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import com.revrobotics.spark.SparkMax;
 import edu.wpi.first.math.filter.SlewRateLimiter;
-import edu.wpi.first.wpilibj.DigitalInput;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import frc.robot.utilities.constants.Constants;
@@ -44,26 +43,9 @@ public class ArmIntake extends SubsystemBase {
       motor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
     }
 
-    // public void runCoralCollector(double speed){
-    //   m_CoralCollect.set(speed);
-    // }
-
-    // public boolean isLimitSwitchPressed() {
-    //   return !limitSwitch.get(); // Assuming the limit switch is active-low
-    // }
-
-    // public void runCoralCollector(double speed) {
-    //   if (!isLimitSwitchPressed()) { // Only run if the limit switch is not pressed
-    //       m_CoralCollect.set(speed);
-    //   } else {
-    //       m_CoralCollect.set(0.0); // Stop the motor if the limit switch is pressed
-    //   }
-    // }
-
     public RunCommand CoralIn() {
       return new RunCommand(() -> {
-            m_CoralCollect.set(0.15);
-      }, this);
+            m_CoralCollect.set(0.15);      }, this);
     }
 
     public RunCommand CoralOut() {

@@ -9,14 +9,12 @@ import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.event.EventLoop;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import edu.wpi.first.wpilibj2.command.button.POVButton;
 import frc.robot.commands.SwerveController;
 import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.utilities.constants.Constants;
@@ -37,7 +35,7 @@ import frc.robot.commands.MoveArmToL3;
 
 import frc.robot.commands.MoveArmToClimb;
 import frc.robot.subsystems.Camera;
-import edu.wpi.first.wpilibj2.command.RunCommand;
+
 
 
 
@@ -94,8 +92,11 @@ public class RobotContainer {
         autoChooser.setDefaultOption("Center Start", new AutoCenterStart(
           swerveSubsystem, armLift, armPivot, armRotate, armIntake));
 
-        autoChooser.addOption("Left Start", new AutoLeftStart(swerveSubsystem));
-        autoChooser.addOption("Right Start", new AutoRightStart(swerveSubsystem));
+        autoChooser.addOption("Left Start", new AutoLeftStart(
+          swerveSubsystem, armLift, armPivot, armRotate, armIntake));
+
+        autoChooser.addOption("Right Start", new AutoRightStart(
+          swerveSubsystem, armLift, armPivot, armRotate, armIntake));
 
         SmartDashboard.putData("Auto Mode", autoChooser);
         
@@ -192,25 +193,6 @@ public class RobotContainer {
       CopilotCommandController.pov(0).onTrue(armCollect
       );
 
-  
-  //Manual Arm Controls
-    // new RunCommand(
-    //   () -> armLift.setLiftPower(
-    //     applyDeadband(liftSlewRateLimiter.calculate(CopilotCommandController.getRightY()), 0.1)
-    //     ), 
-    //     armLift);
-
-    // new RunCommand(
-    //   () -> armPivot.setPivotPower(
-    //     applyDeadband(pivotSlewRateLimiter.calculate(CopilotCommandController.getLeftY()), 0.1)
-    //     ), 
-    //     armRotate);
-
-    // new RunCommand(
-    //   () -> armPivot.setPivotPower(
-    //     applyDeadband(pivotSlewRateLimiter.calculate(CopilotCommandController.getLeftY()), 0.1)
-    //     ), 
-    //     armPivot);
   
   //Climber Controls
     cageClimber.setDefaultCommand(
